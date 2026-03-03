@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'academia.wsgi.application'
 # Configuración de PostgreSQL usando la URL del archivo .env
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://postgres:password@localhost:5432/paula_pilates',
+        default='postgres://postgres:password@localhost:5432/pilates_db',
         conn_max_age=600,
     )
 }
