@@ -21,8 +21,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # Leer el estado de DEBUG desde el archivo .env
 DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['192.168.43.170','127.0.0.1']
-
+# Leemos el texto del .env y lo dividimos por las comas
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(',')
 
 # Application definition
 
