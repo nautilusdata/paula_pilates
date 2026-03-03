@@ -134,7 +134,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SITE_ID = 1
 
 # Configuración moderna de django-allauth (reemplaza las antiguas)
-ACCOUNT_LOGIN_METHODS = {'email', 'username'}          # permite login con email o username
+ACCOUNT_LOGIN_METHODS = {'email'}          # permite login con email
 ACCOUNT_SIGNUP_FIELDS = [
     'email*',          # requerido (*)
     'username*',       # requerido
