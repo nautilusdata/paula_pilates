@@ -1,0 +1,33 @@
+# .gitignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+*.env
+db.sqlite3
+media/
+staticfiles/
+/web_funcional
+local_settings.py
+
+# --- CONFIGURACIÓN SENSIBLE (MariaDB / Webpay) ---
+conf.json
+.env
+secrets.json
+*.runtimeconfig.json
+
+# --- ARCHIVOS ESTÁTICOS Y CARGAS ---
+# Evita subir los 1700+ archivos de FontAwesome y fotos de prueba
+assets/
+static/
+media/
+staticfiles/
+
+# --- HERRAMIENTAS Y SISTEMA ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

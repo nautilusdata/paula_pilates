@@ -1,0 +1,26 @@
+20241204
+Se quitó la Caja 1.
+Se quitó la caja Horarios disponibles Pilates, pero se dejó comentada.
+Se agregó caja de Clase Diagnóstica y se puso texto fino "Una clase individual".
+Se modificaron precios de cajas de Pilates
+
+
+
+20240728_025500
+Se llevó a dos secciones el header, pero igual quedaron referenciadas 3.
+Título en strong desde html
+Logo a la izquierda
+
+También se cambió el  min-height y max-height por el espacio verde era muy alto arriba, comía mucha pantalla.
+/* Estilos generales para el encabezado */
+.header {
+  display: flex; /* Flexbox para distribuir los elementos */
+  min-height: 40px;
+  max-height: 80px;
+  background-color: #408601; /* Color de fondo de la barra superior */
+  justify-content: space-between; /* Espacio entre los elementos */
+  align-items: center; /* Centrar verticalmente los elementos */
+  padding: 10px 20px; /* Espacio interno */
+  color: white; /* Color del texto */
+}
+

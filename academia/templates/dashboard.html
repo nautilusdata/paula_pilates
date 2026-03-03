@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Mis Clases - Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+  .dashboard-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 40px auto;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .dashboard-container h2 {
+    color: #2f6300;
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #d4eac8;
+    padding-bottom: 10px;
+  }
+
+  .clase-card {
+    background: #f8f9fa;
+    border-left: 4px solid #408601;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .clase-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .clase-card__fecha {
+    font-weight: 600;
+    color: #2f6300;
+    font-size: .95rem;
+  }
+
+  .clase-card__detalle {
+    font-size: .85rem;
+    color: #555;
+  }
+
+  .clase-card__estado {
+    font-size: .8rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  .estado-confirmada {
+    background-color: #d4eac8;
+    color: #2f6300;
+  }
+
+  .estado-pendiente {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  .sin-clases {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+    font-size: .95rem;
+  }
+
+  .sin-clases a {
+    color: #408601;
+    font-weight: 600;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='dashboard' %}
+
+<div class="dashboard-container">
+  <h2>Mis Próximas Clases</h2>
+
+  {% if clases %}
+    {% for clase in clases %}
+      <div class="clase-card">
+        <div class="clase-card__info">
+          <span class="clase-card__fecha">{{ clase.fecha|date:"l d \d\e F" }} — {{ clase.hora }}</span>
+          <span class="clase-card__detalle">{{ clase.tipo }}</span>
+        </div>
+        <span class="clase-card__estado {% if clase.confirmada %}estado-confirmada{% else %}estado-pendiente{% endif %}">
+          {% if clase.confirmada %}Confirmada{% else %}Pendiente{% endif %}
+        </span>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="sin-clases">
+      <p>Aún no tienes clases reservadas.</p>
+      <br>
+      <a href="{% url 'reservar' %}">Reservar tu primera clase →</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

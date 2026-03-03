@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Inicio - Pilates Paula{% endblock %}
+
+{% block extra_head %}
+{% if user.is_authenticated %}
+<style>
+  .alumno-titulo {
+    background-color: #f0f7ea;
+    text-align: center;
+    padding: 14px 20px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2f6300;
+    letter-spacing: .04em;
+    border-bottom: 1px solid #d4eac8;
+  }
+
+  .nav-alumno {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background-color: #2f6300;
+  }
+
+  .nav-alumno a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 8px;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: .85rem;
+    font-weight: 500;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,.15);
+    transition: background .2s;
+  }
+
+  .nav-alumno a:last-child {
+    border-right: none;
+  }
+
+  .nav-alumno a:hover {
+    background-color: rgba(255,255,255,.14);
+  }
+
+  .nav-alumno a.nav-reservar {
+    background-color: #408601;
+    font-weight: 600;
+  }
+
+  .nav-alumno a.nav-reservar:hover {
+    background-color: #4d9e01;
+  }
+</style>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+  <div class="alumno-titulo">Información de Alumno</div>
+  <nav class="nav-alumno">
+    <a href="{% url 'dashboard' %}">Mis Clases</a>
+    <a href="{% url 'reservar' %}" class="nav-reservar">Reservar</a>
+    <a href="{% url 'perfil' %}">Mi Perfil</a>
+    <a href="{% url 'reglamento' %}">Reglamento</a>
+  </nav>
+{% else %}
+  <section class="banner">
+    <div class="banner-content"></div>
+  </section>
+{% endif %}
+
+<main>
+
+  <!-- About -->
+  <section class="container about">
+    <h2 class="subtitle">Academia de Pilates Paula Ayarza</h2>
+    <p class="about__paragraph">Tu espacio para fortalecer tu cuerpo, mejorar tu postura y alcanzar el bienestar integral a través de Pilates y Body Balance.</p>
+
+    <div class="about__main">
+      <article class="about__icons">
+        <img src="{% static 'images/reformer.svg' %}" class="about__icon" alt="Reformer">
+        <h3 class="about__title">¿Qué es el Pilates?</h3>
+        <p class="about__paragraph">Pilates es un método de entrenamiento físico y mental que se enfoca en fortalecer los músculos profundos, mejorar la postura y aumentar la flexibilidad.</p>
+      </article>
+
+      <article class="about__icons">
+        <img src="{% static 'images/pilates.svg' %}" class="about__icon" alt="Pilates">
+        <h3 class="about__title">¿Qué es el Body Balance?</h3>
+        <p class="about__paragraph">Es un ejercicio físico de intensidad suave que combina movimientos de yoga, estiramientos, Pilates y taichí, que busca la relajación y equilibrio de cuerpo y mente. Mejora la flexibilidad y postura corporal.</p>
+      </article>
+
+      <article class="about__icons">
+        <img src="{% static 'images/pilates-4.svg' %}" class="about__icon" alt="Modalidad de clases">
+        <h3 class="about__title">Modalidad de las clases</h3>
+        <p class="about__paragraph">Clases grupales, privadas, o puedes tomar clases sueltas. Las clases de Pilates se realizan en reformers.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Knowledge / Reformers -->
+  <section class="knowledge">
+    <div class="knowledge__container container">
+      <div class="knowledge__texts">
+        <h2 class="subtitle">Utilizamos reformers</h2>
+        <p class="knowledge__paragraph">El reformer es una máquina especializada que permite realizar ejercicios de Pilates de manera más precisa y efectiva. Ofrece una resistencia ajustable, lo que facilita la progresión en los ejercicios y ayuda a fortalecer los músculos, mejorar la postura y aumentar la flexibilidad.</p>
+        <a href="#" class="cta">Entra al curso</a>
+      </div>
+      <figure class="knowledge__picture">
+        <img src="{% static 'images/05.jpg' %}" class="knowledge__img" alt="Reformer">
+      </figure>
+    </div>
+  </section>
+
+  <!-- Precios -->
+  <section class="price container">
+    <h2 class="subtitle">Pilates - Precios y Packs</h2>
+    <div class="price__table">
+
+      <div class="price__element">
+        <h3 class="price__price">$140.000/mes</h3>
+        <div class="price__items">
+          <p class="price__features">Pack único</p>
+          <p class="price__features">$14.000 cada clase</p>
+          <p class="price__features">Mejor opción</p>
+        </div>
+        <a href="#" class="price__cta">Clase Grupal</a>
+      </div>
+
+      <div class="price__element">
+        <h3 class="price__price">$285.000/mes</h3>
+        <div class="price__items">
+          <p class="price__features">10 Clases</p>
+          <p class="price__features">Clases a tu medida</p>
+          <p class="price__features">Opción estándar</p>
+        </div>
+        <a href="#" class="price__cta">Clases Privadas</a>
+      </div>
+
+      <div class="price__element">
+        <h3 class="price__price">$25.000</h3>
+        <div class="price__items">
+          <p class="price__features">Una clase individual</p>
+          <p class="price__features">45 minutos</p>
+          <p class="price__features">Sábado a.m.</p>
+        </div>
+        <a href="#" class="price__cta">Clase Prueba</a>
+      </div>
+
+      <div class="price__element">
+        <h3 class="price__price">$20.000</h3>
+        <div class="price__items">
+          <p class="price__features">Pack reducido</p>
+          <p class="price__features">Opción especial</p>
+          <p class="price__features">Menos de 10 clases</p>
+        </div>
+        <a href="#" class="price__cta">Clase Grupal</a>
+      </div>
+
+    </div>
+
+    <br><br><br><br>
+    <h2 class="subtitle">Body Balance - Precios y Packs</h2>
+    <div class="price__table">
+      <div class="price__element">
+        <h3 class="price__price">$60.000/mes</h3>
+        <div class="price__items">
+          <p class="price__features">Martes - Jueves</p>
+          <p class="price__features">20:00 hrs</p>
+          <p class="price__features">Opción estándar</p>
+        </div>
+        <a href="#" class="price__cta">Clase Grupal</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Preguntas frecuentes -->
+  <section class="questions container">
+    <h2 class="subtitle">Preguntas frecuentes</h2>
+    <section class="questions__container">
+
+      <article class="questions__padding">
+        <div class="questions__answer">
+          <h3 class="questions__title">¿En cuánto tiempo veré resultados?
+            <span class="questions__arrow">
+              <img src="{% static 'images/arrow.svg' %}" class="questions__img" alt="Arrow">
+            </span>
+          </h3>
+          <p class="questions__show">Varían según cada persona. Sin embargo, muchas notan mejoras en postura, fuerza y flexibilidad en las primeras 4-8 semanas.</p>
+        </div>
+      </article>
+
+      <article class="questions__padding">
+        <div class="questions__answer">
+          <h3 class="questions__title">¿Es Pilates adecuado para mí?
+            <span class="questions__arrow">
+              <img src="{% static 'images/arrow.svg' %}" class="questions__img" alt="Arrow">
+            </span>
+          </h3>
+          <p class="questions__show">Pilates es especialmente beneficioso para las mujeres de 40 a 50 años y más allá. Los ejercicios están diseñados para ser seguros y efectivos, ayudando a tonificar el cuerpo sin aumentar el volumen muscular.</p>
+        </div>
+      </article>
+
+      <article class="questions__padding">
+        <div class="questions__answer">
+          <h3 class="questions__title">Políticas de la Academia
+            <span class="questions__arrow">
+              <img src="{% static 'images/arrow.svg' %}" class="questions__img" alt="Arrow">
+            </span>
+          </h3>
+          <p class="questions__show">
+            ** Exclusivamente damas **<br>
+            • Se excluyen embarazadas y menores de 18 años.<br>
+            • Las clases se entregan calendarizadas.<br>
+            • Las clases no asistidas, NO se recuperan.<br>
+            • Las clases NO se congelan.<br>
+            • Sólo se reservan cupos previo pago del 100% del valor del pack.<br>
+            • Esta reserva deberá tener una fecha de inicio, la cual NO puede variar.<br>
+            • Uso obligatorio de toalla y calcetines a pie cubierto.<br>
+            • NO se devuelve el dinero.<br>
+            • El primer pago es vía transferencia, los siguientes serán PRESENCIALES, transferencia presencial, cheque o efectivo.<br>
+            • Este sistema de pagos y reservas NO considera la devolución de dineros.<br><br>
+            Paula Ayarza<br>
+            Instructora de Pilates y Body Balance
+          </p>
+        </div>
+      </article>
+
+    </section>
+  </section>
+
+  <!-- Dirección / CTA -->
+  <section class="questions__offer">
+    <h2 class="subtitle">José Nogueira 1580, Punta Arenas</h2>
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="cta">Ir a mis clases</a>
+    {% else %}
+      <a href="{% url 'account_signup' %}" class="cta">Inscríbete ahora</a>
+    {% endif %}
+  </section>
+
+  <!-- Mapa -->
+  <section class="mapita">
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2449.613386348602!2d-70.91283622355581!3d-53.16538357223631!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xbdb263884d0b07f1%3A0x63346d0426f04f26!2sJos%C3%A9%20Nogueira%201580%2C%206201330%20Punta%20Arenas%2C%20Magallanes%20y%20la%20Ant%C3%A1rtica%20Chilena!5e0!3m2!1ses-419!2scl!4v1700000000000!5m2!1ses-419!2scl" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </section>
+
+  <!-- CTA login/dashboard -->
+  {% if user.is_authenticated %}
+    <div class="bienvenida-usuario" style="text-align: center; padding: 2rem; background: #f8f9fa; margin: 2rem 0; border-radius: 10px;">
+      <h2>¡Hola, {{ user.first_name|default:user.username }}!</h2>
+      <br>
+      <p>Ya estás en el sistema de reservas de la Academia.</p>
+      <br>
+      <a href="{% url 'dashboard' %}" class="cta">Ver mis clases</a>
+    </div>
+  {% else %}
+    <div class="auth-links" style="text-align: center; padding: 2rem;">
+      <a href="{% url 'account_login' %}" class="cta" style="margin-right: 1rem;">Iniciar sesión</a>
+      <a href="{% url 'account_signup' %}" class="cta">Registrarse</a>
+    </div>
+  {% endif %}
+
+</main>
+
+{% endblock %}

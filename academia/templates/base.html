@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pilates Paula{% endblock %}</title>
+
+    <!-- Fuentes Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    {% block extra_head %}{% endblock %}
+    </head>
+
+
+    
+    <body>
+
+        <!-- Header (versión producción, sin cambios en estructura) -->
+        <header class="header">
+        <div class="header-left">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="header-logo">
+        </div>
+        <div class="header-right">
+            <strong>Academia de Pilates</strong>
+            <br>
+            Paula Ayarza
+        </div>
+    </header>
+
+    <!-- Botones de auth superpuestos (móvil) o en header (desktop) -->
+    <div class="auth-overlay">
+        {% if user.is_authenticated %}
+            <span class="user-greeting">{{ user.first_name|default:user.username }}</span>
+            <a href="{% url 'account_logout' %}" class="auth-btn logout">Salir</a>
+        {% else %}
+            <a href="{% url 'account_login' %}" class="auth-btn login">Login</a>
+            <a href="{% url 'account_signup' %}" class="auth-btn signup">Registrarse</a>
+        {% endif %}
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <!-- Footer (igual que producción) -->
+    <footer class="footer">
+        <section class="footer__container container">
+            <nav class="nav nav--footer">
+                <h2 class="footer__title">¿Quieres recibir noticias de la Academia?</h2>
+                <ul class="nav__link nav__link--footer">
+                    <!-- Links si querés -->
+                </ul>
+            </nav>
+            <form class="footer__form" action="https://formspree.io/f/xwpebwbp" method="POST">
+                <h2 class="footer__newsletter">Suscríbete al newsletter</h2>
+                <div class="footer__inputs">
+                    <input type="email" placeholder="Email:" class="footer__input" name="_replyto">
+                    <input type="submit" value="Regístrate" class="footer__submit">
+                </div>
+            </form>
+        </section>
+
+        <section class="footer__copy container">
+            <div class="footer__social">
+                <a href="#" class="footer__icons"><img src="{% static 'images/facebook.svg' %}" class="footer__img" alt="Facebook"></a>
+                <a href="#" class="footer__icons"><img src="{% static 'images/twitter.svg' %}" class="footer__img" alt="Twitter"></a>
+                <a href="https://www.instagram.com/paula_ayarzahechtle" class="footer__icons instagram-link"><img src="{% static 'images/instagram.svg' %}" class="footer__img" alt="Instagram"></a>
+            </div>
+            <h3 class="footer__copyright">Derechos reservados &copy; Paula Ayarza 2026</h3>
+        </section>
+    </footer>
+
+    <!-- Whatsapp widget -->
+    <script>
+        var url = 'https://wati-integration-prod-service.clare.ai/v2/watiWidget.js?61400';
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = url;
+        var options = {
+            "enabled": true,
+            "chatButtonSetting": {
+                "backgroundColor": "#408601",
+                "ctaText": "Escríbenos",
+                "borderRadius": "25",
+                "marginLeft": "5",
+                "marginRight": "20",
+                "marginBottom": "20",
+                "ctaIconWATI": false,
+                "position": "left"
+            },
+            "brandSetting": {
+                "brandName": "Pilates y Fitness",
+                "brandSubTitle": "undefined",
+                "brandImg": "www.paulapilates.cl",
+                "welcomeText": "¿Cómo te podemos ayudar?",
+                "messageText": "Hola, %0A Tengo una consulta:",
+                "backgroundColor": "#408601",
+                "ctaText": "Chatea con nosotros",
+                "borderRadius": "25",
+                "autoShow": false,
+                "phoneNumber": "56985050508"
+            }
+        };
+        s.onload = function() {
+            CreateWhatsappChatWidget(options);
+        };
+        var x = document.getElementsByTagName('script')[0];
+        x.parentNode.insertBefore(s, x);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

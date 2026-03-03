@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Mi Perfil - Pilates Paula{% endblock %}
+
+{% block extra_head %}
+
+<style>
+  .perfil-container {
+    width: 90%;
+    max-width: 520px;
+    margin: 40px auto 80px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .perfil-socio {
+    background-color: #f0f7ea;
+    border-left: 4px solid #408601;
+    border-radius: 6px;
+    padding: 12px 18px;
+    margin-bottom: 28px;
+    font-size: .9rem;
+    color: #2f6300;
+  }
+
+  .perfil-socio span {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  .perfil-email {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: .95rem;
+    color: #888;
+    margin-bottom: 16px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .perfil-seccion {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #408601;
+    margin: 24px 0 10px;
+    border-bottom: 1px solid #d4eac8;
+    padding-bottom: 6px;
+  }
+
+  .perfil-seccion.opcional {
+    color: #888;
+  }
+
+  .form-field {
+    margin-bottom: 16px;
+  }
+
+  .form-field label {
+    display: block;
+    font-size: .85rem;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  .form-field label .opcional-tag {
+    font-weight: 300;
+    color: #aaa;
+    font-size: .8rem;
+    margin-left: 6px;
+  }
+
+  .form-field input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: .95rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: border .2s;
+    box-sizing: border-box;
+  }
+
+  .form-field input:focus {
+    border-color: #408601;
+  }
+
+  .perfil-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background-color: #408601;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 28px;
+    transition: background .2s;
+  }
+
+  .perfil-btn:hover {
+    background-color: #2f6300;
+  }
+
+  .perfil-guardado {
+    background: #f0f7ea;
+    border-left: 4px solid #408601;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: .88rem;
+    color: #2f6300;
+    font-weight: 600;
+  }
+</style>
+
+
+
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='perfil' %}
+
+<div class="perfil-container">
+
+  <div class="perfil-socio">
+    Socia N° <span>{{ metadata.numero_socio }}</span>
+  </div>
+
+  {% if saved %}
+    <div class="perfil-guardado">✓ Datos guardados correctamente.</div>
+  {% endif %}
+
+  <div class="perfil-seccion">Email</div>
+  <div class="perfil-email">{{ request.user.email }}</div>
+
+  <form method="POST" action="{% url 'perfil' %}">
+    {% csrf_token %}
+
+    <div class="perfil-seccion">Datos personales</div>
+
+    <div class="form-field">
+      <label for="id_first_name">Nombre</label>
+      <input type="text" name="first_name" id="id_first_name"
+             value="{{ form.first_name.value|default:'' }}">
+    </div>
+
+    <div class="form-field">
+      <label for="id_last_name">Apellido</label>
+      <input type="text" name="last_name" id="id_last_name"
+             value="{{ form.last_name.value|default:'' }}">
+    </div>
+
+    <div class="perfil-seccion opcional">Datos de contacto</div>
+
+    <div class="form-field">
+      <label for="id_telefono">Teléfono <span class="opcional-tag">opcional</span></label>
+      <input type="text" name="telefono" id="id_telefono"
+             value="{{ form.telefono.value|default:'' }}">
+    </div>
+
+    <div class="form-field">
+      <label for="id_contacto_emergencia">Contacto de emergencia <span class="opcional-tag">opcional</span></label>
+      <input type="text" name="contacto_emergencia" id="id_contacto_emergencia"
+             value="{{ form.contacto_emergencia.value|default:'' }}">
+    </div>
+
+    <div class="form-field">
+      <label for="id_telefono_emergencia">Teléfono de emergencia <span class="opcional-tag">opcional</span></label>
+      <input type="text" name="telefono_emergencia" id="id_telefono_emergencia"
+             value="{{ form.telefono_emergencia.value|default:'' }}">
+    </div>
+
+    <div class="form-field">
+      <label for="id_fecha_nacimiento">Fecha de nacimiento <span class="opcional-tag">opcional</span></label>
+      <input type="date" name="fecha_nacimiento" id="id_fecha_nacimiento"
+             value="{{ form.fecha_nacimiento.value|default:'' }}">
+    </div>
+
+    <button type="submit" class="perfil-btn">Guardar cambios</button>
+  </form>
+
+</div>
+{% endblock %}

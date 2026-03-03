@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reservar - Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+  .reservar-container {
+    width: 90%;
+    max-width: 600px; /* Estrecho para Mobile First */
+    margin: 30px auto 80px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .categoria-header {
+    color: #2f6300;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin: 30px 0 15px;
+    text-align: left;
+    border-bottom: 2px solid #d4eac8;
+    padding-bottom: 5px;
+  }
+
+  /* Contenedor de botones tipo Card */
+  .menu-reserva {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .btn-producto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .btn-producto:active {
+    transform: scale(0.98);
+    background-color: #f0f7ea;
+  }
+
+  .btn-producto .info {
+    text-align: left;
+  }
+
+  .btn-producto .titulo {
+    display: block;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: #2f6300;
+  }
+
+  .btn-producto .subtitulo {
+    display: block;
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 4px;
+  }
+
+  .btn-producto .precio {
+    font-weight: 700;
+    color: #408601;
+    font-size: 1.1rem;
+  }
+
+  /* Icono de flecha para indicar acción */
+  .btn-producto::after {
+    content: '→';
+    color: #d4eac8;
+    font-size: 1.2rem;
+    margin-left: 10px;
+  }
+
+  .aviso-importante {
+    background-color: #fff9e6;
+    border-left: 4px solid #f1c40f;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #856404;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='reservar' %}
+
+<div class="reservar-container">
+  
+  <div class="aviso-importante">
+    <strong>Nota:</strong> En Pilates, tu horario de inicio será fijo para todas las sesiones del pack.
+  </div>
+
+  <div class="categoria-header">Pilates Reformer</div>
+  <div class="menu-reserva">
+    
+    <a href="#" class="btn-producto">
+      <div class="info">
+        <span class="titulo">Pack 10 Clases</span>
+        <span class="subtitulo">Horario fijo • Recomendado</span>
+      </div>
+      <div class="precio">$140.000</div>
+    </a>
+
+    <a href="#" class="btn-producto">
+      <div class="info">
+        <span class="titulo">Pack Reducido (2 a 9)</span>
+        <span class="subtitulo">Elige cantidad de sesiones</span>
+      </div>
+      <div class="precio">$20k c/u</div>
+    </a>
+
+    <a href="#" class="btn-producto">
+      <div class="info">
+        <span class="titulo">Clase Suelta</span>
+        <span class="subtitulo">Sesión única individual</span>
+      </div>
+      <div class="precio">$25.000</div>
+    </a>
+
+    <a href="#" class="btn-producto">
+      <div class="info">
+        <span class="titulo">Clase de Prueba</span>
+        <span class="subtitulo">Sábados • Solo alumnas nuevas</span>
+      </div>
+      <div class="precio">$15.000</div>
+    </a>
+
+    <a href="#" class="btn-producto">
+      <div class="info">
+        <span class="titulo">Clase Privada</span>
+        <span class="subtitulo">Personalizado 1 a 1</span>
+      </div>
+      <div class="precio">Consultar</div>
+    </a>
+  </div>
+
+  <div class="categoria-header">Body Balance</div>
+  <div class="menu-reserva">
+    
+    <a href="#" class="btn-producto">
+      <div class="info">
+        <span class="titulo">Mensualidad Full</span>
+        <span class="subtitulo">3 veces por semana</span>
+      </div>
+      <div class="precio">$60.000</div>
+    </a>
+
+    <a href="#" class="btn-producto">
+      <div class="info">
+        <span class="titulo">Clase Semanal</span>
+        <span class="subtitulo">1 vez por semana</span>
+      </div>
+      <div class="precio">$15.000</div>
+    </a>
+
+  </div>
+
+</div>
+{% endblock %}

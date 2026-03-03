@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Registro - Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+  .signup-container {
+    width: 90%;
+    max-width: 520px;
+    margin: 50px auto 80px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .signup-container h2 {
+    color: #2f6300;
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .signup-subtitulo {
+    text-align: center;
+    color: #666;
+    font-size: .9rem;
+    margin-bottom: 30px;
+  }
+
+  .signup-seccion {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #408601;
+    margin: 24px 0 10px;
+    border-bottom: 1px solid #d4eac8;
+    padding-bottom: 6px;
+  }
+
+  .signup-seccion.opcional {
+    color: #888;
+  }
+
+  .form-field {
+    margin-bottom: 16px;
+  }
+
+  .form-field label {
+    display: block;
+    font-size: .85rem;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  .form-field label .opcional-tag {
+    font-weight: 300;
+    color: #aaa;
+    font-size: .8rem;
+    margin-left: 6px;
+  }
+
+  .form-field input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: .95rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: border .2s;
+    box-sizing: border-box;
+  }
+
+  .form-field input:focus {
+    border-color: #408601;
+  }
+
+  .form-errors {
+    background: #fff0f0;
+    border-left: 4px solid #e53e3e;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: .88rem;
+    color: #c53030;
+  }
+
+  .field-error {
+    color: #e53e3e;
+    font-size: .8rem;
+    margin-top: 4px;
+  }
+
+  .signup-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background-color: #408601;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 28px;
+    transition: background .2s;
+  }
+
+  .signup-btn:hover {
+    background-color: #2f6300;
+  }
+
+  .signup-login {
+    text-align: center;
+    margin-top: 20px;
+    font-size: .88rem;
+    color: #666;
+  }
+
+  .signup-login a {
+    color: #408601;
+    font-weight: 600;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="signup-container">
+  <h2>Crear cuenta</h2>
+  <p class="signup-subtitulo">Academia de Pilates Paula Ayarza</p>
+
+  {% if form.non_field_errors %}
+    <div class="form-errors">
+      {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" action="{% url 'registro' %}">
+    {% csrf_token %}
+
+    <div class="signup-seccion">Datos personales</div>
+
+    <div class="form-field">
+      <label for="id_first_name">Nombre</label>
+      <input type="text" name="first_name" id="id_first_name"
+             placeholder="Tu nombre"
+             value="{{ form.first_name.value|default:'' }}">
+      {% if form.first_name.errors %}
+        <p class="field-error">{{ form.first_name.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="form-field">
+      <label for="id_last_name">Apellido</label>
+      <input type="text" name="last_name" id="id_last_name"
+             placeholder="Tu apellido"
+             value="{{ form.last_name.value|default:'' }}">
+      {% if form.last_name.errors %}
+        <p class="field-error">{{ form.last_name.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="form-field">
+      <label for="id_email">Email</label>
+      <input type="email" name="email" id="id_email"
+             placeholder="tu@email.com"
+             value="{{ form.email.value|default:'' }}">
+      {% if form.email.errors %}
+        <p class="field-error">{{ form.email.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="form-field">
+      <label for="id_password1">Contraseña</label>
+      <input type="password" name="password1" id="id_password1"
+             placeholder="Contraseña">
+      {% if form.password1.errors %}
+        <p class="field-error">{{ form.password1.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="form-field">
+      <label for="id_password2">Confirmar contraseña</label>
+      <input type="password" name="password2" id="id_password2"
+             placeholder="Repite la contraseña">
+      {% if form.password2.errors %}
+        <p class="field-error">{{ form.password2.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="signup-seccion opcional">Datos opcionales — puedes completarlos después</div>
+
+    <div class="form-field">
+      <label for="id_telefono">Teléfono <span class="opcional-tag">opcional</span></label>
+      <input type="text" name="telefono" id="id_telefono"
+             placeholder="+56 9 1234 5678"
+             value="{{ form.telefono.value|default:'' }}">
+    </div>
+
+    <div class="form-field">
+      <label for="id_contacto_emergencia">Contacto de emergencia <span class="opcional-tag">opcional</span></label>
+      <input type="text" name="contacto_emergencia" id="id_contacto_emergencia"
+             placeholder="Nombre completo"
+             value="{{ form.contacto_emergencia.value|default:'' }}">
+    </div>
+
+    <div class="form-field">
+      <label for="id_telefono_emergencia">Teléfono de emergencia <span class="opcional-tag">opcional</span></label>
+      <input type="text" name="telefono_emergencia" id="id_telefono_emergencia"
+             placeholder="+56 9 1234 5678"
+             value="{{ form.telefono_emergencia.value|default:'' }}">
+    </div>
+
+    <div class="form-field">
+      <label for="id_fecha_nacimiento">Fecha de nacimiento <span class="opcional-tag">opcional</span></label>
+      <input type="date" name="fecha_nacimiento" id="id_fecha_nacimiento"
+             value="{{ form.fecha_nacimiento.value|default:'' }}">
+    </div>
+
+    <button type="submit" class="signup-btn">Crear cuenta</button>
+  </form>
+
+  <p class="signup-login">
+    ¿Ya tienes cuenta? <a href="{% url 'account_login' %}">Inicia sesión</a>
+  </p>
+</div>
+{% endblock %}

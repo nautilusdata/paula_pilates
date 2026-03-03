@@ -1,0 +1,60 @@
+{% load static %}
+<style>
+  .alumno-titulo {
+    background-color: #f0f7ea;
+    text-align: center;
+    padding: 14px 20px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2f6300;
+    letter-spacing: .04em;
+    border-bottom: 1px solid #d4eac8;
+  }
+
+  .nav-alumno {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background-color: #2f6300;
+  }
+
+  .nav-alumno a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 8px;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: .85rem;
+    font-weight: 500;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,.15);
+    transition: background .2s;
+  }
+
+  .nav-alumno a:last-child {
+    border-right: none;
+  }
+
+  .nav-alumno a:hover {
+    background-color: rgba(255,255,255,.14);
+  }
+
+  .nav-alumno a.nav-activo {
+    background-color: #6abf30;
+    font-weight: 700;
+  }
+
+  .nav-alumno {
+  margin-top: 45px;
+}
+
+</style>
+
+<nav class="nav-alumno">
+  <a href="{% url 'dashboard' %}"  {% if activo == 'dashboard'  %}class="nav-activo"{% endif %}>Mis Clases</a>
+  <a href="{% url 'reservar' %}"   {% if activo == 'reservar'   %}class="nav-activo"{% endif %}>Reservar</a>
+  <a href="{% url 'perfil' %}"     {% if activo == 'perfil'     %}class="nav-activo"{% endif %}>Mi Perfil</a>
+  <a href="{% url 'reglamento' %}" {% if activo == 'reglamento' %}class="nav-activo"{% endif %}>Reglamento</a>
+</nav>
