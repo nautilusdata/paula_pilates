@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Iniciar sesión - Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+  .login-container {
+    width: 90%;
+    max-width: 520px;
+    margin: 50px auto 80px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .login-container h2 {
+    color: #2f6300;
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .login-subtitulo {
+    text-align: center;
+    color: #666;
+    font-size: .9rem;
+    margin-bottom: 30px;
+  }
+
+  .login-seccion {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #408601;
+    margin: 24px 0 10px;
+    border-bottom: 1px solid #d4eac8;
+    padding-bottom: 6px;
+  }
+
+  .form-field {
+    margin-bottom: 16px;
+  }
+
+  .form-field label {
+    display: block;
+    font-size: .85rem;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  .form-field input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: .95rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: border .2s;
+    box-sizing: border-box;
+  }
+
+  .form-field input:focus {
+    border-color: #408601;
+  }
+
+  .form-errors {
+    background: #fff0f0;
+    border-left: 4px solid #e53e3e;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: .88rem;
+    color: #c53030;
+  }
+
+  .field-error {
+    color: #e53e3e;
+    font-size: .8rem;
+    margin-top: 4px;
+  }
+
+  .login-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background-color: #408601;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 28px;
+    transition: background .2s;
+  }
+
+  .login-btn:hover {
+    background-color: #2f6300;
+  }
+
+  .login-links {
+    text-align: center;
+    margin-top: 20px;
+    font-size: .88rem;
+    color: #666;
+  }
+
+  .login-links a {
+    color: #408601;
+    font-weight: 600;
+  }
+
+  .login-forgot {
+    text-align: right;
+    margin-top: -8px;
+    margin-bottom: 16px;
+    font-size: .82rem;
+  }
+
+  .login-forgot a {
+    color: #408601;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+  <h2>Iniciar sesión</h2>
+  <p class="login-subtitulo">Academia de Pilates Paula Ayarza</p>
+
+  {% if form.non_field_errors %}
+    <div class="form-errors">
+      {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" action="{% url 'account_login' %}">
+    {% csrf_token %}
+
+    <div class="login-seccion">Acceso</div>
+
+    <div class="form-field">
+      <label for="id_login">Email o usuario</label>
+      <input type="text" name="login" id="id_login"
+             placeholder="tu@email.com"
+             value="{{ form.login.value|default:'' }}" autofocus>
+      {% if form.login.errors %}
+        <p class="field-error">{{ form.login.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="form-field">
+      <label for="id_password">Contraseña</label>
+      <input type="password" name="password" id="id_password"
+             placeholder="Tu contraseña">
+      {% if form.password.errors %}
+        <p class="field-error">{{ form.password.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="login-forgot">
+      <a href="{% url 'account_reset_password' %}">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <button type="submit" class="login-btn">Ingresar</button>
+  </form>
+
+  <p class="login-links">
+    ¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a>
+  </p>
+</div>
+{% endblock %}
