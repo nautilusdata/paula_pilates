@@ -22,7 +22,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.utils.timezone import now
 
-from .models_reservas import (
+from .models import (
     Pack, Sesion, HORAS_PILATES, DIAS_SEMANA_PILATES,
     generar_fechas_pack, crear_sesiones_pack, feriados_punta_arenas
 )
