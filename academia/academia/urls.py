@@ -14,6 +14,7 @@ urlpatterns = [
     path('reservar/', TemplateView.as_view(template_name='reservar.html'), name='reservar'),
     path('perfil/', reservas_views.perfil, name='perfil'),
     path('reglamento/', TemplateView.as_view(template_name='reglamento.html'), name='reglamento'),
+    path('', include('reservas.urls')),  # ← agregar esta línea
 ]
 
 if settings.DEBUG:
