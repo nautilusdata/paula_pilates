@@ -11,6 +11,7 @@ media/
 staticfiles/
 /web_funcional
 local_settings.py
+NOTAS_development/
 
 # --- CONFIGURACIÓN SENSIBLE (MariaDB / Webpay) ---
 conf.json
@@ -32,4 +33,3 @@ staticfiles/
 Thumbs.db
 *.log
 
-NOTAS_development/
