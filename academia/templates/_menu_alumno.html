@@ -53,7 +53,7 @@
 </style>
 
 <nav class="nav-alumno">
-  <a href="{% url 'dashboard' %}"  {% if activo == 'dashboard'  %}class="nav-activo"{% endif %}>Mis Clases</a>
+  <a href="{% url 'mis_clases' %}"  {% if activo == 'mis_clases'  %}class="nav-activo"{% endif %}>Mis Clases</a>
   <a href="{% url 'reservar' %}"   {% if activo == 'reservar'   %}class="nav-activo"{% endif %}>Reservar</a>
   <a href="{% url 'perfil' %}"     {% if activo == 'perfil'     %}class="nav-activo"{% endif %}>Mi Perfil</a>
   <a href="{% url 'reglamento' %}" {% if activo == 'reglamento' %}class="nav-activo"{% endif %}>Reglamento</a>
