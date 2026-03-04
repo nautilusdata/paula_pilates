@@ -31,3 +31,5 @@ staticfiles/
 .DS_Store
 Thumbs.db
 *.log
+
+/NOTAS_development
