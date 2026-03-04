@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Mis Clases – Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-mid:   #408601;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --gris-claro:  #f5f5f5;
+  --gris-texto:  #999;
+  --borde:       #e8e8e8;
+  --radio:       14px;
+  --font:        'Poppins', sans-serif;
+}
+
+.misclases-wrap {
+  width: 92%;
+  max-width: 560px;
+  margin: 24px auto 100px;
+  font-family: var(--font);
+}
+
+/* ── Próxima clase destacada ────────────────────────── */
+.proxima-card {
+  background: var(--verde);
+  color: #fff;
+  border-radius: var(--radio);
+  padding: 20px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 16px rgba(47,99,0,.25);
+}
+.proxima-card .eyebrow {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  opacity: .75;
+  margin-bottom: 6px;
+}
+.proxima-card .fecha-grande {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.proxima-card .hora-grande {
+  font-size: 1rem;
+  opacity: .85;
+  margin-bottom: 12px;
+}
+.proxima-card .clase-num {
+  font-size: .78rem;
+  opacity: .7;
+}
+
+/* ── Sección de pack ────────────────────────────────── */
+.pack-seccion {
+  margin-bottom: 36px;
+}
+.pack-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.pack-titulo {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--verde);
+}
+.pack-estado {
+  font-size: .7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.estado-ACTIVO     { background: #e8f5e9; color: #388e3c; }
+.estado-COMPLETADO { background: #f5f5f5; color: #999; }
+.estado-CONGELADO  { background: #e3f2fd; color: #1565c0; }
+.estado-PENDIENTE_PAGO { background: #fff9e6; color: #856404; }
+
+/* ── Barra de progreso ──────────────────────────────── */
+.progreso-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.progreso-puntos {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+}
+.punto {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--borde);
+  transition: background .3s;
+}
+.punto.hecho    { background: var(--verde); }
+.punto.proxima  { background: var(--verde-light); }
+.progreso-texto {
+  font-size: .75rem;
+  color: var(--gris-texto);
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ── Lista de sesiones ──────────────────────────────── */
+.sesiones-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.sesion-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--borde);
+  background: #fff;
+  transition: background .15s;
+}
+.sesion-item:last-child { border-bottom: none; }
+
+/* Estados visuales */
+.sesion-item.pasada {
+  background: var(--gris-claro);
+  opacity: .65;
+}
+.sesion-item.es-proxima {
+  background: var(--verde-pale);
+  border-left: 3px solid var(--verde);
+}
+
+/* Número de clase */
+.sesion-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.sesion-num.futura   { background: var(--verde-pale); color: var(--verde); border: 1.5px solid var(--verde-light); }
+.sesion-num.pasada   { background: #eee; color: #bbb; }
+.sesion-num.proxima  { background: var(--verde); color: #fff; }
+
+/* Fecha y hora */
+.sesion-info { flex: 1; }
+.sesion-fecha {
+  font-size: .88rem;
+  font-weight: 600;
+  color: #333;
+}
+.sesion-item.pasada .sesion-fecha { color: #aaa; }
+.sesion-hora {
+  font-size: .75rem;
+  color: var(--gris-texto);
+  margin-top: 1px;
+}
+
+/* Badge de estado */
+.sesion-badge {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.badge-proxima    { background: var(--verde); color: #fff; }
+.badge-programada { background: transparent; color: #ccc; }
+.badge-completada { background: #eee; color: #aaa; }
+.badge-congelada  { background: #e3f2fd; color: #1565c0; }
+.badge-recuperar  { background: #fff3e0; color: #e65100; }
+
+/* ── Sin clases ─────────────────────────────────────── */
+.sin-clases {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gris-texto);
+}
+.sin-clases .icono { font-size: 2.5rem; margin-bottom: 12px; }
+.sin-clases p { font-size: .9rem; margin-bottom: 20px; }
+.btn-reservar {
+  display: inline-block;
+  padding: 12px 24px;
+  background: var(--verde);
+  color: #fff;
+  border-radius: var(--radio);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: .9rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='mis_clases' %}
+
+<div class="misclases-wrap">
+
+  {% if not packs_data %}
+    <!-- Sin clases -->
+    <div class="sin-clases">
+      <div class="icono">🧘</div>
+      <p>Todavía no tienes clases reservadas.</p>
+      <a href="{% url 'reservar' %}" class="btn-reservar">Reservar mi primera clase</a>
+    </div>
+
+  {% else %}
+
+    <!-- Próxima clase destacada -->
+    {% if proxima_global %}
+    <div class="proxima-card">
+      <div class="eyebrow">Tu próxima clase</div>
+      <div class="fecha-grande">
+        {{ proxima_global.fecha|date:"l j \d\e F" }}
+      </div>
+      <div class="hora-grande">{{ proxima_global.hora }}:00 hrs · Pilates Reformer</div>
+      <div class="clase-num">
+        Clase {{ proxima_global.numero }} de {{ proxima_global.pack.cantidad }}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Un bloque por cada pack -->
+    {% for pd in packs_data %}
+    <div class="pack-seccion">
+
+      <!-- Header del pack -->
+      <div class="pack-header">
+        <div class="pack-titulo">
+          {{ pd.pack.get_tipo_display }}
+          · {{ pd.pack.get_frecuencia_display }}
+          · {{ pd.pack.hora }}:00
+        </div>
+        <span class="pack-estado estado-{{ pd.pack.estado }}">
+          {{ pd.pack.get_estado_display }}
+        </span>
+      </div>
+
+      <!-- Barra de progreso -->
+      <div class="progreso-wrap">
+        <div class="progreso-puntos">
+          {% for s in pd.sesiones %}
+          <div class="punto
+            {% if s.sesion.estado == 'COMPLETADA' %}hecho
+            {% elif s.es_proxima %}proxima
+            {% endif %}
+          "></div>
+          {% endfor %}
+        </div>
+        <span class="progreso-texto">{{ pd.completadas }}/{{ pd.total }}</span>
+      </div>
+
+      <!-- Lista de sesiones -->
+      <div class="sesiones-lista">
+        {% for s in pd.sesiones %}
+        <div class="sesion-item
+          {% if s.pasada %}pasada{% elif s.es_proxima %}es-proxima{% endif %}
+        ">
+          <!-- Número -->
+          <div class="sesion-num
+            {% if s.sesion.estado == 'COMPLETADA' %}pasada
+            {% elif s.es_proxima %}proxima
+            {% else %}futura{% endif %}
+          ">{{ s.sesion.numero }}</div>
+
+          <!-- Info -->
+          <div class="sesion-info">
+            <div class="sesion-fecha">{{ s.sesion.fecha|date:"l j \d\e F" }}</div>
+            <div class="sesion-hora">{{ s.sesion.hora }}:00 hrs</div>
+          </div>
+
+          <!-- Badge -->
+          {% if s.es_proxima %}
+            <span class="sesion-badge badge-proxima">Próxima</span>
+          {% elif s.sesion.estado == 'COMPLETADA' %}
+            <span class="sesion-badge badge-completada">✓ Hecha</span>
+          {% elif s.sesion.estado == 'CONGELADA' %}
+            <span class="sesion-badge badge-congelada">Congelada</span>
+          {% elif s.sesion.estado == 'RECUPERAR' %}
+            <span class="sesion-badge badge-recuperar">Recuperar</span>
+          {% else %}
+            <span class="sesion-badge badge-programada">—</span>
+          {% endif %}
+
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+    {% endfor %}
+
+  {% endif %}
+
+</div>
+{% endblock %}
