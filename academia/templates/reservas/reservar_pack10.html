@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reservar Pack 10 Clases – Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Variables de diseño ─────────────────────────────── */
+:root {
+  --verde:       #2f6300;
+  --verde-mid:   #408601;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --amarillo:    #f1c40f;
+  --gris:        #555;
+  --borde:       #ddd;
+  --radio:       14px;
+  --sombra:      0 2px 12px rgba(0,0,0,.07);
+  --font:        'Poppins', sans-serif;
+}
+
+/* ── Layout ──────────────────────────────────────────── */
+.pack-wrap {
+  width: 92%;
+  max-width: 580px;
+  margin: 24px auto 100px;
+  font-family: var(--font);
+}
+
+/* ── Breadcrumb ──────────────────────────────────────── */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .78rem;
+  color: #999;
+  margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--verde); text-decoration: none; }
+.breadcrumb .sep { color: #ccc; }
+.breadcrumb .actual { color: var(--gris); font-weight: 600; }
+
+/* ── Título ──────────────────────────────────────────── */
+.pack-titulo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--verde);
+  margin-bottom: 4px;
+}
+.pack-subtitulo {
+  font-size: .85rem;
+  color: var(--gris);
+  margin-bottom: 24px;
+}
+
+/* ── Pasos ───────────────────────────────────────────── */
+.pasos {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-radius: 30px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+.paso {
+  flex: 1;
+  text-align: center;
+  padding: 8px 4px;
+  font-size: .75rem;
+  color: #aaa;
+  font-weight: 500;
+  transition: background .2s;
+}
+.paso.activo {
+  background: var(--verde);
+  color: #fff;
+  border-radius: 30px;
+}
+
+/* ── Aviso ───────────────────────────────────────────── */
+.aviso {
+  background: #fff9e6;
+  border-left: 4px solid var(--amarillo);
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: .82rem;
+  color: #856404;
+  margin-bottom: 22px;
+}
+
+/* ── Errores ─────────────────────────────────────────── */
+.errores {
+  background: #fff0f0;
+  border-left: 4px solid #e74c3c;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: .82rem;
+  color: #c0392b;
+  margin-bottom: 20px;
+}
+.errores ul { margin: 6px 0 0; padding-left: 18px; }
+
+/* ── Sección de paso ─────────────────────────────────── */
+.seccion-label {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--verde);
+  margin-bottom: 10px;
+}
+
+/* ── Cards de frecuencia ─────────────────────────────── */
+.frecuencias {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+.frec-option { display: none; }
+.frec-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 18px;
+  border: 2px solid var(--borde);
+  border-radius: var(--radio);
+  cursor: pointer;
+  transition: all .15s ease;
+  background: #fff;
+  box-shadow: var(--sombra);
+}
+.frec-label .frec-info .frec-nombre {
+  font-weight: 600;
+  color: #333;
+  font-size: .95rem;
+}
+.frec-label .frec-info .frec-sub {
+  font-size: .78rem;
+  color: #999;
+  margin-top: 2px;
+}
+.frec-label .frec-pill {
+  background: #f0f0f0;
+  color: #777;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.frec-option:checked + .frec-label {
+  border-color: var(--verde);
+  background: var(--verde-pale);
+}
+.frec-option:checked + .frec-label .frec-pill {
+  background: var(--verde);
+  color: #fff;
+}
+
+/* ── Selector de hora ────────────────────────────────── */
+.horas-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 26px;
+}
+.hora-opt { display: none; }
+.hora-label {
+  display: block;
+  text-align: center;
+  padding: 12px 6px;
+  border: 2px solid var(--borde);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #555;
+  background: #fff;
+  transition: all .15s ease;
+  position: relative;
+}
+.hora-label.sin-cupo {
+  opacity: .4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.hora-opt:checked + .hora-label {
+  border-color: var(--verde);
+  background: var(--verde);
+  color: #fff;
+}
+.hora-cupos {
+  display: block;
+  font-size: .62rem;
+  font-weight: 400;
+  margin-top: 2px;
+  opacity: .75;
+}
+.hora-loading { text-align:center; color:#aaa; font-size:.8rem; padding:12px 0; }
+
+/* ── Date picker de inicio ───────────────────────────── */
+.fecha-field {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--borde);
+  border-radius: var(--radio);
+  font-family: var(--font);
+  font-size: .95rem;
+  color: #333;
+  background: #fff;
+  appearance: none;
+  box-sizing: border-box;
+  transition: border-color .15s;
+  margin-bottom: 26px;
+}
+.fecha-field:focus {
+  outline: none;
+  border-color: var(--verde);
+}
+.fecha-hint {
+  font-size: .75rem;
+  color: #999;
+  margin-top: -20px;
+  margin-bottom: 22px;
+  display: block;
+}
+
+/* ── Precio badge ────────────────────────────────────── */
+.precio-badge {
+  background: var(--verde-pale);
+  border: 1px solid var(--verde-light);
+  border-radius: var(--radio);
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.precio-badge .det { font-size: .82rem; color: var(--gris); }
+.precio-badge .det strong { display: block; color: var(--verde); font-size: 1.4rem; }
+
+/* ── Botón CTA ───────────────────────────────────────── */
+.btn-continuar {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: var(--verde);
+  color: #fff;
+  border: none;
+  border-radius: var(--radio);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+  text-align: center;
+}
+.btn-continuar:active { transform: scale(.98); background: #245200; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='reservar' %}
+
+<div class="pack-wrap">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="{% url 'reservar' %}">Reservar</a>
+    <span class="sep">›</span>
+    <a href="{% url 'reservar' %}">Pilates Reformer</a>
+    <span class="sep">›</span>
+    <span class="actual">Pack 10 Clases</span>
+  </nav>
+
+  <!-- Pasos de progreso -->
+  <div class="pasos">
+    <div class="paso activo">1 · Configurar</div>
+    <div class="paso">2 · Confirmar</div>
+    <div class="paso">3 · Pagar</div>
+  </div>
+
+  <p class="pack-titulo">Pack 10 Clases</p>
+  <p class="pack-subtitulo">Pilates Reformer · $14.000 por clase · Horario fijo</p>
+
+  <!-- Aviso importante -->
+  <div class="aviso">
+    <strong>Horario fijo:</strong> La hora y días que elijas hoy se mantendrán en todas las
+    10 sesiones. El pack parte el mismo día que reservas.
+  </div>
+
+  {% if errores %}
+  <div class="errores">
+    <strong>Por favor corrige lo siguiente:</strong>
+    <ul>
+      {% for e in errores %}<li>{{ e }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <form method="POST" action="{% url 'reservar_pack10' %}" id="form-pack10">
+    {% csrf_token %}
+
+    <!-- PASO A: Frecuencia -->
+    <div class="seccion-label">① ¿Con qué frecuencia quieres venir?</div>
+    <div class="frecuencias">
+      {% for f in frecuencias %}
+      <input
+        type="radio"
+        name="frecuencia"
+        id="frec_{{ f.codigo }}"
+        value="{{ f.codigo }}"
+        class="frec-option"
+        {% if sel_frecuencia == f.codigo %}checked{% endif %}
+        required
+      >
+      <label for="frec_{{ f.codigo }}" class="frec-label">
+        <div class="frec-info">
+          <span class="frec-nombre">{{ f.label }}</span>
+          <span class="frec-sub">{{ f.dias }}</span>
+        </div>
+        <span class="frec-pill">{{ f.dias }}</span>
+      </label>
+      {% endfor %}
+    </div>
+
+    <!-- PASO B: Fecha de primera clase -->
+    <div class="seccion-label">② ¿Cuándo empieza tu primera clase?</div>
+    <input
+      type="date"
+      name="fecha_inicio"
+      id="fecha_inicio"
+      class="fecha-field"
+      min="{{ hoy|date:'Y-m-d' }}"
+      value="{{ sel_fecha|default:'' }}"
+      required
+    >
+    <span class="fecha-hint" id="fecha-hint">Selecciona la frecuencia primero para ver los días habilitados.</span>
+
+    <!-- PASO C: Hora -->
+    <div class="seccion-label">③ ¿A qué hora?</div>
+    <div id="horas-container">
+      <div class="hora-loading">Elige frecuencia y fecha para ver disponibilidad.</div>
+    </div>
+    <!-- Campo oculto para la hora seleccionada -->
+    <input type="hidden" name="hora" id="hora-valor" value="{{ sel_hora|default:'' }}">
+
+    <!-- Precio -->
+    <div class="precio-badge">
+      <div class="det">
+        <strong>${{ precio_total|floatformat:0 }}</strong>
+        10 clases · ${{ precio_por_clase|floatformat:0 }} c/u
+      </div>
+      <div style="font-size:.75rem; color:#999; text-align:right;">
+        Pago único<br>por adelantado
+      </div>
+    </div>
+
+    <button type="submit" class="btn-continuar">Ver resumen →</button>
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ──────────────────────────────────────────────────────────
+// Lógica dinámica:
+// 1. Al elegir frecuencia → actualizar min/max del date picker
+//    y marcar qué días están habilitados
+// 2. Al elegir fecha → cargar horas disponibles por AJAX
+// ──────────────────────────────────────────────────────────
+
+const DIAS_FRECUENCIA = {
+  LMV: [1, 3, 5],   // JS: 0=Dom, 1=Lun, 3=Mié, 5=Vie
+  LM:  [1, 3],
+  MJ:  [2, 4],
+};
+
+const NOMBRE_DIA_CORTO = {
+  LMV: 'lunes, miércoles o viernes',
+  LM:  'lunes o miércoles',
+  MJ:  'martes o jueves',
+};
+
+let frecuenciaActual = null;
+
+// Referencias DOM
+const inputFecha   = document.getElementById('fecha_inicio');
+const hintFecha    = document.getElementById('fecha-hint');
+const horasDiv     = document.getElementById('horas-container');
+const horaOculto   = document.getElementById('hora-valor');
+
+// ── Al elegir frecuencia ──────────────────────────────────
+document.querySelectorAll('.frec-option').forEach(radio => {
+  radio.addEventListener('change', () => {
+    frecuenciaActual = radio.value;
+    hintFecha.textContent = `Elige un ${NOMBRE_DIA_CORTO[frecuenciaActual]} como día de inicio.`;
+
+    // Limpiar fecha y horas
+    inputFecha.value = '';
+    horasDiv.innerHTML = '<div class="hora-loading">Selecciona la fecha de inicio.</div>';
+    horaOculto.value = '';
+
+    // Programar para que el navegador nativo solo permita esos días
+    // (no todos los browsers soportan filtrado nativo; lo validamos en backend)
+  });
+});
+
+// ── Al elegir fecha → cargar horas disponibles ────────────
+inputFecha.addEventListener('change', () => {
+  if (!frecuenciaActual) {
+    alert('Primero elige con qué frecuencia quieres venir.');
+    inputFecha.value = '';
+    return;
+  }
+
+  const fecha = inputFecha.value;
+  if (!fecha) return;
+
+  // Verificar que sea un día válido
+  const jsDate = new Date(fecha + 'T12:00:00');  // noon para evitar bugs de TZ
+  const diasValidos = DIAS_FRECUENCIA[frecuenciaActual];
+  const diaSemana   = jsDate.getDay();
+
+  if (!diasValidos.includes(diaSemana)) {
+    alert(`Para ${frecuenciaActual}, la primera clase debe ser un ${NOMBRE_DIA_CORTO[frecuenciaActual]}.`);
+    inputFecha.value = '';
+    return;
+  }
+
+  // Cargar disponibilidad de horas
+  horasDiv.innerHTML = '<div class="hora-loading">Consultando disponibilidad…</div>';
+  horaOculto.value = '';
+
+  fetch(`{% url 'horas_disponibles_ajax' %}?frecuencia=${frecuenciaActual}&fecha=${fecha}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { horasDiv.innerHTML = `<p style="color:red">${data.error}</p>`; return; }
+      renderHoras(data.horas, fecha);
+    })
+    .catch(() => {
+      horasDiv.innerHTML = '<div class="hora-loading" style="color:#e74c3c">Error al cargar horas. Intenta de nuevo.</div>';
+    });
+});
+
+function renderHoras(horas, fecha) {
+  let html = '<div class="horas-grid">';
+  horas.forEach(h => {
+    const id        = `hora_${h.hora}`;
+    const disabled  = !h.disponible ? 'disabled' : '';
+    const clsSinCupo = !h.disponible ? 'sin-cupo' : '';
+    const cuposLabel = h.disponible ? `<span class="hora-cupos">${h.cupos_min} cupo${h.cupos_min !== 1 ? 's' : ''}</span>` : `<span class="hora-cupos">Sin cupo</span>`;
+    const prevSel   = horaOculto.value == h.hora ? 'checked' : '';
+    html += `
+      <input type="radio" name="_hora_display" id="${id}" value="${h.hora}"
+             class="hora-opt" ${disabled} ${prevSel} onchange="horaElegida(${h.hora})">
+      <label for="${id}" class="hora-label ${clsSinCupo}">
+        ${h.label}
+        ${cuposLabel}
+      </label>`;
+  });
+  html += '</div>';
+  horasDiv.innerHTML = html;
+}
+
+function horaElegida(hora) {
+  horaOculto.value = hora;
+}
+
+// ── Si viene de un POST con errores, restaurar horas ──────
+window.addEventListener('DOMContentLoaded', () => {
+  const selFrq  = "{{ sel_frecuencia|default:'' }}";
+  const selFecha = "{{ sel_fecha|default:'' }}";
+  const selHora  = "{{ sel_hora|default:'' }}";
+
+  if (selFrq && selFecha) {
+    frecuenciaActual = selFrq;
+    fetch(`{% url 'horas_disponibles_ajax' %}?frecuencia=${selFrq}&fecha=${selFecha}`)
+      .then(r => r.json())
+      .then(data => { if (!data.error) renderHoras(data.horas, selFecha); });
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Confirmar Reserva – Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-mid:   #408601;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --gris:        #555;
+  --borde:       #e0e0e0;
+  --radio:       14px;
+  --sombra:      0 2px 12px rgba(0,0,0,.07);
+  --font:        'Poppins', sans-serif;
+}
+
+.confirmar-wrap {
+  width: 92%;
+  max-width: 580px;
+  margin: 24px auto 100px;
+  font-family: var(--font);
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .78rem; color: #999; margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--verde); text-decoration: none; }
+.breadcrumb .sep { color: #ccc; }
+.breadcrumb .actual { color: var(--gris); font-weight: 600; }
+
+/* ── Pasos ── */
+.pasos { display: flex; gap: 0; margin-bottom: 28px; border-radius: 30px; overflow: hidden; background: #f5f5f5; }
+.paso  { flex: 1; text-align: center; padding: 8px 4px; font-size: .75rem; color: #aaa; font-weight: 500; }
+.paso.activo { background: var(--verde); color: #fff; border-radius: 30px; }
+.paso.hecho  { background: #c8e6a0; color: var(--verde); }
+
+/* ── Resumen card ── */
+.resumen-card {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 20px;
+  box-shadow: var(--sombra);
+  margin-bottom: 20px;
+}
+.resumen-card .card-titulo {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--verde);
+  margin-bottom: 14px;
+}
+.resumen-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: .88rem;
+}
+.resumen-fila:last-child { border-bottom: none; }
+.resumen-fila .etiq { color: #888; }
+.resumen-fila .valor { font-weight: 600; color: #333; }
+
+/* ── Timeline de fechas ── */
+.timeline-titulo {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--verde);
+  margin: 24px 0 12px;
+}
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: .88rem;
+}
+.timeline-item:last-child { border-bottom: none; }
+.timeline-num {
+  width: 26px;
+  height: 26px;
+  background: var(--verde-pale);
+  border: 2px solid var(--verde-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--verde);
+  flex-shrink: 0;
+}
+.timeline-item.primera .timeline-num {
+  background: var(--verde);
+  color: #fff;
+  border-color: var(--verde);
+}
+.timeline-item.ultima .timeline-num {
+  background: #408601;
+  color: #fff;
+  border-color: #408601;
+}
+.timeline-fecha { flex: 1; color: #333; }
+.timeline-fecha .dia { font-weight: 600; }
+.timeline-fecha .hora-tag {
+  display: inline-block;
+  background: var(--verde-pale);
+  color: var(--verde);
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-size: .72rem;
+  font-weight: 600;
+  margin-left: 6px;
+}
+.timeline-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+.badge-inicio { background: #e8f5e9; color: #388e3c; }
+.badge-fin    { background: #fce4ec; color: #c62828; }
+
+/* ── Precio total ── */
+.precio-bloque {
+  background: var(--verde-pale);
+  border: 1px solid var(--verde-light);
+  border-radius: var(--radio);
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 22px 0;
+}
+.precio-bloque .etiq { font-size: .82rem; color: var(--gris); }
+.precio-bloque .monto { font-size: 1.6rem; font-weight: 700; color: var(--verde); }
+.precio-bloque .sub   { font-size: .73rem; color: #999; }
+
+/* ── Botones ── */
+.btn-pagar {
+  display: block; width: 100%; padding: 16px;
+  background: var(--verde); color: #fff; border: none; border-radius: var(--radio);
+  font-family: var(--font); font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: background .15s, transform .1s;
+  text-align: center; margin-bottom: 12px;
+}
+.btn-pagar:active { transform: scale(.98); background: #245200; }
+
+.btn-volver {
+  display: block; width: 100%; padding: 14px;
+  background: transparent; color: var(--gris);
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  font-family: var(--font); font-size: .9rem; font-weight: 500;
+  cursor: pointer; transition: background .15s;
+  text-align: center; text-decoration: none;
+}
+.btn-volver:hover { background: #f9f9f9; }
+
+/* ── Nota legal ── */
+.nota-pago {
+  font-size: .73rem;
+  color: #aaa;
+  text-align: center;
+  margin-top: 14px;
+  line-height: 1.5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='reservar' %}
+
+<div class="confirmar-wrap">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="{% url 'reservar' %}">Reservar</a>
+    <span class="sep">›</span>
+    <a href="{% url 'reservar_pack10' %}">Pack 10 Clases</a>
+    <span class="sep">›</span>
+    <span class="actual">Confirmar</span>
+  </nav>
+
+  <!-- Pasos -->
+  <div class="pasos">
+    <div class="paso hecho">✓ Configurar</div>
+    <div class="paso activo">2 · Confirmar</div>
+    <div class="paso">3 · Pagar</div>
+  </div>
+
+  <!-- Resumen de la reserva -->
+  <div class="resumen-card">
+    <div class="card-titulo">Resumen de tu reserva</div>
+
+    <div class="resumen-fila">
+      <span class="etiq">Producto</span>
+      <span class="valor">Pack 10 Clases · Pilates Reformer</span>
+    </div>
+    <div class="resumen-fila">
+      <span class="etiq">Frecuencia</span>
+      <span class="valor">{{ frecuencia_label }}</span>
+    </div>
+    <div class="resumen-fila">
+      <span class="etiq">Horario fijo</span>
+      <span class="valor">{{ hora }}:00 hrs (todas las sesiones)</span>
+    </div>
+    <div class="resumen-fila">
+      <span class="etiq">Primera clase</span>
+      <span class="valor">{{ fecha_inicio|date:"d/m/Y" }}</span>
+    </div>
+    <div class="resumen-fila">
+      <span class="etiq">Última clase</span>
+      <span class="valor">{{ fecha_fin|date:"d/m/Y" }}</span>
+    </div>
+    <div class="resumen-fila">
+      <span class="etiq">Alumna</span>
+      <span class="valor">{{ request.user.get_full_name|default:request.user.username }}</span>
+    </div>
+  </div>
+
+  <!-- Timeline de las 10 fechas -->
+  <div class="timeline-titulo">Tus 10 clases programadas</div>
+  <div class="timeline">
+    {% for num, fecha, label in fechas %}
+    <div class="timeline-item {% if forloop.first %}primera{% elif forloop.last %}ultima{% endif %}">
+      <div class="timeline-num">{{ num }}</div>
+      <div class="timeline-fecha">
+        <span class="dia">{{ label }}</span>
+        <span class="hora-tag">{{ hora }}:00</span>
+      </div>
+      {% if forloop.first %}
+        <span class="timeline-badge badge-inicio">Inicio</span>
+      {% elif forloop.last %}
+        <span class="timeline-badge badge-fin">Fin</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Precio -->
+  <div class="precio-bloque">
+    <div>
+      <div class="etiq">Total a pagar</div>
+      <div class="sub">Pago único · ${{ precio_por_clase|floatformat:0 }} × 10 clases</div>
+    </div>
+    <div class="monto">${{ precio_total|floatformat:0 }}</div>
+  </div>
+
+  <!-- Botones de acción -->
+  <form method="POST" action="{% url 'reservar_pack10_confirmar' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn-pagar">Pagar con WebPay →</button>
+  </form>
+
+  <a href="{% url 'reservar_pack10' %}" class="btn-volver">← Volver y editar</a>
+
+  <p class="nota-pago">
+    Al confirmar, aceptas que el pago se realiza en su totalidad por adelantado.<br>
+    Serás redirigida a la plataforma segura de Transbank (WebPay).
+  </p>
+
+</div>
+{% endblock %}
