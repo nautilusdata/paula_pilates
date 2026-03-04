@@ -146,6 +146,22 @@ academia/                        ← carpeta raíz del proyecto
         └── reservar_pack10_confirmar.html
 
 
+Los únicos pasos de estructura son:
+
+Crear la carpeta templates/reservas/
+Mover los 2 HTML ahí
+Crear reservas/views_reservar_pack10.py como archivo nuevo
+Pegar el contenido de models_reservas.py al final de tu reservas/models.py existente (no reemplazar, los modelos se acumulan en el mismo archivo)
+
+El models_reservas.py que te entregué no es un archivo separado — es código para agregar a tu models.py actual, debajo del UserMetadata que ya tienes.
+
+
+
+
+
+
+
+
 
 
 
