@@ -44,9 +44,12 @@ def crear_metadata(sender, instance, created, **kwargs):
             user=instance,
             numero_socio=f"{numero:03d}"
         )
-'''Es un signal — Django tiene un sistema de señales que permite ejecutar código automáticamente cuando ocurre algo en el sistema.
-@receiver(post_save, sender=User) significa: "cada vez que se guarde un objeto User, ejecuta esta función". El parámetro created distingue si es un User nuevo o una edición de uno existente, por eso el if created: — solo crea el UserMetadata cuando el User es nuevo, no cada vez que se edita.
-Es como un gancho automático: se registra una nueva alumna → Django guarda el User → el signal se dispara → se crea el UserMetadata con su número de socia asignado automáticamente. Todo sin que tengas que acordarte de hacerlo manualmente.
+'''
+Es un signal — Django tiene un sistema de señales que permite ejecutar código automáticamente cuando ocurre algo en el sistema.
+@receiver(post_save, sender=User) significa: "cada vez que se guarde un objeto User, ejecuta esta función". El parámetro created distingue si es un User nuevo o una edición de uno existente, 
+por eso el if created: — solo crea el UserMetadata cuando el User es nuevo, no cada vez que se edita.
+Es como un gancho automático: se registra una nueva alumna → Django guarda el User → el signal se dispara → se crea el UserMetadata con su número de socia asignado automáticamente. 
+Todo sin que tengas que acordarte de hacerlo manualmente.
 
 Para acceder a los datos desde cualquier parte del código es muy simple:
 # Desde el User llegas al UserMetadata
@@ -55,7 +58,8 @@ request.user.usermetadata.numero_socio
 
 # Desde el UserMetadata llegas al User
 metadata.user.first_name
-metadata.user.email.Django maneja esa navegación en ambas direcciones automáticamente gracias al OneToOneField.
+metadata.user.email.
+Django maneja esa navegación en ambas direcciones automáticamente gracias al OneToOneField.
 '''
 
 def feriados_punta_arenas(years=None):
