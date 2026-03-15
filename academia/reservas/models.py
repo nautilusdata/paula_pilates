@@ -6,6 +6,8 @@ from django.core.exceptions import ValidationError
 from datetime import date, timedelta
 import holidays
 
+
+
 # ─── Constantes de Negocio ────────────────────────────────────────────────────
 
 DIAS_SEMANA_PILATES = {
