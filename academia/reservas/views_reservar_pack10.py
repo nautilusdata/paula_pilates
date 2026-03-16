@@ -244,3 +244,131 @@ def horas_disponibles_ajax(request):
         })
 
     return JsonResponse({'horas': result})
+
+
+
+
+# ─── RESERVAR PACK REDUCIDO (2 a 9 clases) ──────────────────────
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_pack_reducido(request):
+    context = {
+        'frecuencias': [
+            {'codigo': 'LMV', 'label': 'Lun · Miérc · Vier', 'dias': '3 días/semana'},
+            {'codigo': 'LM',  'label': 'Lun · Miérc',         'dias': '2 días/semana'},
+            {'codigo': 'MJ',  'label': 'Mar · Jue',            'dias': '2 días/semana'},
+        ],
+        'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in HORAS_PILATES],
+        'precio_por_clase': 20_000,
+        'cantidades': range(2, 10),
+    }
+
+    if request.method == 'POST':
+        frecuencia  = request.POST.get('frecuencia')
+        hora_str    = request.POST.get('hora')
+        fecha_str   = request.POST.get('fecha_inicio')
+        cantidad_str = request.POST.get('cantidad')
+
+        errores = []
+        if frecuencia not in DIAS_SEMANA_PILATES:
+            errores.append('Frecuencia no válida.')
+
+        hora = int(hora_str) if hora_str and hora_str.isdigit() else None
+        if not hora or hora not in HORAS_PILATES:
+            errores.append('Hora no válida.')
+
+        cantidad = int(cantidad_str) if cantidad_str and cantidad_str.isdigit() else None
+        if not cantidad or not (2 <= cantidad <= 9):
+            errores.append('La cantidad debe ser entre 2 y 9 clases.')
+
+        fecha_inicio = None
+        if fecha_str:
+            try:
+                fecha_inicio = date.fromisoformat(fecha_str)
+                if fecha_inicio < date.today():
+                    errores.append('La fecha no puede ser en el pasado.')
+            except ValueError:
+                errores.append('Fecha no válida.')
+
+        if not errores and frecuencia and hora and fecha_inicio:
+            dias = DIAS_SEMANA_PILATES[frecuencia]
+            if fecha_inicio.weekday() not in dias:
+                nombres = {
+                    'LMV': 'lunes, miércoles o viernes',
+                    'LM':  'lunes o miércoles',
+                    'MJ':  'martes o jueves',
+                }
+                errores.append(f'Para {frecuencia}, la primera clase debe ser un {nombres[frecuencia]}.')
+
+        if not errores:
+            fechas, sin_cupo = _slots_disponibles(frecuencia, hora, fecha_inicio, cantidad)
+            if sin_cupo:
+                errores.append(
+                    f'Sin cupo en: {", ".join(fmt_fecha(f) for f in sin_cupo[:3])}'
+                    + ('…' if len(sin_cupo) > 3 else '')
+                )
+
+        if errores:
+            context.update({'errores': errores,
+                            'sel_frecuencia': frecuencia,
+                            'sel_hora': hora_str,
+                            'sel_fecha': fecha_str,
+                            'sel_cantidad': cantidad_str})
+            return render(request, 'reservas/reservar_pack_reducido.html', context)
+
+        request.session['pack_reducido_borrador'] = {
+            'frecuencia':   frecuencia,
+            'hora':         hora,
+            'fecha_inicio': fecha_inicio.isoformat(),
+            'cantidad':     cantidad,
+            'fechas':       [f.isoformat() for f in fechas],
+        }
+        return redirect('reservar_pack_reducido_confirmar')
+
+    return render(request, 'reservas/reservar_pack_reducido.html', context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_pack_reducido_confirmar(request):
+    borrador = request.session.get('pack_reducido_borrador')
+    if not borrador:
+        messages.warning(request, 'Sesión expirada. Inicia la reserva de nuevo.')
+        return redirect('reservar_pack_reducido')
+
+    fechas   = [date.fromisoformat(f) for f in borrador['fechas']]
+    cantidad = borrador['cantidad']
+    precio   = cantidad * 20_000
+
+    context = {
+        'frecuencia_label': {
+            'LMV': 'Lun · Miérc · Vier',
+            'LM':  'Lun · Miérc',
+            'MJ':  'Mar · Jue',
+        }[borrador['frecuencia']],
+        'hora':             borrador['hora'],
+        'fecha_inicio':     date.fromisoformat(borrador['fecha_inicio']),
+        'fecha_fin':        fechas[-1],
+        'fechas':           [(i + 1, f, fmt_fecha(f)) for i, f in enumerate(fechas)],
+        'cantidad':         cantidad,
+        'precio_total':     precio,
+        'precio_por_clase': 20_000,
+    }
+
+    if request.method == 'POST':
+        pack = Pack.objects.create(
+            alumna       = request.user,
+            tipo         = 'REDUCIDO',
+            frecuencia   = borrador['frecuencia'],
+            hora         = borrador['hora'],
+            fecha_inicio = date.fromisoformat(borrador['fecha_inicio']),
+            cantidad     = cantidad,
+        )
+        del request.session['pack_reducido_borrador']
+        crear_sesiones_pack(pack)
+        messages.success(request, f'¡Reserva confirmada! Tu primera clase es el {fmt_fecha(fechas[0])} a las {borrador["hora"]:02d}:00.')
+        return redirect('mis_clases')
+
+    return render(request, 'reservas/reservar_pack_reducido_confirmar.html', context)
