@@ -263,6 +263,7 @@ def reservar_pack_reducido(request):
         'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in HORAS_PILATES],
         'precio_por_clase': 20_000,
         'cantidades': range(2, 10),
+        'hoy': date.today(),
     }
 
     if request.method == 'POST':
