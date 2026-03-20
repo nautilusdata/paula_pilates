@@ -222,7 +222,7 @@ def horas_disponibles_ajax(request):
     frecuencia  = request.GET.get('frecuencia')
     fecha_str   = request.GET.get('fecha')
 
-    if frecuencia not in DIAS_SEMANA_PILATES or not fecha_str:
+    if not fecha_str:
         return JsonResponse({'error': 'Parámetros inválidos'}, status=400)
 
     try:
@@ -232,17 +232,28 @@ def horas_disponibles_ajax(request):
 
     result = []
     for h in HORAS_PILATES:
-        fechas, sin_cupo = _slots_disponibles(frecuencia, h, fecha_inicio)
-        cupo_minimo = min(
-            Sesion.cupos_disponibles(f, h) for f in fechas
-        )
-        result.append({
-            'hora':       h,
-            'label':      f'{h:02d}:00',
-            'disponible': len(sin_cupo) == 0,
-            'cupos_min':  cupo_minimo,
-        })
-
+        if frecuencia not in DIAS_SEMANA_PILATES:
+            # Clase suelta — solo chequea ese día
+            cupo = Sesion.cupos_disponibles(fecha_inicio, h)
+            result.append({
+                'hora':       h,
+                'label':      f'{h:02d}:00',
+                'disponible': cupo > 0,
+                'cupos_min':  cupo,
+            })
+        else:
+            # Packs — proyecta todas las fechas
+            cantidad = int(request.GET.get('cantidad', 10))
+            fechas, sin_cupo = _slots_disponibles(frecuencia, h, fecha_inicio, cantidad)
+            cupo_minimo = min(
+                Sesion.cupos_disponibles(f, h) for f in fechas
+            )
+            result.append({
+                'hora':       h,
+                'label':      f'{h:02d}:00',
+                'disponible': len(sin_cupo) == 0,
+                'cupos_min':  cupo_minimo,
+            })
     return JsonResponse({'horas': result})
 
 

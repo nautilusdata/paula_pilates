@@ -194,7 +194,7 @@ inputFecha.addEventListener('change', () => {
   horaOculto.value = '';
 
   // Reutilizamos el mismo endpoint AJAX, con frecuencia LM y cantidad 1
-  fetch(`{% url 'horas_disponibles_ajax' %}?frecuencia=LM&fecha=${fecha}&cantidad=1`)
+  fetch(`{% url 'horas_disponibles_ajax' %}?fecha=${fecha}`)
     .then(r => r.json())
     .then(data => { if (!data.error) renderHoras(data.horas); })
     .catch(() => {
@@ -227,7 +227,7 @@ function horaElegida(hora) { horaOculto.value = hora; }
 window.addEventListener('DOMContentLoaded', () => {
   const selFecha = "{{ sel_fecha|default:'' }}";
   if (selFecha) {
-    fetch(`{% url 'horas_disponibles_ajax' %}?frecuencia=LM&fecha=${selFecha}&cantidad=1`)
+    fetch(`{% url 'horas_disponibles_ajax' %}?fecha=${selFecha}`)
       .then(r => r.json())
       .then(data => { if (!data.error) renderHoras(data.horas); });
   }
