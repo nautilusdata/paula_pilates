@@ -373,3 +373,99 @@ def reservar_pack_reducido_confirmar(request):
         return redirect('mis_clases')
 
     return render(request, 'reservas/reservar_pack_reducido_confirmar.html', context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_clase_suelta(request):
+    context = {
+        'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in HORAS_PILATES],
+        'precio': 25_000,
+        'hoy': date.today(),
+    }
+
+    if request.method == 'POST':
+        hora_str  = request.POST.get('hora')
+        fecha_str = request.POST.get('fecha_inicio')
+
+        errores = []
+        hora = int(hora_str) if hora_str and hora_str.isdigit() else None
+        if not hora or hora not in HORAS_PILATES:
+            errores.append('Hora no válida.')
+
+        fecha_inicio = None
+        if fecha_str:
+            try:
+                fecha_inicio = date.fromisoformat(fecha_str)
+                if fecha_inicio < date.today():
+                    errores.append('La fecha no puede ser en el pasado.')
+                if fecha_inicio.weekday() > 4:
+                    errores.append('Las clases sueltas son solo de lunes a viernes.')
+            except ValueError:
+                errores.append('Fecha no válida.')
+
+        if not errores and hora and fecha_inicio:
+            if Sesion.cupos_disponibles(fecha_inicio, hora) < 1:
+                errores.append(f'Sin cupo disponible el {fmt_fecha(fecha_inicio)} a las {hora:02d}:00.')
+
+        if errores:
+            context.update({'errores': errores,
+                            'sel_hora': hora_str,
+                            'sel_fecha': fecha_str})
+            return render(request, 'reservas/reservar_clase_suelta.html', context)
+
+        request.session['clase_suelta_borrador'] = {
+            'hora':         hora,
+            'fecha_inicio': fecha_inicio.isoformat(),
+        }
+        return redirect('reservar_clase_suelta_confirmar')
+
+    return render(request, 'reservas/reservar_clase_suelta.html', context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_clase_suelta_confirmar(request):
+    borrador = request.session.get('clase_suelta_borrador')
+    if not borrador:
+        messages.warning(request, 'Sesión expirada. Inicia la reserva de nuevo.')
+        return redirect('reservar_clase_suelta')
+
+    fecha = date.fromisoformat(borrador['fecha_inicio'])
+    hora  = borrador['hora']
+
+    context = {
+        'fecha':       fecha,
+        'fecha_label': fmt_fecha(fecha),
+        'hora':        hora,
+        'precio':      25_000,
+    }
+
+    if request.method == 'POST':
+        # Verificar cupo de nuevo antes de crear
+        if Sesion.cupos_disponibles(fecha, hora) < 1:
+            messages.error(request, 'Lo sentimos, el cupo se ocupó mientras confirmabas. Elige otro horario.')
+            return redirect('reservar_clase_suelta')
+
+        pack = Pack.objects.create(
+            alumna       = request.user,
+            tipo         = 'SUELTA',
+            hora         = hora,
+            fecha_inicio = fecha,
+            cantidad     = 1,
+        )
+        Sesion.objects.create(
+            pack   = pack,
+            fecha  = fecha,
+            hora   = hora,
+            numero = 1,
+        )
+        pack.fecha_fin = fecha
+        pack.estado    = 'ACTIVO'
+        pack.save(update_fields=['fecha_fin', 'estado'])
+
+        del request.session['clase_suelta_borrador']
+        messages.success(request, f'¡Clase reservada! Te esperamos el {fmt_fecha(fecha)} a las {hora:02d}:00.')
+        return redirect('mis_clases')
+
+    return render(request, 'reservas/reservar_clase_suelta_confirmar.html', context)
