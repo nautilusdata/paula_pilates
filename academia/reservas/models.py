@@ -95,7 +95,7 @@ def generar_fechas_pack(fecha_inicio: date, frecuencia: str, cantidad: int = 10)
     return fechas
 
 
-# ─── Modelos ──────────────────────────────────────────────────────────────────
+# --------------------- Modelos ──────────────────────────────────────────
 
 class Pack(models.Model):
     """
@@ -216,7 +216,7 @@ def crear_sesiones_pack(pack: Pack):
     Genera las Sesion del pack después de confirmación de pago.
     Valida disponibilidad de cupos antes de crear.
     """
-    if pack.tipo not in ('PACK10', 'REDUCIDO'):
+    if pack.tipo not in ('PACK10', 'REDUCIDO', 'PRIVADA'):
         raise ValueError('Solo packs tienen sesiones múltiples con esta función.')
 
     fechas = generar_fechas_pack(pack.fecha_inicio, pack.frecuencia, pack.cantidad)
