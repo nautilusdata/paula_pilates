@@ -12,4 +12,6 @@ urlpatterns = [
     path('reservar_pack_reducido/confirmar/', views_reservar_pack10.reservar_pack_reducido_confirmar, name='reservar_pack_reducido_confirmar'),
     path('reservar/clase-suelta/', views_reservar_pack10.reservar_clase_suelta, name='reservar_clase_suelta'),
     path('reservar/clase-suelta/confirmar/', views_reservar_pack10.reservar_clase_suelta_confirmar, name='reservar_clase_suelta_confirmar'),
+    path('reservar/clase-prueba/', views_reservar_pack10.reservar_clase_prueba, name='reservar_clase_prueba'),
+    path('reservar/clase-prueba/confirmar/', views_reservar_pack10.reservar_clase_prueba_confirmar, name='reservar_clase_prueba_confirmar'),
 ]

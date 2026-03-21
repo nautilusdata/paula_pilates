@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Clase de Prueba – Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-mid:   #408601;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --amarillo:    #f1c40f;
+  --gris:        #555;
+  --borde:       #ddd;
+  --radio:       14px;
+  --sombra:      0 2px 12px rgba(0,0,0,.07);
+  --font:        'Poppins', sans-serif;
+}
+.pack-wrap {
+  width: 92%; max-width: 580px;
+  margin: 24px auto 100px;
+  font-family: var(--font);
+}
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .78rem; color: #999; margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--verde); text-decoration: none; }
+.breadcrumb .sep { color: #ccc; }
+.breadcrumb .actual { color: var(--gris); font-weight: 600; }
+
+.pasos {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-radius: 30px; overflow: hidden; background: #f5f5f5;
+}
+.paso { flex: 1; text-align: center; padding: 8px 4px; font-size: .75rem; color: #aaa; font-weight: 500; }
+.paso.activo { background: var(--verde); color: #fff; border-radius: 30px; }
+
+.pack-titulo { font-size: 1.3rem; font-weight: 700; color: var(--verde); margin-bottom: 4px; }
+.pack-subtitulo { font-size: .85rem; color: var(--gris); margin-bottom: 24px; }
+
+.aviso {
+  background: #fff9e6; border-left: 4px solid var(--amarillo);
+  padding: 12px 14px; border-radius: 8px;
+  font-size: .82rem; color: #856404; margin-bottom: 22px;
+}
+.errores {
+  background: #fff0f0; border-left: 4px solid #e74c3c;
+  padding: 12px 14px; border-radius: 8px;
+  font-size: .82rem; color: #c0392b; margin-bottom: 20px;
+}
+.errores ul { margin: 6px 0 0; padding-left: 18px; }
+
+.seccion-label {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--verde); margin-bottom: 10px;
+}
+
+/* Info fija de la clase */
+.info-fija {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 18px 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--sombra);
+}
+.info-fija-fila {
+  display: flex; justify-content: space-between;
+  padding: 7px 0; border-bottom: 1px solid #f5f5f5;
+  font-size: .88rem;
+}
+.info-fija-fila:last-child { border-bottom: none; }
+.info-fija-fila .etiq { color: #888; }
+.info-fija-fila .valor { font-weight: 600; color: #333; }
+
+.fecha-field {
+  width: 100%; padding: 14px 16px;
+  border: 2px solid var(--borde); border-radius: var(--radio);
+  font-family: var(--font); font-size: .95rem; color: #333;
+  background: #fff; box-sizing: border-box;
+  transition: border-color .15s; margin-bottom: 6px;
+}
+.fecha-field:focus { outline: none; border-color: var(--verde); }
+.fecha-hint { font-size: .75rem; color: #999; margin-bottom: 22px; display: block; }
+
+.precio-badge {
+  background: var(--verde-pale); border: 1px solid var(--verde-light);
+  border-radius: var(--radio); padding: 16px 18px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px;
+}
+.precio-badge .det { font-size: .82rem; color: var(--gris); }
+.precio-badge .det strong { display: block; color: var(--verde); font-size: 1.4rem; }
+
+.btn-continuar {
+  display: block; width: 100%; padding: 16px;
+  background: var(--verde); color: #fff; border: none;
+  border-radius: var(--radio); font-family: var(--font);
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: background .15s, transform .1s; text-align: center;
+}
+.btn-continuar:active { transform: scale(.98); background: #245200; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='reservar' %}
+
+<div class="pack-wrap">
+
+  <nav class="breadcrumb">
+    <a href="{% url 'reservar' %}">Reservar</a>
+    <span class="sep">›</span>
+    <a href="{% url 'reservar' %}">Pilates Reformer</a>
+    <span class="sep">›</span>
+    <span class="actual">Clase de Prueba</span>
+  </nav>
+
+  <div class="pasos">
+    <div class="paso activo">1 · Elegir sábado</div>
+    <div class="paso">2 · Confirmar</div>
+    <div class="paso">3 · Pagar</div>
+  </div>
+
+  <p class="pack-titulo">Clase de Prueba</p>
+  <p class="pack-subtitulo">Pilates Reformer · Solo sábados · $15.000</p>
+
+  <div class="aviso">
+    <strong>Solo sábados a las 12:30.</strong> Elige el sábado que más te acomoda y te esperamos para que conozcas el estudio.
+  </div>
+
+  {% if errores %}
+  <div class="errores">
+    <strong>Por favor corrige lo siguiente:</strong>
+    <ul>{% for e in errores %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <!-- Info fija -->
+  <div class="seccion-label">Detalles de la clase</div>
+  <div class="info-fija">
+    <div class="info-fija-fila">
+      <span class="etiq">Día</span>
+      <span class="valor">Sábado</span>
+    </div>
+    <div class="info-fija-fila">
+      <span class="etiq">Hora</span>
+      <span class="valor">{{ hora }} hrs</span>
+    </div>
+    <div class="info-fija-fila">
+      <span class="etiq">Duración</span>
+      <span class="valor">{{ duracion }}</span>
+    </div>
+    <div class="info-fija-fila">
+      <span class="etiq">Modalidad</span>
+      <span class="valor">Pilates Reformer</span>
+    </div>
+  </div>
+
+  <form method="POST" id="form-prueba">
+    {% csrf_token %}
+
+    <div class="seccion-label">① ¿Qué sábado quieres venir?</div>
+    <input type="date" name="fecha_inicio" id="fecha_inicio"
+           class="fecha-field"
+           min="{{ hoy|date:'Y-m-d' }}"
+           value="{{ sel_fecha|default:'' }}" required>
+    <span class="fecha-hint">Solo sábados — otros días serán rechazados.</span>
+
+    <div class="precio-badge">
+      <div class="det">
+        <strong>${{ precio|floatformat:0 }}</strong>
+        Sesión de prueba · {{ duracion }}
+      </div>
+      <div style="font-size:.75rem; color:#999; text-align:right;">
+        Pago único<br>por adelantado
+      </div>
+    </div>
+
+    <button type="submit" class="btn-continuar">Ver resumen →</button>
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const inputFecha = document.getElementById('fecha_inicio');
+
+inputFecha.addEventListener('change', () => {
+  const fecha = inputFecha.value;
+  if (!fecha) return;
+  const jsDate = new Date(fecha + 'T12:00:00');
+  if (jsDate.getDay() !== 6) {
+    alert('La clase de prueba es solo los sábados. Por favor elige un sábado.');
+    inputFecha.value = '';
+  }
+});
+</script>
+{% endblock %}

@@ -480,3 +480,98 @@ def reservar_clase_suelta_confirmar(request):
         return redirect('mis_clases')
 
     return render(request, 'reservas/reservar_clase_suelta_confirmar.html', context)
+
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_clase_prueba(request):
+    hoy = date.today()
+
+    context = {
+        'precio':   15_000,
+        'hora':     '12:30',
+        'duracion': '45 minutos',
+        'hoy':      hoy,
+    }
+
+    if request.method == 'POST':
+        fecha_str = request.POST.get('fecha_inicio')
+        errores = []
+
+        fecha_inicio = None
+        if fecha_str:
+            try:
+                fecha_inicio = date.fromisoformat(fecha_str)
+                if fecha_inicio < hoy:
+                    errores.append('La fecha no puede ser en el pasado.')
+                if fecha_inicio.weekday() != 5:
+                    errores.append('La clase de prueba es solo los sábados.')
+                if fecha_inicio and Sesion.cupos_disponibles(fecha_inicio, 12) < 1:
+                    errores.append('No hay cupo disponible ese sábado.')
+            except ValueError:
+                errores.append('Fecha no válida.')
+        else:
+            errores.append('Debes elegir un sábado.')
+
+        if errores:
+            context['errores'] = errores
+            context['sel_fecha'] = fecha_str
+            return render(request, 'reservas/reservar_clase_prueba.html', context)
+
+        request.session['clase_prueba_borrador'] = {
+            'fecha_inicio': fecha_inicio.isoformat(),
+        }
+        return redirect('reservar_clase_prueba_confirmar')
+
+    return render(request, 'reservas/reservar_clase_prueba.html', context)
+
+
+
+# ─── RESERVAR CLASE E PRUEBA ──────────────────────
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_clase_prueba_confirmar(request):
+    borrador = request.session.get('clase_prueba_borrador')
+    if not borrador:
+        messages.warning(request, 'Sesión expirada. Inicia la reserva de nuevo.')
+        return redirect('reservar_clase_prueba')
+
+    fecha = date.fromisoformat(borrador['fecha_inicio'])
+
+    context = {
+        'fecha':       fecha,
+        'fecha_label': fmt_fecha(fecha),
+        'hora':        '12:30',
+        'duracion':    '45 minutos',
+        'precio':      15_000,
+    }
+
+    if request.method == 'POST':
+        if Sesion.cupos_disponibles(fecha, 12) < 1:
+            messages.error(request, 'Lo sentimos, el cupo se ocupó. Elige otro sábado.')
+            return redirect('reservar_clase_prueba')
+
+        pack = Pack.objects.create(
+            alumna       = request.user,
+            tipo         = 'PRUEBA',
+            hora         = 12,
+            fecha_inicio = fecha,
+            cantidad     = 1,
+        )
+        Sesion.objects.create(
+            pack   = pack,
+            fecha  = fecha,
+            hora   = 12,
+            numero = 1,
+        )
+        pack.fecha_fin = fecha
+        pack.estado    = 'ACTIVO'
+        pack.save(update_fields=['fecha_fin', 'estado'])
+
+        del request.session['clase_prueba_borrador']
+        messages.success(request, f'¡Clase de prueba reservada! Te esperamos el {fmt_fecha(fecha)} a las 12:30.')
+        return redirect('mis_clases')
+
+    return render(request, 'reservas/reservar_clase_prueba_confirmar.html', context)
