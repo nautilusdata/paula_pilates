@@ -78,11 +78,8 @@ Viernes     11, 16
 RECUPERACIÓN DE CLASES
 ----------------------
 En casos extremos como accidente, enfermedad GRAVE, muerte de familiar, etc, las clases se pueden congelar.
-Cuando una alumna quiera recuperar, es sólo si hay disponibilidad.
-Tiene que recuperar dentro del tiempo incial del pack (considerando día completo por ejemplo si el pack original terminaba el día 1 a las 9am darle la posibildiad de ese día hasta el último horario, si hay disponibilidad). Y tiene que ser al otro día de haber perdido la clase, no tiene que ser los mismos días que ella tomó (si el esquema que tomó es LU-MIE-VIE, puede recuperar el JUE también) pero debe ser lo antes posible porque si no, se pierde una venta.
-Se pueden recuperar hasta 3 clases.
-
-****Si una alumna pide cambiar su clase de hoy, por ejemplo ella va Lunes y Miercoles y por cualquier motivo no puede asistir y pide si puede ir el martes a cierta hora x. Como se tomaría eso? como clase perdida?
+Si una alumna no asiste a clases puede recuperar hasta  clases, siempre que haya disponibilidad. Pero debe recuperarla dentro de la semana.
+Tiene que ser al otro día de haber perdido la clase, no tiene que ser los mismos días que ella tomó (si el esquema que tomó es LU-MIE-VIE, puede recuperar el JUE también).
 
 
 
