@@ -528,7 +528,7 @@ def reservar_clase_prueba(request):
 
 
 
-# ─── RESERVAR CLASE E PRUEBA ──────────────────────
+# ─── RESERVAR CLASE DE PRUEBA ──────────────────────
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -575,3 +575,168 @@ def reservar_clase_prueba_confirmar(request):
         return redirect('mis_clases')
 
     return render(request, 'reservas/reservar_clase_prueba_confirmar.html', context)
+
+
+
+# ─── RESERVAR CLASE PRIVADA ──────────────────────
+
+HORAS_PRIVADAS = [11, 16]
+
+def slot_privado_disponible(fecha: date, hora: int) -> bool:
+    """
+    Un slot privado está disponible solo si no hay NINGUNA sesión
+    (grupal ni privada) en esa fecha y hora.
+    """
+    return not Sesion.objects.filter(
+        fecha=fecha,
+        hora=hora,
+        estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
+    ).exists()
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_clase_privada(request):
+    context = {
+        'hoy':        date.today(),
+        'horas':      [{'valor': h, 'label': f'{h:02d}:00'} for h in HORAS_PRIVADAS],
+        'frecuencias': [
+            {'codigo': 'LMV', 'label': 'Lun · Miérc · Vier', 'dias': '3 días/semana'},
+            {'codigo': 'LM',  'label': 'Lun · Miérc',         'dias': '2 días/semana'},
+            {'codigo': 'MJ',  'label': 'Mar · Jue',            'dias': '2 días/semana'},
+        ],
+        'precio_pack10':  285_000,
+        'precio_reducido': 30_000,
+    }
+
+    if request.method == 'POST':
+        tipo        = request.POST.get('tipo')       # PRIVADA10 o PRIVADA_REDUCIDO
+        frecuencia  = request.POST.get('frecuencia')
+        hora_str    = request.POST.get('hora')
+        fecha_str   = request.POST.get('fecha_inicio')
+        cantidad_str = request.POST.get('cantidad', '10')
+
+        errores = []
+
+        if tipo not in ('PRIVADA10', 'PRIVADA_REDUCIDO'):
+            errores.append('Debes elegir Pack 10 o Pack Reducido.')
+
+        if frecuencia not in DIAS_SEMANA_PILATES:
+            errores.append('Frecuencia no válida.')
+
+        hora = int(hora_str) if hora_str and hora_str.isdigit() else None
+        if not hora or hora not in HORAS_PRIVADAS:
+            errores.append('Hora no válida.')
+
+        cantidad = 10
+        if tipo == 'PRIVADA_REDUCIDO':
+            cantidad = int(cantidad_str) if cantidad_str and cantidad_str.isdigit() else None
+            if not cantidad or not (2 <= cantidad <= 9):
+                errores.append('El pack reducido debe tener entre 2 y 9 clases.')
+
+        fecha_inicio = None
+        if fecha_str:
+            try:
+                fecha_inicio = date.fromisoformat(fecha_str)
+                if fecha_inicio < date.today():
+                    errores.append('La fecha no puede ser en el pasado.')
+                elif frecuencia and fecha_inicio.weekday() not in DIAS_SEMANA_PILATES.get(frecuencia, []):
+                    nombres = {
+                        'LMV': 'lunes, miércoles o viernes',
+                        'LM':  'lunes o miércoles',
+                        'MJ':  'martes o jueves',
+                    }
+                    errores.append(f'La fecha debe ser un {nombres.get(frecuencia, "")}.')
+            except ValueError:
+                errores.append('Fecha no válida.')
+        else:
+            errores.append('Debes elegir una fecha de inicio.')
+
+        if not errores and fecha_inicio and hora and frecuencia:
+            fechas = generar_fechas_pack(fecha_inicio, frecuencia, cantidad)
+            sin_cupo = [f for f in fechas if not slot_privado_disponible(f, hora)]
+            if sin_cupo:
+                errores.append(
+                    f'Paula no está disponible en: '
+                    + ', '.join(fmt_fecha(f) for f in sin_cupo[:3])
+                    + ('…' if len(sin_cupo) > 3 else '')
+                )
+
+        if errores:
+            context.update({
+                'errores':       errores,
+                'sel_tipo':      tipo,
+                'sel_frecuencia': frecuencia,
+                'sel_hora':      hora_str,
+                'sel_fecha':     fecha_str,
+                'sel_cantidad':  cantidad_str,
+            })
+            return render(request, 'reservas/reservar_clase_privada.html', context)
+
+        precio = 285_000 if tipo == 'PRIVADA10' else cantidad * 30_000
+
+        request.session['privada_borrador'] = {
+            'tipo':         tipo,
+            'frecuencia':   frecuencia,
+            'hora':         hora,
+            'fecha_inicio': fecha_inicio.isoformat(),
+            'cantidad':     cantidad,
+            'fechas':       [f.isoformat() for f in fechas],
+            'precio':       precio,
+        }
+        return redirect('reservar_clase_privada_confirmar')
+
+    return render(request, 'reservas/reservar_clase_privada.html', context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_clase_privada_confirmar(request):
+    borrador = request.session.get('privada_borrador')
+    if not borrador:
+        messages.warning(request, 'Sesión expirada. Inicia la reserva de nuevo.')
+        return redirect('reservar_clase_privada')
+
+    fechas   = [date.fromisoformat(f) for f in borrador['fechas']]
+    cantidad = borrador['cantidad']
+    tipo     = borrador['tipo']
+
+    context = {
+        'tipo_label': 'Pack 10 Clases Privadas' if tipo == 'PRIVADA10' else f'Pack {cantidad} Clases Privadas',
+        'frecuencia_label': {
+            'LMV': 'Lun · Miérc · Vier',
+            'LM':  'Lun · Miérc',
+            'MJ':  'Mar · Jue',
+        }[borrador['frecuencia']],
+        'hora':         borrador['hora'],
+        'fecha_inicio': fechas[0],
+        'fecha_fin':    fechas[-1],
+        'fechas':       [(i + 1, f, fmt_fecha(f)) for i, f in enumerate(fechas)],
+        'cantidad':     cantidad,
+        'precio':       borrador['precio'],
+        'precio_por_clase': 28_500 if tipo == 'PRIVADA10' else 30_000,
+    }
+
+    if request.method == 'POST':
+        # Verificar disponibilidad de nuevo
+        hora = borrador['hora']
+        sin_cupo = [f for f in fechas if not slot_privado_disponible(f, hora)]
+        if sin_cupo:
+            messages.error(request, 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.')
+            return redirect('reservar_clase_privada')
+
+        pack = Pack.objects.create(
+            alumna       = request.user,
+            tipo         = 'PRIVADA',
+            frecuencia   = borrador['frecuencia'],
+            hora         = hora,
+            fecha_inicio = fechas[0],
+            cantidad     = cantidad,
+        )
+        crear_sesiones_pack(pack)
+
+        del request.session['privada_borrador']
+        messages.success(request, f'¡Clase privada reservada! Tu primera clase es el {fmt_fecha(fechas[0])} a las {hora:02d}:00.')
+        return redirect('mis_clases')
+
+    return render(request, 'reservas/reservar_clase_privada_confirmar.html', context)

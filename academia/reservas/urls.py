@@ -17,5 +17,7 @@ urlpatterns = [
     path('reservar/clase-prueba/confirmar/', views_reservar_pack10.reservar_clase_prueba_confirmar, name='reservar_clase_prueba_confirmar'),
     path('reservar/body-balance/', views_body_balance.reservar_body_balance, name='reservar_body_balance'),
     path('reservar/body-balance/confirmar/', views_body_balance.reservar_body_balance_confirmar, name='reservar_body_balance_confirmar'),
+    path('reservar/clase-privada/', views_reservar_pack10.reservar_clase_privada, name='reservar_clase_privada'),
+    path('reservar/clase-privada/confirmar/', views_reservar_pack10.reservar_clase_privada_confirmar, name='reservar_clase_privada_confirmar'),
     
 ]
