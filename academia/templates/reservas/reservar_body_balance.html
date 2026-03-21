@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reservar Body Balance – Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-mid:   #408601;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --amarillo:    #f1c40f;
+  --azul:        #1565c0;
+  --azul-pale:   #e3f2fd;
+  --gris:        #555;
+  --borde:       #ddd;
+  --radio:       14px;
+  --sombra:      0 2px 12px rgba(0,0,0,.07);
+  --font:        'Poppins', sans-serif;
+}
+.pack-wrap {
+  width: 92%; max-width: 580px;
+  margin: 24px auto 100px;
+  font-family: var(--font);
+}
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .78rem; color: #999; margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--verde); text-decoration: none; }
+.breadcrumb .sep { color: #ccc; }
+.breadcrumb .actual { color: var(--gris); font-weight: 600; }
+
+.pasos {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-radius: 30px; overflow: hidden; background: #f5f5f5;
+}
+.paso { flex: 1; text-align: center; padding: 8px 4px; font-size: .75rem; color: #aaa; font-weight: 500; }
+.paso.activo { background: var(--verde); color: #fff; border-radius: 30px; }
+
+.pack-titulo { font-size: 1.3rem; font-weight: 700; color: var(--verde); margin-bottom: 4px; }
+.pack-subtitulo { font-size: .85rem; color: var(--gris); margin-bottom: 24px; }
+
+.aviso {
+  background: #fff9e6; border-left: 4px solid var(--amarillo);
+  padding: 12px 14px; border-radius: 8px;
+  font-size: .82rem; color: #856404; margin-bottom: 22px;
+}
+.errores {
+  background: #fff0f0; border-left: 4px solid #e74c3c;
+  padding: 12px 14px; border-radius: 8px;
+  font-size: .82rem; color: #c0392b; margin-bottom: 20px;
+}
+.errores ul { margin: 6px 0 0; padding-left: 18px; }
+
+.seccion-label {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--verde); margin-bottom: 10px;
+}
+
+/* ── Selector de tipo ── */
+.tipo-opciones { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+.tipo-opt { display: none; }
+.tipo-label {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 20px; border: 2px solid var(--borde); border-radius: var(--radio);
+  cursor: pointer; background: #fff; box-shadow: var(--sombra); transition: all .15s;
+}
+.tipo-label .tipo-info .tipo-nombre { font-weight: 600; color: #333; font-size: .95rem; }
+.tipo-label .tipo-info .tipo-sub { font-size: .78rem; color: #999; margin-top: 3px; }
+.tipo-label .tipo-precio { font-weight: 700; color: var(--verde-mid); font-size: 1.1rem; }
+.tipo-opt:checked + .tipo-label { border-color: var(--verde); background: var(--verde-pale); }
+
+/* ── Horarios BB ── */
+.horarios-bb { display: flex; flex-direction: column; gap: 8px; margin-bottom: 26px; }
+.dia-opt { display: none; }
+.dia-label {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px; border: 2px solid var(--borde); border-radius: var(--radio);
+  cursor: pointer; background: #fff; font-size: .88rem; transition: all .15s;
+}
+.dia-label .dia-nombre { font-weight: 600; color: #333; }
+.dia-label .dia-hora { color: #999; font-size: .82rem; }
+.dia-opt:checked + .dia-label { border-color: var(--verde); background: var(--verde-pale); }
+
+/* Horarios full (solo info) */
+.horarios-full {
+  background: #fff; border: 1px solid var(--borde);
+  border-radius: var(--radio); padding: 14px 18px;
+  margin-bottom: 26px; font-size: .88rem;
+}
+.horario-full-fila {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid #f5f5f5;
+}
+.horario-full-fila:last-child { border-bottom: none; }
+.horario-full-fila .dia { font-weight: 600; color: #333; }
+.horario-full-fila .hora { color: #999; }
+
+.fecha-field {
+  width: 100%; padding: 14px 16px;
+  border: 2px solid var(--borde); border-radius: var(--radio);
+  font-family: var(--font); font-size: .95rem; color: #333;
+  background: #fff; box-sizing: border-box;
+  transition: border-color .15s; margin-bottom: 6px;
+}
+.fecha-field:focus { outline: none; border-color: var(--verde); }
+.fecha-hint { font-size: .75rem; color: #999; margin-bottom: 22px; display: block; }
+
+/* Sección semanal oculta por defecto */
+.seccion-semanal { display: none; }
+.seccion-semanal.visible { display: block; }
+.seccion-full { display: none; }
+.seccion-full.visible { display: block; }
+
+.btn-continuar {
+  display: block; width: 100%; padding: 16px;
+  background: var(--verde); color: #fff; border: none;
+  border-radius: var(--radio); font-family: var(--font);
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: background .15s, transform .1s; text-align: center;
+}
+.btn-continuar:active { transform: scale(.98); background: #245200; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='reservar' %}
+
+<div class="pack-wrap">
+
+  <nav class="breadcrumb">
+    <a href="{% url 'reservar' %}">Reservar</a>
+    <span class="sep">›</span>
+    <span class="actual">Body Balance</span>
+  </nav>
+
+  <div class="pasos">
+    <div class="paso activo">1 · Configurar</div>
+    <div class="paso">2 · Confirmar</div>
+    <div class="paso">3 · Pagar</div>
+  </div>
+
+  <p class="pack-titulo">Body Balance</p>
+  <p class="pack-subtitulo">Martes · Jueves · Sábado</p>
+
+  <div class="aviso">
+    <strong>Clases grupales</strong> — Martes y Jueves a las 20:00, Sábado a las 11:00.
+  </div>
+
+  {% if errores %}
+  <div class="errores">
+    <strong>Por favor corrige lo siguiente:</strong>
+    <ul>{% for e in errores %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <form method="POST" id="form-bb">
+    {% csrf_token %}
+
+    <!-- TIPO -->
+    <div class="seccion-label">① ¿Qué modalidad quieres?</div>
+    <div class="tipo-opciones">
+      <input type="radio" name="tipo" id="tipo_full" value="BB_FULL"
+             class="tipo-opt" {% if sel_tipo == 'BB_FULL' %}checked{% endif %} required>
+      <label for="tipo_full" class="tipo-label">
+        <div class="tipo-info">
+          <span class="tipo-nombre">Mensualidad Full</span>
+          <span class="tipo-sub">3 veces por semana · Mar + Jue + Sáb</span>
+        </div>
+        <span class="tipo-precio">$60.000</span>
+      </label>
+
+      <input type="radio" name="tipo" id="tipo_semanal" value="BB_SEMANAL"
+             class="tipo-opt" {% if sel_tipo == 'BB_SEMANAL' %}checked{% endif %}>
+      <label for="tipo_semanal" class="tipo-label">
+        <div class="tipo-info">
+          <span class="tipo-nombre">Clase Semanal</span>
+          <span class="tipo-sub">1 vez por semana · Elige el día</span>
+        </div>
+        <span class="tipo-precio">$15.000</span>
+      </label>
+    </div>
+
+    <!-- MENSUALIDAD FULL: info horarios + fecha inicio -->
+    <div class="seccion-full {% if sel_tipo == 'BB_FULL' %}visible{% endif %}" id="seccion-full">
+      <div class="seccion-label">② Horarios fijos</div>
+      <div class="horarios-full">
+        <div class="horario-full-fila"><span class="dia">Martes</span><span class="hora">20:00 hrs</span></div>
+        <div class="horario-full-fila"><span class="dia">Jueves</span><span class="hora">20:00 hrs</span></div>
+        <div class="horario-full-fila"><span class="dia">Sábado</span><span class="hora">11:00 hrs</span></div>
+      </div>
+      <div class="seccion-label">③ ¿Cuándo empiezas?</div>
+      <input type="date" name="fecha_inicio" id="fecha_full"
+             class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
+             value="{{ sel_fecha|default:'' }}">
+      <span class="fecha-hint" id="hint-full">Elige el primer martes, jueves o sábado desde el que quieres partir.</span>
+    </div>
+
+    <!-- CLASE SEMANAL: elegir día + fecha -->
+    <div class="seccion-semanal {% if sel_tipo == 'BB_SEMANAL' %}visible{% endif %}" id="seccion-semanal">
+      <div class="seccion-label">② ¿Qué día de la semana?</div>
+      <div class="horarios-bb">
+        <input type="radio" name="dia_bb" id="dia_mar" value="MAR"
+               class="dia-opt" {% if sel_dia_bb == 'MAR' %}checked{% endif %}>
+        <label for="dia_mar" class="dia-label">
+          <span class="dia-nombre">Martes</span>
+          <span class="dia-hora">20:00 hrs</span>
+        </label>
+
+        <input type="radio" name="dia_bb" id="dia_jue" value="JUE"
+               class="dia-opt" {% if sel_dia_bb == 'JUE' %}checked{% endif %}>
+        <label for="dia_jue" class="dia-label">
+          <span class="dia-nombre">Jueves</span>
+          <span class="dia-hora">20:00 hrs</span>
+        </label>
+
+        <input type="radio" name="dia_bb" id="dia_sab" value="SAB"
+               class="dia-opt" {% if sel_dia_bb == 'SAB' %}checked{% endif %}>
+        <label for="dia_sab" class="dia-label">
+          <span class="dia-nombre">Sábado</span>
+          <span class="dia-hora">11:00 hrs</span>
+        </label>
+      </div>
+
+      <div class="seccion-label">③ ¿Cuándo es tu primera clase?</div>
+      <input type="date" name="fecha_inicio" id="fecha_semanal"
+             class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
+             value="{{ sel_fecha|default:'' }}">
+      <span class="fecha-hint" id="hint-semanal">Debe coincidir con el día elegido.</span>
+    </div>
+
+    <button type="submit" class="btn-continuar">Ver resumen →</button>
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const DIAS_BB = { MAR: 2, JUE: 4, SAB: 6 };  // JS: 0=Dom
+const DIAS_FULL = [2, 4, 6];  // Mar, Jue, Sáb en JS
+
+const seccionFull    = document.getElementById('seccion-full');
+const seccionSemanal = document.getElementById('seccion-semanal');
+const fechaFull      = document.getElementById('fecha_full');
+const fechaSemanal   = document.getElementById('fecha_semanal');
+
+// ── Mostrar/ocultar secciones según tipo ──
+document.querySelectorAll('input[name="tipo"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    if (radio.value === 'BB_FULL') {
+      seccionFull.classList.add('visible');
+      seccionSemanal.classList.remove('visible');
+      fechaSemanal.removeAttribute('required');
+      fechaFull.setAttribute('required', '');
+    } else {
+      seccionSemanal.classList.add('visible');
+      seccionFull.classList.remove('visible');
+      fechaFull.removeAttribute('required');
+      fechaSemanal.setAttribute('required', '');
+    }
+  });
+});
+
+// ── Validar fecha Full (Mar, Jue o Sáb) ──
+fechaFull.addEventListener('change', () => {
+  const fecha = fechaFull.value;
+  if (!fecha) return;
+  const dia = new Date(fecha + 'T12:00:00').getDay();
+  if (!DIAS_FULL.includes(dia)) {
+    alert('Para Mensualidad Full elige un martes, jueves o sábado como fecha de inicio.');
+    fechaFull.value = '';
+  }
+});
+
+// ── Validar fecha Semanal contra día elegido ──
+fechaSemanal.addEventListener('change', () => {
+  const fecha  = fechaSemanal.value;
+  const diaOpt = document.querySelector('input[name="dia_bb"]:checked');
+  if (!fecha) return;
+  if (!diaOpt) { alert('Primero elige el día de la semana.'); fechaSemanal.value = ''; return; }
+  const diaEsperado = DIAS_BB[diaOpt.value];
+  const diaFecha    = new Date(fecha + 'T12:00:00').getDay();
+  if (diaFecha !== diaEsperado) {
+    const nombres = { MAR: 'martes', JUE: 'jueves', SAB: 'sábado' };
+    alert(`La fecha debe ser un ${nombres[diaOpt.value]}.`);
+    fechaSemanal.value = '';
+  }
+});
+
+// ── Si cambia el día semanal, limpiar fecha ──
+document.querySelectorAll('input[name="dia_bb"]').forEach(radio => {
+  radio.addEventListener('change', () => { fechaSemanal.value = ''; });
+});
+
+// ── Restaurar sección al volver de error ──
+window.addEventListener('DOMContentLoaded', () => {
+  const selTipo = "{{ sel_tipo|default:'' }}";
+  if (selTipo === 'BB_FULL') {
+    seccionFull.classList.add('visible');
+    fechaFull.setAttribute('required', '');
+  } else if (selTipo === 'BB_SEMANAL') {
+    seccionSemanal.classList.add('visible');
+    fechaSemanal.setAttribute('required', '');
+  }
+});
+</script>
+{% endblock %}
