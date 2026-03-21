@@ -60,19 +60,22 @@ def reservar_body_balance(request):
     hoy = date.today()
 
     context = {
-        'hoy':      hoy,
-        'horarios': HORARIOS_BB,
+        'hoy':            hoy,
+        'horarios':       HORARIOS_BB,
         'precio_full':    60_000,
         'precio_semanal': 15_000,
     }
 
     if request.method == 'POST':
-        tipo      = request.POST.get('tipo')       # BB_FULL o BB_SEMANAL
-        fecha_str = request.POST.get('fecha_inicio')
-        dia_bb    = request.POST.get('dia_bb')     # MAR, JUE, SAB (solo para semanal)
+        tipo   = request.POST.get('tipo')
+        dia_bb = request.POST.get('dia_bb')
+
+        if tipo == 'BB_FULL':
+            fecha_str = request.POST.get('fecha_full')
+        else:
+            fecha_str = request.POST.get('fecha_semanal')
 
         errores = []
-
         if tipo not in ('BB_FULL', 'BB_SEMANAL'):
             errores.append('Debes elegir Mensualidad Full o Clase Semanal.')
 
@@ -87,7 +90,6 @@ def reservar_body_balance(request):
         else:
             errores.append('Debes elegir una fecha de inicio.')
 
-        # Validar día según tipo
         if not errores and fecha_inicio:
             if tipo == 'BB_FULL':
                 if fecha_inicio.weekday() not in [1, 3, 5]:
@@ -102,13 +104,14 @@ def reservar_body_balance(request):
                         errores.append(f'Para {HORARIOS_BB[dia_bb]["label"]} la fecha debe ser un {nombres[dia_bb]}.')
 
         if errores:
-            context.update({'errores': errores,
-                            'sel_tipo': tipo,
-                            'sel_fecha': fecha_str,
-                            'sel_dia_bb': dia_bb})
+            context.update({
+                'errores':   errores,
+                'sel_tipo':  tipo,
+                'sel_fecha': fecha_str,
+                'sel_dia_bb': dia_bb,
+            })
             return render(request, 'reservas/reservar_body_balance.html', context)
 
-        # Calcular fechas y hora
         if tipo == 'BB_FULL':
             fechas = generar_fechas_bb_full(fecha_inicio)
             hora   = HORARIOS_BB[{1: 'MAR', 3: 'JUE', 5: 'SAB'}[fecha_inicio.weekday()]]['hora']

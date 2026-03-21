@@ -191,7 +191,7 @@
         <div class="horario-full-fila"><span class="dia">Sábado</span><span class="hora">11:00 hrs</span></div>
       </div>
       <div class="seccion-label">③ ¿Cuándo empiezas?</div>
-      <input type="date" name="fecha_inicio" id="fecha_full"
+      <input type="date" name="fecha_full" id="fecha_full"
              class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
              value="{{ sel_fecha|default:'' }}">
       <span class="fecha-hint" id="hint-full">Elige el primer martes, jueves o sábado desde el que quieres partir.</span>
@@ -224,7 +224,7 @@
       </div>
 
       <div class="seccion-label">③ ¿Cuándo es tu primera clase?</div>
-      <input type="date" name="fecha_inicio" id="fecha_semanal"
+      <input type="date" name="fecha_semanal" id="fecha_semanal"
              class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
              value="{{ sel_fecha|default:'' }}">
       <span class="fecha-hint" id="hint-semanal">Debe coincidir con el día elegido.</span>
