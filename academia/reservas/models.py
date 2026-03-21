@@ -109,6 +109,8 @@ class Pack(models.Model):
         ('SUELTA',    'Clase Suelta'),
         ('PRUEBA',    'Clase de Prueba'),
         ('PRIVADA',   'Clase Privada'),
+        ('BB_FULL',    'Body Balance Mensualidad'),
+        ('BB_SEMANAL', 'Body Balance Clase Semanal'),
     ]
 
     FRECUENCIA_CHOICES = [
