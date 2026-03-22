@@ -239,3 +239,40 @@ def crear_sesiones_pack(pack: Pack):
     pack.save(update_fields=['fecha_fin', 'estado'])
 
     return sesiones
+
+
+
+#------------------------PANEL DE INSTRUCTOR-----------------------------
+
+class ConfiguracionHorario(models.Model):
+    TIPO_CHOICES = [
+        ('PL',   'Pilates Grupal'),
+        ('PV',   'Pilates Privada'),
+        ('BDB',  'Body Balance'),
+        ('TEST', 'Clase de Prueba'),
+    ]
+
+    DIA_CHOICES = [
+        (0, 'Lunes'),
+        (1, 'Martes'),
+        (2, 'Miércoles'),
+        (3, 'Jueves'),
+        (4, 'Viernes'),
+        (5, 'Sábado'),
+    ]
+
+    dia   = models.PositiveSmallIntegerField(choices=DIA_CHOICES)
+    hora  = models.PositiveSmallIntegerField()
+    tipo  = models.CharField(max_length=4, choices=TIPO_CHOICES)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = [('dia', 'hora', 'tipo')]
+        ordering = ['hora', 'dia']
+
+    def __str__(self):
+        return f"{self.get_dia_display()} {self.hora:02d}:00 — {self.tipo}"
+    
+
+
+

@@ -10,13 +10,7 @@ Los recursos son los slots de horas,  los reformers para Pilates y las salas.
 1. Pilates
 =================================================
 
-Días de la semana y horarios
-------------------------------
-Lunes       8,9,10,17,18,19
-Martes      8,9,10,17,18,19
-Miércoles   8,9,10,17,18,19
-Jueves      8,9,10,17,18,19
-Viernes     8,9,10,18,19
+priv
 
 La selección de un día de partida y hora, genera un horario invariable en los días siguiente. El cliente no tiene liebertad para elegir otros horarios a medida que avanzan los días, sino que la HORA de las sesiones se establece el día de la reserva. 
 La reserva del reformer se hace el mismo día en que quiere partir el cliente, ya que si reserva para partir la próxima semana, podria venir otro cliente hoy que quiere partir cuanto antes, Se perderían esos espacios de ingresos en lo que queda de días para la supuesta reserva futura.
