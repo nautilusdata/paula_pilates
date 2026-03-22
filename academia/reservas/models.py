@@ -70,6 +70,18 @@ def feriados_punta_arenas(years=None):
     return holidays.Chile(subdiv='MA', years=years)
 
 
+def horas_disponibles_por_tipo(tipo: str, dia: int = None) -> list:
+    """
+    Lee de la DB los horarios activos para un tipo dado.
+    Si se pasa dia (0=Lun ... 5=Sáb), filtra por día también.
+    """
+    qs = ConfiguracionHorario.objects.filter(tipo=tipo, activo=True)
+    if dia is not None:
+        qs = qs.filter(dia=dia)
+    return sorted(set(qs.values_list('hora', flat=True)))
+
+
+
 def generar_fechas_pack(fecha_inicio: date, frecuencia: str, cantidad: int = 10):
     """
     Genera lista de `cantidad` fechas para el pack, partiendo en `fecha_inicio`,
