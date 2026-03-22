@@ -165,7 +165,9 @@ class Pack(models.Model):
         return precios.get(self.tipo, 0)
 
     def clean(self):
-        if self.tipo in ('PACK10', 'REDUCIDO') and self.hora not in HORAS_PILATES:
+        if self.tipo in ('PACK10', 'REDUCIDO'):
+            horas_validas = horas_disponibles_por_tipo('PL')
+        if self.hora not in horas_validas:
             raise ValidationError(f'Hora {self.hora} no es válida para Pilates Reformer.')
 
     def save(self, *args, **kwargs):
@@ -287,4 +289,15 @@ class ConfiguracionHorario(models.Model):
     
 
 
+
+def horas_disponibles_por_tipo(tipo: str, dia: int = None) -> list:
+    """
+    Lee de la DB los horarios activos para un tipo dado.
+    Si se pasa dia (0=Lun ... 5=Sáb), filtra por día también.
+    tipo: 'PL', 'PV', 'BDB', 'TEST'
+    """
+    qs = ConfiguracionHorario.objects.filter(tipo=tipo, activo=True)
+    if dia is not None:
+        qs = qs.filter(dia=dia)
+    return sorted(set(qs.values_list('hora', flat=True)))
 
