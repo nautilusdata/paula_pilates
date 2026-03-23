@@ -258,6 +258,26 @@ def crear_sesiones_pack(pack: Pack):
 
 #------------------------PANEL DE INSTRUCTOR-----------------------------
 
+
+class ConfiguracionGeneral(models.Model):
+    clave  = models.CharField(max_length=50, unique=True)
+    valor  = models.PositiveIntegerField()
+    descripcion = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"{self.clave} = {self.valor}"
+
+    @classmethod
+    def get(cls, clave: str, default: int = 0) -> int:
+        try:
+            return cls.objects.get(clave=clave).valor
+        except cls.DoesNotExist:
+            return default
+
+
+
+
+
 class ConfiguracionHorario(models.Model):
     TIPO_CHOICES = [
         ('PL',   'Pilates Grupal'),
