@@ -17,13 +17,6 @@ DIAS_SEMANA_PILATES = {
 }
 
 
-
-CAPACIDAD_REFORMERS = 6
-
-
-
-
-
 class UserMetadata(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     numero_socio = models.CharField(max_length=10, unique=True, blank=True)
@@ -217,7 +210,7 @@ class Sesion(models.Model):
             hora=hora,
             estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
         ).count()
-        return CAPACIDAD_REFORMERS - ocupados
+        return ConfiguracionGeneral.get('CAPACIDAD_REFORMERS', 6) - ocupados
 
     def __str__(self):
         return f"#{self.numero} {self.fecha} {self.hora}:00 — {self.pack.alumna.get_full_name()}"
