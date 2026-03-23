@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
-from .models import Pack, Sesion, feriados_punta_arenas, ConfiguracionGeneral
+from .models import Pack, Sesion, feriados_punta_arenas, ConfiguracionGeneral, ConfiguracionPrecio
 
 HORARIOS_BB = {
     'MAR': {'dia': 1, 'hora': 20, 'label': 'Martes 20:00'},
@@ -59,8 +59,8 @@ def reservar_body_balance(request):
     context = {
         'hoy':            hoy,
         'horarios':       HORARIOS_BB,
-        'precio_full':    60_000,
-        'precio_semanal': 15_000,
+        'precio_full':    ConfiguracionPrecio.get('BB_FULL', 60_000),
+        'precio_semanal': ConfiguracionPrecio.get('BB_SEMANAL', 15_000),
     }
 
     if request.method == 'POST':
@@ -112,11 +112,11 @@ def reservar_body_balance(request):
         if tipo == 'BB_FULL':
             fechas = generar_fechas_bb_full(fecha_inicio)
             hora   = HORARIOS_BB[{1: 'MAR', 3: 'JUE', 5: 'SAB'}[fecha_inicio.weekday()]]['hora']
-            precio = 60_000
+            precio = ConfiguracionPrecio.get('BB_FULL', 60_000)
         else:
             hora   = HORARIOS_BB[dia_bb]['hora']
             fechas = [fecha_inicio]
-            precio = 15_000
+            precio = ConfiguracionPrecio.get('BB_SEMANAL', 15_000)
 
         request.session['bb_borrador'] = {
             'tipo':         tipo,

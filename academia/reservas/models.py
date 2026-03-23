@@ -143,19 +143,26 @@ class Pack(models.Model):
     estado        = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='PENDIENTE_PAGO')
     creado_en     = models.DateTimeField(auto_now_add=True)
 
+
     def calcular_precio(self):
-        precios = {
-            'PACK10':   140_000,
-            'SUELTA':    25_000,
-            'PRUEBA':    15_000,
-        }
         if self.tipo == 'PACK10':
-            return 140_000
+            return ConfiguracionPrecio.get('PACK10', 140_000)
         if self.tipo == 'REDUCIDO':
             if not (2 <= self.cantidad <= 9):
                 raise ValidationError('Pack reducido debe tener entre 2 y 9 clases.')
-            return self.cantidad * 20_000
-        return precios.get(self.tipo, 0)
+            return self.cantidad * ConfiguracionPrecio.get('PACK_REDUCIDO_CLASE', 20_000)
+        if self.tipo == 'SUELTA':
+            return ConfiguracionPrecio.get('CLASE_SUELTA', 25_000)
+        if self.tipo == 'PRUEBA':
+            return ConfiguracionPrecio.get('CLASE_PRUEBA', 15_000)
+        if self.tipo == 'PRIVADA':
+            return ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000)
+        if self.tipo in ('BB_FULL',):
+            return ConfiguracionPrecio.get('BB_FULL', 60_000)
+        if self.tipo in ('BB_SEMANAL',):
+            return ConfiguracionPrecio.get('BB_SEMANAL', 15_000)
+        return 0
+
 
     def clean(self):
         if self.tipo in ('PACK10', 'REDUCIDO'):
@@ -163,10 +170,12 @@ class Pack(models.Model):
         if self.hora not in horas_validas:
             raise ValidationError(f'Hora {self.hora} no es válida para Pilates Reformer.')
 
+
     def save(self, *args, **kwargs):
         self.full_clean()
         self.precio_total = self.calcular_precio()
         super().save(*args, **kwargs)
+
 
     def __str__(self):
         return f"{self.alumna.get_full_name()} | {self.get_tipo_display()} | {self.fecha_inicio}"

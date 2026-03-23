@@ -25,7 +25,7 @@ from django.utils.timezone import now
 from .models import (
     Pack, Sesion, DIAS_SEMANA_PILATES,
     generar_fechas_pack, crear_sesiones_pack, feriados_punta_arenas,
-    horas_disponibles_por_tipo
+    horas_disponibles_por_tipo, ConfiguracionPrecio
 )
 
 
@@ -88,7 +88,7 @@ def reservar_pack10(request):
             {'valor': h, 'label': f'{h:02d}:00'}
             for h in horas_disponibles_por_tipo('PL')
         ],
-        'precio_total': 140_000,
+        'precio_total': ConfiguracionPrecio.get('PACK10', 140_000),
         'precio_por_clase': 14_000,
     }
 
@@ -186,7 +186,7 @@ def reservar_pack10_confirmar(request):
         'fecha_inicio': date.fromisoformat(borrador['fecha_inicio']),
         'fecha_fin':    fechas[-1],
         'fechas':       [(i + 1, f, fmt_fecha(f)) for i, f in enumerate(fechas)],
-        'precio_total': 140_000,
+        'precio_total': ConfiguracionPrecio.get('PACK10', 140_000),
         'precio_por_clase': 14_000,
     }
 
@@ -273,7 +273,7 @@ def reservar_pack_reducido(request):
             {'codigo': 'MJ',  'label': 'Mar · Jue',            'dias': '2 días/semana'},
         ],
         'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in horas_disponibles_por_tipo('PL')],
-        'precio_por_clase': 20_000,
+        'precio_por_clase': ConfiguracionPrecio.get('PACK_REDUCIDO_CLASE', 20_000),
         'cantidades': range(2, 10),
         'hoy': date.today(),
     }
@@ -353,7 +353,7 @@ def reservar_pack_reducido_confirmar(request):
 
     fechas   = [date.fromisoformat(f) for f in borrador['fechas']]
     cantidad = borrador['cantidad']
-    precio   = cantidad * 20_000
+    precio   = cantidad * ConfiguracionPrecio.get('PACK_REDUCIDO_CLASE', 20_000)
 
     context = {
         'frecuencia_label': {
@@ -367,7 +367,7 @@ def reservar_pack_reducido_confirmar(request):
         'fechas':           [(i + 1, f, fmt_fecha(f)) for i, f in enumerate(fechas)],
         'cantidad':         cantidad,
         'precio_total':     precio,
-        'precio_por_clase': 20_000,
+        'precio_por_clase': ConfiguracionPrecio.get('PACK_REDUCIDO_CLASE', 20_000),
     }
 
     if request.method == 'POST':
@@ -392,7 +392,7 @@ def reservar_pack_reducido_confirmar(request):
 def reservar_clase_suelta(request):
     context = {
         'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in horas_disponibles_por_tipo('PL')],
-        'precio': 25_000,
+        'precio': ConfiguracionPrecio.get('CLASE_SUELTA', 25_000),
         'hoy': date.today(),
     }
 
@@ -450,7 +450,7 @@ def reservar_clase_suelta_confirmar(request):
         'fecha':       fecha,
         'fecha_label': fmt_fecha(fecha),
         'hora':        hora,
-        'precio':      25_000,
+        'precio': ConfiguracionPrecio.get('CLASE_SUELTA', 25_000),
     }
 
     if request.method == 'POST':
@@ -490,7 +490,7 @@ def reservar_clase_prueba(request):
     hoy = date.today()
 
     context = {
-        'precio':   15_000,
+        'precio': ConfiguracionPrecio.get('CLASE_PRUEBA', 15_000),
         'hora':     '12:30',
         'duracion': '45 minutos',
         'hoy':      hoy,
@@ -546,7 +546,7 @@ def reservar_clase_prueba_confirmar(request):
         'fecha_label': fmt_fecha(fecha),
         'hora':        '12:30',
         'duracion':    '45 minutos',
-        'precio':      15_000,
+        'precio': ConfiguracionPrecio.get('CLASE_PRUEBA', 15_000),
     }
 
     if request.method == 'POST':
@@ -606,8 +606,8 @@ def reservar_clase_privada(request):
             {'codigo': 'LM',  'label': 'Lun · Miérc',         'dias': '2 días/semana'},
             {'codigo': 'MJ',  'label': 'Mar · Jue',            'dias': '2 días/semana'},
         ],
-        'precio_pack10':  285_000,
-        'precio_reducido': 30_000,
+        'precio_pack10':  ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000),
+        'precio_reducido': ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000),
     }
 
     if request.method == 'POST':
@@ -674,7 +674,7 @@ def reservar_clase_privada(request):
             })
             return render(request, 'reservas/reservar_clase_privada.html', context)
 
-        precio = 285_000 if tipo == 'PRIVADA10' else cantidad * 30_000
+        precio = ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000) if tipo == 'PRIVADA10' else cantidad * ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000)
 
         request.session['privada_borrador'] = {
             'tipo':         tipo,
@@ -715,7 +715,7 @@ def reservar_clase_privada_confirmar(request):
         'fechas':       [(i + 1, f, fmt_fecha(f)) for i, f in enumerate(fechas)],
         'cantidad':     cantidad,
         'precio':       borrador['precio'],
-        'precio_por_clase': 28_500 if tipo == 'PRIVADA10' else 30_000,
+        'precio_por_clase': ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000) // 10 if tipo == 'PRIVADA10' else ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000),
     }
 
     if request.method == 'POST':
