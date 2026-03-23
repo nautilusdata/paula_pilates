@@ -16,7 +16,7 @@ DIAS_SEMANA_PILATES = {
     'MJ':  [1, 3],       # Martes, Jueves
 }
 
-HORAS_PILATES = [8, 9, 10, 11, 17, 18, 19]   # horas disponibles en reformers
+
 
 CAPACIDAD_REFORMERS = 6
 
