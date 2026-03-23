@@ -49,3 +49,23 @@ class Command(BaseCommand):
         defaults={'valor': 20, 'descripcion': 'Capacidad máxima sala Body Balance'}
         )
         self.stdout.write(self.style.SUCCESS('Configuración general cargada.'))
+
+
+        # Precios
+        from reservas.models import ConfiguracionPrecio
+        precios = [
+        ('PACK10',              140_000, 'Pack 10 Clases Pilates'),
+        ('PACK_REDUCIDO_CLASE',  20_000, 'Pack Reducido precio por clase'),
+        ('CLASE_SUELTA',         25_000, 'Clase Suelta'),
+        ('CLASE_PRUEBA',         15_000, 'Clase de Prueba'),
+        ('PRIVADA_PACK10',      285_000, 'Clase Privada Pack 10'),
+        ('PRIVADA_CLASE',        30_000, 'Clase Privada precio por clase'),
+        ('BB_FULL',              60_000, 'Body Balance Mensualidad Full'),
+        ('BB_SEMANAL',           15_000, 'Body Balance Clase Semanal'),
+        ]
+        for clave, valor, descripcion in precios:
+            ConfiguracionPrecio.objects.get_or_create(
+                clave=clave,
+                defaults={'valor': valor, 'descripcion': descripcion}
+            )
+        self.stdout.write(self.style.SUCCESS('Precios cargados.'))
