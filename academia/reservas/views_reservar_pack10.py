@@ -86,7 +86,7 @@ def reservar_pack10(request):
         ],
         'horas': [
             {'valor': h, 'label': f'{h:02d}:00'}
-            for h in HORAS_PILATES
+            for h in horas_disponibles_por_tipo('PL')
         ],
         'precio_total': 140_000,
         'precio_por_clase': 14_000,
