@@ -3,10 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
-
-from .models import Pack, Sesion, feriados_punta_arenas
-
-CAPACIDAD_BODY_BALANCE = 20
+from .models import Pack, Sesion, feriados_punta_arenas, ConfiguracionGeneral
 
 HORARIOS_BB = {
     'MAR': {'dia': 1, 'hora': 20, 'label': 'Martes 20:00'},
@@ -31,7 +28,7 @@ def cupos_bb(fecha: date, hora: int) -> int:
         estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
         pack__tipo__in=['BB_FULL', 'BB_SEMANAL'],
     ).count()
-    return CAPACIDAD_BODY_BALANCE - ocupados
+    return ConfiguracionGeneral.get('CAPACIDAD_BODY_BALANCE', 20) - ocupados
 
 
 def generar_fechas_bb_full(fecha_inicio: date) -> list:
