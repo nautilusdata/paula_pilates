@@ -104,7 +104,7 @@ def reservar_pack10(request):
         if hora_str and not hora_str.isdigit():
             errores.append('Hora no válida.')
         hora = int(hora_str) if hora_str and hora_str.isdigit() else None
-        if hora and hora not in HORAS_PILATES:
+        if hora and hora not in horas_disponibles_por_tipo('PL'):
             errores.append(f'La hora {hora}:00 no está disponible para Pilates.')
 
         fecha_inicio = None
@@ -232,7 +232,7 @@ def horas_disponibles_ajax(request):
         return JsonResponse({'error': 'Fecha inválida'}, status=400)
 
     result = []
-    for h in HORAS_PILATES:
+    for h in horas_disponibles_por_tipo('PL'):
         if frecuencia not in DIAS_SEMANA_PILATES:
             # Clase suelta — solo chequea ese día
             cupo = Sesion.cupos_disponibles(fecha_inicio, h)
@@ -272,7 +272,7 @@ def reservar_pack_reducido(request):
             {'codigo': 'LM',  'label': 'Lun · Miérc',         'dias': '2 días/semana'},
             {'codigo': 'MJ',  'label': 'Mar · Jue',            'dias': '2 días/semana'},
         ],
-        'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in HORAS_PILATES],
+        'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in horas_disponibles_por_tipo('PL')],
         'precio_por_clase': 20_000,
         'cantidades': range(2, 10),
         'hoy': date.today(),
@@ -289,7 +289,7 @@ def reservar_pack_reducido(request):
             errores.append('Frecuencia no válida.')
 
         hora = int(hora_str) if hora_str and hora_str.isdigit() else None
-        if not hora or hora not in HORAS_PILATES:
+        if not hora or hora not in horas_disponibles_por_tipo('PL'):
             errores.append('Hora no válida.')
 
         cantidad = int(cantidad_str) if cantidad_str and cantidad_str.isdigit() else None
@@ -391,7 +391,7 @@ def reservar_pack_reducido_confirmar(request):
 @require_http_methods(["GET", "POST"])
 def reservar_clase_suelta(request):
     context = {
-        'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in HORAS_PILATES],
+        'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in horas_disponibles_por_tipo('PL')],
         'precio': 25_000,
         'hoy': date.today(),
     }
@@ -402,7 +402,7 @@ def reservar_clase_suelta(request):
 
         errores = []
         hora = int(hora_str) if hora_str and hora_str.isdigit() else None
-        if not hora or hora not in HORAS_PILATES:
+        if not hora or hora not in horas_disponibles_por_tipo('PL'):
             errores.append('Hora no válida.')
 
         fecha_inicio = None
