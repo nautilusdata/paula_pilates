@@ -37,3 +37,15 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f'Horarios cargados: {ConfiguracionHorario.objects.count()} slots'
         ))
+
+        # Configuración general
+        from reservas.models import ConfiguracionGeneral
+        ConfiguracionGeneral.objects.get_or_create(
+        clave='CAPACIDAD_REFORMERS',
+        defaults={'valor': 7, 'descripcion': 'Número de reformers disponibles'}
+        )
+        ConfiguracionGeneral.objects.get_or_create(
+        clave='CAPACIDAD_BODY_BALANCE',
+        defaults={'valor': 20, 'descripcion': 'Capacidad máxima sala Body Balance'}
+        )
+        self.stdout.write(self.style.SUCCESS('Configuración general cargada.'))
