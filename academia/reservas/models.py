@@ -314,3 +314,18 @@ def horas_disponibles_por_tipo(tipo: str, dia: int = None) -> list:
         qs = qs.filter(dia=dia)
     return sorted(set(qs.values_list('hora', flat=True)))
 
+
+class ConfiguracionPrecio(models.Model):
+    clave       = models.CharField(max_length=50, unique=True)
+    valor       = models.PositiveIntegerField()
+    descripcion = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"{self.clave} = ${self.valor:,}"
+
+    @classmethod
+    def get(cls, clave: str, default: int = 0) -> int:
+        try:
+            return cls.objects.get(clave=clave).valor
+        except cls.DoesNotExist:
+            return default
