@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Paula – Precios{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --gris:        #555;
+  --borde:       #e0e0e0;
+  --radio:       12px;
+  --font:        'Poppins', sans-serif;
+}
+body { font-family: var(--font); }
+
+.panel-wrap {
+  width: 92%; max-width: 680px;
+  margin: 20px auto 80px;
+}
+.panel-nav {
+  display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.panel-nav a {
+  padding: 8px 16px; border-radius: 20px; text-decoration: none;
+  font-size: .82rem; font-weight: 600; background: #f0f0f0; color: var(--gris);
+  transition: all .15s;
+}
+.panel-nav a.activo { background: var(--verde); color: #fff; }
+.panel-nav a:hover  { background: var(--verde-light); color: var(--verde); }
+
+.seccion-titulo {
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--verde); margin: 24px 0 12px;
+  border-bottom: 2px solid var(--verde-light); padding-bottom: 6px;
+}
+
+.precio-card {
+  background: #fff; border: 1px solid var(--borde);
+  border-radius: var(--radio); padding: 16px 18px;
+  margin-bottom: 10px; display: flex;
+  justify-content: space-between; align-items: center;
+  gap: 16px;
+}
+.precio-card .desc {
+  flex: 1;
+  font-size: .88rem; color: #333; font-weight: 500;
+}
+.precio-card .desc small {
+  display: block; font-size: .73rem; color: #999; margin-top: 2px;
+}
+.precio-input-wrap {
+  display: flex; align-items: center; gap: 4px;
+}
+.precio-input-wrap span {
+  font-size: .9rem; color: var(--gris); font-weight: 600;
+}
+.precio-input {
+  width: 100px; padding: 8px 10px;
+  border: 2px solid var(--borde); border-radius: 8px;
+  font-family: var(--font); font-size: .9rem; font-weight: 600;
+  color: var(--verde); text-align: right;
+  transition: border-color .15s;
+}
+.precio-input:focus { outline: none; border-color: var(--verde); }
+
+/* Config general */
+.config-card {
+  background: var(--verde-pale); border: 1px solid var(--verde-light);
+  border-radius: var(--radio); padding: 16px 18px;
+  margin-bottom: 10px; display: flex;
+  justify-content: space-between; align-items: center; gap: 16px;
+}
+.config-card .desc { flex: 1; font-size: .88rem; color: #333; font-weight: 500; }
+.config-input {
+  width: 70px; padding: 8px 10px;
+  border: 2px solid var(--verde-light); border-radius: 8px;
+  font-family: var(--font); font-size: .9rem; font-weight: 700;
+  color: var(--verde); text-align: center;
+  transition: border-color .15s;
+}
+.config-input:focus { outline: none; border-color: var(--verde); }
+
+.btn-guardar {
+  display: block; width: 100%; padding: 16px;
+  background: var(--verde); color: #fff; border: none;
+  border-radius: var(--radio); font-family: var(--font);
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: background .15s; margin-top: 24px;
+}
+.btn-guardar:hover { background: #245200; }
+
+.mensaje-ok {
+  background: #e8f5e9; border-left: 4px solid #388e3c;
+  padding: 12px 16px; border-radius: 8px;
+  font-size: .85rem; color: #2e7d32; margin-bottom: 20px;
+}
+
+/* Mapa de claves a nombres legibles */
+.clave-label {
+  font-size: .7rem; color: #bbb; margin-top: 2px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="panel-wrap">
+
+  <div class="panel-nav">
+    <a href="{% url 'panel_principal' %}">📅 Calendario</a>
+    <a href="{% url 'panel_precios' %}" class="activo">💰 Precios</a>
+    <a href="{% url 'panel_horarios' %}">⚙️ Horarios</a>
+  </div>
+
+  {% if messages %}
+  {% for msg in messages %}
+  <div class="mensaje-ok">{{ msg }}</div>
+  {% endfor %}
+  {% endif %}
+
+  <form method="POST">
+    {% csrf_token %}
+
+    <!-- Pilates -->
+    <div class="seccion-titulo">Pilates Reformer</div>
+
+    {% for precio in precios %}
+    {% if precio.clave == 'PACK10' %}
+    <div class="precio-card">
+      <div class="desc">
+        Pack 10 Clases
+        <small>Precio total del pack</small>
+      </div>
+      <div class="precio-input-wrap">
+        <span>$</span>
+        <input type="number" name="precio_{{ precio.clave }}"
+               value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
+      </div>
+    </div>
+    {% endif %}
+    {% if precio.clave == 'PACK_REDUCIDO_CLASE' %}
+    <div class="precio-card">
+      <div class="desc">
+        Pack Reducido
+        <small>Precio por clase (2 a 9 clases)</small>
+      </div>
+      <div class="precio-input-wrap">
+        <span>$</span>
+        <input type="number" name="precio_{{ precio.clave }}"
+               value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
+      </div>
+    </div>
+    {% endif %}
+    {% if precio.clave == 'CLASE_SUELTA' %}
+    <div class="precio-card">
+      <div class="desc">
+        Clase Suelta
+        <small>Sesión única</small>
+      </div>
+      <div class="precio-input-wrap">
+        <span>$</span>
+        <input type="number" name="precio_{{ precio.clave }}"
+               value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
+      </div>
+    </div>
+    {% endif %}
+    {% if precio.clave == 'CLASE_PRUEBA' %}
+    <div class="precio-card">
+      <div class="desc">
+        Clase de Prueba
+        <small>Sábado 12:30 · 45 minutos</small>
+      </div>
+      <div class="precio-input-wrap">
+        <span>$</span>
+        <input type="number" name="precio_{{ precio.clave }}"
+               value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Privadas -->
+    <div class="seccion-titulo">Clases Privadas</div>
+
+    {% for precio in precios %}
+    {% if precio.clave == 'PRIVADA_PACK10' %}
+    <div class="precio-card">
+      <div class="desc">
+        Pack 10 Privadas
+        <small>Precio total del pack</small>
+      </div>
+      <div class="precio-input-wrap">
+        <span>$</span>
+        <input type="number" name="precio_{{ precio.clave }}"
+               value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
+      </div>
+    </div>
+    {% endif %}
+    {% if precio.clave == 'PRIVADA_CLASE' %}
+    <div class="precio-card">
+      <div class="desc">
+        Pack Reducido Privado
+        <small>Precio por clase</small>
+      </div>
+      <div class="precio-input-wrap">
+        <span>$</span>
+        <input type="number" name="precio_{{ precio.clave }}"
+               value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Body Balance -->
+    <div class="seccion-titulo">Body Balance</div>
+
+    {% for precio in precios %}
+    {% if precio.clave == 'BB_FULL' %}
+    <div class="precio-card">
+      <div class="desc">
+        Mensualidad Full
+        <small>3 veces por semana · 4 semanas</small>
+      </div>
+      <div class="precio-input-wrap">
+        <span>$</span>
+        <input type="number" name="precio_{{ precio.clave }}"
+               value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
+      </div>
+    </div>
+    {% endif %}
+    {% if precio.clave == 'BB_SEMANAL' %}
+    <div class="precio-card">
+      <div class="desc">
+        Clase Semanal
+        <small>1 vez por semana</small>
+      </div>
+      <div class="precio-input-wrap">
+        <span>$</span>
+        <input type="number" name="precio_{{ precio.clave }}"
+               value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Configuración general -->
+    <div class="seccion-titulo">Configuración General</div>
+
+    <div class="config-card">
+      <div class="desc">Reformers disponibles</div>
+      <input type="number" name="reformers" value="{{ reformers }}"
+             class="config-input" min="1" max="20">
+    </div>
+
+    <div class="config-card">
+      <div class="desc">Capacidad Body Balance (personas)</div>
+      <input type="number" name="cap_bb" value="{{ cap_bb }}"
+             class="config-input" min="1" max="100">
+    </div>
+
+    <button type="submit" class="btn-guardar">Guardar cambios</button>
+  </form>
+
+</div>
+{% endblock %}

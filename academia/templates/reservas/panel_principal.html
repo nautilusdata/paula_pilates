@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel Paula – Calendario{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --gris:        #555;
+  --borde:       #e0e0e0;
+  --radio:       10px;
+  --font:        'Poppins', sans-serif;
+
+  /* Colores por tipo */
+  --pl:   #2f6300;
+  --pv:   #1565c0;
+  --bdb:  #e65100;
+  --test: #6a1b9a;
+}
+
+body { font-family: var(--font); }
+
+.panel-wrap {
+  width: 96%;
+  max-width: 900px;
+  margin: 20px auto 80px;
+}
+
+/* ── Nav del panel ── */
+.panel-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.panel-nav a {
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: .82rem;
+  font-weight: 600;
+  background: #f0f0f0;
+  color: var(--gris);
+  transition: all .15s;
+}
+.panel-nav a.activo { background: var(--verde); color: #fff; }
+.panel-nav a:hover  { background: var(--verde-light); color: var(--verde); }
+
+/* ── Navegación semana ── */
+.semana-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 10px;
+}
+.semana-nav a {
+  padding: 8px 16px;
+  background: var(--verde-pale);
+  color: var(--verde);
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: .85rem;
+}
+.semana-titulo {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--verde);
+  text-align: center;
+}
+
+/* ── Leyenda ── */
+.leyenda {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .75rem;
+  color: var(--gris);
+}
+.leyenda-dot {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+}
+.dot-pl   { background: var(--pl); }
+.dot-pv   { background: var(--pv); }
+.dot-bdb  { background: var(--bdb); }
+.dot-test { background: var(--test); }
+
+/* ── Grilla ── */
+.grilla-wrap { overflow-x: auto; }
+
+table.grilla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .78rem;
+  min-width: 500px;
+}
+
+.grilla th {
+  background: var(--verde);
+  color: #fff;
+  padding: 8px 6px;
+  text-align: center;
+  font-weight: 600;
+  font-size: .75rem;
+}
+.grilla th.hoy-col { background: #408601; }
+
+.grilla td {
+  border: 1px solid var(--borde);
+  padding: 4px;
+  vertical-align: top;
+  min-width: 80px;
+  min-height: 40px;
+  background: #fff;
+}
+.grilla td.hora-col {
+  background: var(--verde-pale);
+  color: var(--verde);
+  font-weight: 700;
+  text-align: center;
+  font-size: .8rem;
+  white-space: nowrap;
+  padding: 6px 8px;
+}
+.grilla td.hoy-col { background: #f9fff5; }
+.grilla td.inactivo { background: #fafafa; }
+
+/* ── Chips de sesión ── */
+.chip {
+  display: block;
+  border-radius: 4px;
+  padding: 3px 5px;
+  margin-bottom: 2px;
+  font-size: .68rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chip-PL   { background: var(--pl); }
+.chip-PV   { background: var(--pv); }
+.chip-BB_FULL, .chip-BB_SEMANAL { background: var(--bdb); }
+.chip-PRUEBA { background: var(--test); }
+.chip-SUELTA { background: #558b2f; }
+.chip-REDUCIDO { background: #1b5e20; }
+.chip-PRIVADA  { background: var(--pv); }
+
+/* tipo slot (fondo si no hay sesión) */
+.slot-tipo {
+  font-size: .65rem;
+  color: #ccc;
+  text-align: center;
+  padding: 4px 0;
+}
+.slot-tipo.PL   { color: #a5d6a7; }
+.slot-tipo.PV   { color: #90caf9; }
+.slot-tipo.BDB  { color: #ffcc80; }
+.slot-tipo.TEST { color: #ce93d8; }
+
+/* ── Stats rápidas ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 14px;
+  text-align: center;
+}
+.stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--verde); }
+.stat-card .lab { font-size: .72rem; color: #999; margin-top: 2px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="panel-wrap">
+
+  <!-- Nav panel -->
+  <div class="panel-nav">
+    <a href="{% url 'panel_principal' %}" class="activo">📅 Calendario</a>
+    <a href="{% url 'panel_precios' %}">💰 Precios</a>
+    <a href="{% url 'panel_horarios' %}">⚙️ Horarios</a>
+  </div>
+
+  <!-- Stats rápidas -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="num">{{ grilla.values|length }}</div>
+      <div class="lab">Slots activos</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">
+        {% with total=0 %}
+          {% for hora, dias_data in grilla.items %}
+            {% for dia, sesiones in dias_data.items %}
+              {% for s in sesiones %}{% endfor %}
+            {% endfor %}
+          {% endfor %}
+        {% endwith %}
+        —
+      </div>
+      <div class="lab">Clases esta semana</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ hoy|date:"d/m" }}</div>
+      <div class="lab">Hoy</div>
+    </div>
+  </div>
+
+  <!-- Navegación semana -->
+  <div class="semana-nav">
+    <a href="?semana={{ semana_anterior }}">← Anterior</a>
+    <div class="semana-titulo">
+      {{ dias.0|date:"d/m" }} — {{ dias.5|date:"d/m/Y" }}
+    </div>
+    <a href="?semana={{ semana_siguiente }}">Siguiente →</a>
+  </div>
+
+  <!-- Leyenda -->
+  <div class="leyenda">
+    <div class="leyenda-item"><div class="leyenda-dot dot-pl"></div> PL Pilates Grupal</div>
+    <div class="leyenda-item"><div class="leyenda-dot dot-pv"></div> PV Privada</div>
+    <div class="leyenda-item"><div class="leyenda-dot dot-bdb"></div> BDB Body Balance</div>
+    <div class="leyenda-item"><div class="leyenda-dot dot-test"></div> TEST Prueba</div>
+  </div>
+
+  <!-- Grilla semanal -->
+  <div class="grilla-wrap">
+    <table class="grilla">
+      <thead>
+        <tr>
+          <th>Hora</th>
+          {% for dia in dias %}
+          <th {% if dia == hoy %}class="hoy-col"{% endif %}>
+            {{ dia|date:"D" }}<br>{{ dia|date:"d/m" }}
+          </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for hora, dias_data in grilla.items %}
+        <tr>
+          <td class="hora-col">{{ hora }}:00</td>
+          {% for dia in dias %}
+          {% with sesiones=dias_data|get_item:dia.weekday tipo_slot=config_horarios|get_item:dia.weekday|default:'' %}
+          <td {% if dia == hoy %}class="hoy-col"{% endif %}>
+            {% if sesiones %}
+              {% for s in sesiones %}
+              <span class="chip chip-{{ s.pack.tipo }}" title="{{ s.pack.alumna.get_full_name }}">
+                {{ s.pack.alumna.first_name|truncatechars:8 }}
+              </span>
+              {% endfor %}
+            {% else %}
+              <div class="slot-tipo {{ tipo_slot }}">{{ tipo_slot }}</div>
+            {% endif %}
+          </td>
+          {% endwith %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
