@@ -167,8 +167,8 @@ class Pack(models.Model):
     def clean(self):
         if self.tipo in ('PACK10', 'REDUCIDO'):
             horas_validas = horas_disponibles_por_tipo('PL')
-        if self.hora not in horas_validas:
-            raise ValidationError(f'Hora {self.hora} no es válida para Pilates Reformer.')
+            if self.hora not in horas_validas:
+                raise ValidationError(f'Hora {self.hora} no es válida para Pilates Reformer.')
 
 
     def save(self, *args, **kwargs):
