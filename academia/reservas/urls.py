@@ -2,6 +2,7 @@ from django.urls import path
 from . import views_reservar_pack10
 from . import views_mis_clases
 from . import views_body_balance
+from . import views_panel_paula
 
 
 urlpatterns = [
@@ -19,5 +20,8 @@ urlpatterns = [
     path('reservar/body-balance/confirmar/', views_body_balance.reservar_body_balance_confirmar, name='reservar_body_balance_confirmar'),
     path('reservar/clase-privada/', views_reservar_pack10.reservar_clase_privada, name='reservar_clase_privada'),
     path('reservar/clase-privada/confirmar/', views_reservar_pack10.reservar_clase_privada_confirmar, name='reservar_clase_privada_confirmar'),
+    path('panel/', views_panel_paula.panel_principal, name='panel_principal'),
+    path('panel/precios/', views_panel_paula.panel_precios, name='panel_precios'),
+    path('panel/horarios/', views_panel_paula.panel_horarios, name='panel_horarios'),
     
 ]
