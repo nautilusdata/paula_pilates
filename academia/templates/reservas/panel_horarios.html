@@ -20,9 +20,10 @@
 body { font-family: var(--font); }
 
 .panel-wrap {
-  width: 92%; max-width: 680px;
+  width: 96%; max-width: 860px;
   margin: 80px auto 80px;
 }
+
 .panel-nav {
   display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
 }
@@ -40,47 +41,89 @@ body { font-family: var(--font); }
   font-size: .85rem; color: #2e7d32; margin-bottom: 20px;
 }
 
-.dia-seccion { margin-bottom: 24px; }
-.dia-titulo {
-  font-size: .8rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--verde);
-  border-bottom: 2px solid var(--verde-light);
-  padding-bottom: 6px; margin-bottom: 10px;
+/* ── Leyenda ── */
+.leyenda {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.leyenda-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: .72rem; color: var(--gris);
+}
+.leyenda-chip {
+  padding: 2px 8px; border-radius: 10px;
+  font-size: .68rem; font-weight: 700;
+}
+.lc-PL   { background: var(--verde-pale); color: var(--verde); border: 1.5px solid var(--verde); }
+.lc-PV   { background: #e3f2fd; color: var(--azul); border: 1.5px solid var(--azul); }
+.lc-BDB  { background: #fff3e0; color: var(--naranja); border: 1.5px solid var(--naranja); }
+.lc-TEST { background: #f3e5f5; color: var(--morado); border: 1.5px solid var(--morado); }
+
+/* ── Grilla ── */
+.grilla-wrap { overflow-x: auto; margin-bottom: 28px; }
+
+table.grilla {
+  width: 100%; border-collapse: collapse;
+  table-layout: fixed;
 }
 
-.hora-fila {
-  display: flex; align-items: center;
-  padding: 10px 14px; background: #fff;
-  border: 1px solid var(--borde); border-radius: 10px;
-  margin-bottom: 8px; gap: 12px; flex-wrap: wrap;
-}
-.hora-num {
-  font-size: .95rem; font-weight: 700;
-  color: var(--gris); min-width: 48px;
+.grilla th:not(.th-hora) {
+  width: 15%;
 }
 
-.tipo-chips { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+.grilla th {
+  padding: 4px 1px; text-align: center;
+  font-size: .6rem; font-weight: 700;
+  color: #fff; background: var(--verde);
+  white-width: 32px; min-width: 32px; max-width: 32px;
+  white-space: nowrap;
+}white-space: nowrap;
 
-.tipo-chip {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 12px; border-radius: 20px;
-  font-size: .75rem; font-weight: 700;
-  cursor: pointer; transition: all .15s; user-select: none;
+
+.grilla th.th-hora {
+  background: #333; width: 42px; min-width: 42px; max-width: 42px;
 }
-.tipo-chip input { display: none; }
 
-.chip-PL   { background: #f0f0f0; color: #aaa; border: 2px solid #e0e0e0; }
-.chip-PV   { background: #f0f0f0; color: #aaa; border: 2px solid #e0e0e0; }
-.chip-BDB  { background: #f0f0f0; color: #aaa; border: 2px solid #e0e0e0; }
-.chip-TEST { background: #f0f0f0; color: #aaa; border: 2px solid #e0e0e0; }
+.grilla td {
+  border: 1px solid var(--borde);
+  padding: 2px; text-align: center;
+  background: #fafafa;
+}
 
-.chip-PL.activo   { background: var(--verde-pale); color: var(--verde); border-color: var(--verde); }
-.chip-PV.activo   { background: #e3f2fd; color: var(--azul); border-color: var(--azul); }
-.chip-BDB.activo  { background: #fff3e0; color: var(--naranja); border-color: var(--naranja); }
-.chip-TEST.activo { background: #f3e5f5; color: var(--morado); border-color: var(--morado); }
+.grilla td.td-hora {
+  background: var(--verde-pale);
+  color: var(--verde); font-weight: 700;
+  font-size: .68rem; white-space: nowrap;
+  padding: 4px 2px;
+  width: 42px; min-width: 42px; max-width: 42px;
+}
 
-.chip-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+/* ── Celda toggle ── */
+.celda-toggle { display: flex; flex-direction: column; gap: 3px; align-items: center; padding: 3px 2px; }
 
+.slot-check { display: none; }
+
+.slot-label {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 100%; min-width: 20px;
+  padding: 2px 0px;
+  border-radius: 3px;
+  font-size: .5rem; font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  border: 1.5px solid #e0e0e0;
+  background: #f5f5f5; color: #ccc;
+  user-select: none;
+}
+
+/* Activos por tipo */
+.slot-check.tipo-PL:checked   + .slot-label { background: var(--verde-pale); color: var(--verde); border-color: var(--verde); }
+.slot-check.tipo-PV:checked   + .slot-label { background: #e3f2fd; color: var(--azul); border-color: var(--azul); }
+.slot-check.tipo-BDB:checked  + .slot-label { background: #fff3e0; color: var(--naranja); border-color: var(--naranja); }
+.slot-check.tipo-TEST:checked + .slot-label { background: #f3e5f5; color: var(--morado); border-color: var(--morado); }
+
+.sin-slot { color: #eee; font-size: .65rem; }
+
+/* ── Config general ── */
 .config-fila {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 16px; background: var(--verde-pale);
@@ -95,12 +138,19 @@ body { font-family: var(--font); }
 }
 .config-input:focus { outline: none; border-color: var(--verde); }
 
+.seccion-titulo {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--verde);
+  border-bottom: 2px solid var(--verde-light);
+  padding-bottom: 6px; margin: 20px 0 12px;
+}
+
 .btn-guardar {
   display: block; width: 100%; padding: 16px;
   background: var(--verde); color: #fff; border: none;
   border-radius: var(--radio); font-family: var(--font);
   font-size: 1rem; font-weight: 700; cursor: pointer;
-  transition: background .15s; margin-top: 8px;
+  transition: background .15s; margin-top: 16px;
 }
 .btn-guardar:hover { background: #245200; }
 </style>
@@ -124,38 +174,58 @@ body { font-family: var(--font); }
   <form method="POST">
     {% csrf_token %}
 
-    {% for dia_num, dia_nombre in dias_enumerados %}
-    <div class="dia-seccion">
-      <div class="dia-titulo">{{ dia_nombre }}</div>
-
-      {% for hora in todas_horas %}
-      {% with fila=grilla|get_item:hora %}
-      {% with tipos_en_dia=fila|get_item:dia_num %}
-      {% if tipos_en_dia %}
-      <div class="hora-fila">
-        <span class="hora-num">{{ hora }}:00</span>
-        <div class="tipo-chips">
-          {% for tipo, ch in tipos_en_dia.items %}
-          <label class="tipo-chip chip-{{ tipo }} {% if ch.activo %}activo{% endif %}">
-            <input type="checkbox"
-                   name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
-                   {% if ch.activo %}checked{% endif %}
-                   onchange="toggleChip(this)">
-            <span class="chip-dot"></span>
-            {{ tipo }}
-          </label>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
-      {% endwith %}
-      {% endwith %}
-      {% endfor %}
-
+    <!-- Leyenda -->
+    <div class="leyenda">
+      <div class="leyenda-item"><span class="leyenda-chip lc-PL">PL</span> Pilates Grupal</div>
+      <div class="leyenda-item"><span class="leyenda-chip lc-PV">PV</span> Privada</div>
+      <div class="leyenda-item"><span class="leyenda-chip lc-BDB">BDB</span> Body Balance</div>
+      <div class="leyenda-item"><span class="leyenda-chip lc-TEST">TEST</span> Clase Prueba</div>
     </div>
-    {% endfor %}
 
-    <div class="dia-titulo" style="margin-top:8px;">Configuración General</div>
+    <!-- Grilla semanal -->
+    <div class="grilla-wrap">
+      <table class="grilla">
+        <thead>
+          <tr>
+            <th class="th-hora">Hora</th>
+            {% for dia_num, dia_nombre in dias_enumerados %}
+            <th>{{ dia_nombre|slice:":3" }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for hora in todas_horas %}
+          <tr>
+            <td class="td-hora">{{ hora }}:00</td>
+            {% for dia_num, dia_nombre in dias_enumerados %}
+            <td>
+              {% with tipos_en_dia=grilla|get_item:hora|get_item:dia_num %}
+              {% if tipos_en_dia %}
+              <div class="celda-toggle">
+                {% for tipo, ch in tipos_en_dia.items %}
+                <input type="checkbox"
+                       class="slot-check tipo-{{ tipo }}"
+                       name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                       id="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                       {% if ch.activo %}checked{% endif %}>
+                <label for="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                       class="slot-label">{{ tipo }}</label>
+                {% endfor %}
+              </div>
+              {% else %}
+              <span class="sin-slot">·</span>
+              {% endif %}
+              {% endwith %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Configuración general -->
+    <div class="seccion-titulo">Configuración General</div>
     <div class="config-fila">
       <span class="desc">Reformers disponibles</span>
       <input type="number" name="reformers" value="{{ reformers }}"
@@ -171,17 +241,4 @@ body { font-family: var(--font); }
   </form>
 
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function toggleChip(checkbox) {
-  const label = checkbox.closest('label');
-  if (checkbox.checked) {
-    label.classList.add('activo');
-  } else {
-    label.classList.remove('activo');
-  }
-}
-</script>
 {% endblock %}
