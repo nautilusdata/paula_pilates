@@ -15,58 +15,45 @@ def es_staff(user):
 @login_required
 @user_passes_test(es_staff, login_url='/')
 def panel_principal(request):
-    """Vista principal del panel — calendario semanal."""
+    """Vista principal del panel — día a día."""
     hoy = date.today()
 
-    # Semana actual (lunes a sábado)
-    lunes = hoy - timedelta(days=hoy.weekday())
-    semana_str = request.GET.get('semana')
-    if semana_str:
+    # Día a mostrar
+    dia_str = request.GET.get('dia')
+    if dia_str:
         try:
-            lunes = date.fromisoformat(semana_str)
+            dia_actual = date.fromisoformat(dia_str)
         except ValueError:
-            pass
+            dia_actual = hoy
+    else:
+        dia_actual = hoy
 
-    dias = [lunes + timedelta(days=i) for i in range(6)]  # Lun a Sáb
+    dia_anterior  = (dia_actual - timedelta(days=1)).isoformat()
+    dia_siguiente = (dia_actual + timedelta(days=1)).isoformat()
 
-    # Todas las horas posibles en la grilla
-    todas_horas = sorted(set(
-        ConfiguracionHorario.objects.values_list('hora', flat=True)
-    ))
-
-    # Sesiones de la semana
-    sesiones_semana = Sesion.objects.filter(
-        fecha__range=(dias[0], dias[-1]),
+    # Sesiones del día
+    sesiones_dia = Sesion.objects.filter(
+        fecha=dia_actual,
         estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
-    ).select_related('pack__alumna').order_by('fecha', 'hora')
+    ).select_related('pack__alumna').order_by('hora')
 
-    # Construir grilla: {hora: {dia_weekday: [sesiones]}}
-    grilla = {}
-    for hora in todas_horas:
-        grilla[hora] = {}
-        for dia in dias:
-            grilla[hora][dia.weekday()] = []
+    # Agrupar por hora
+    from collections import defaultdict
+    por_hora = defaultdict(list)
+    for sesion in sesiones_dia:
+        por_hora[sesion.hora].append(sesion)
 
-    for sesion in sesiones_semana:
-        hora = sesion.hora
-        dia_wd = sesion.fecha.weekday()
-        if hora in grilla and dia_wd in grilla[hora]:
-            grilla[hora][dia_wd].append(sesion)
-
-    # Configuración de horarios activos para mostrar tipo en grilla
-    config_horarios = {}
-    for ch in ConfiguracionHorario.objects.filter(activo=True):
-        config_horarios[(ch.dia, ch.hora)] = ch.tipo
+    # Ordenar horas
+    horas_del_dia = sorted(por_hora.keys())
 
     context = {
-        'dias':            dias,
-        'todas_horas':     todas_horas,
-        'grilla':          grilla,
-        'config_horarios': config_horarios,
-        'semana_anterior': (lunes - timedelta(weeks=1)).isoformat(),
-        'semana_siguiente': (lunes + timedelta(weeks=1)).isoformat(),
-        'semana_actual':   lunes.isoformat(),
-        'hoy':             hoy,
+        'dia_actual':    dia_actual,
+        'dia_anterior':  dia_anterior,
+        'dia_siguiente': dia_siguiente,
+        'por_hora':      dict(por_hora),
+        'horas_del_dia': horas_del_dia,
+        'hoy':           hoy,
+        'es_hoy':        dia_actual == hoy,
     }
     return render(request, 'reservas/panel_principal.html', context)
 
@@ -103,34 +90,23 @@ def panel_precios(request):
 @user_passes_test(es_staff, login_url='/')
 @require_http_methods(["GET", "POST"])
 def panel_horarios(request):
-    """Vista para activar/desactivar slots de horario."""
     if request.method == 'POST':
-        # Actualizar configuración general
         reformers = request.POST.get('reformers')
         cap_bb    = request.POST.get('cap_bb')
 
         if reformers and reformers.isdigit():
             obj, _ = ConfiguracionGeneral.objects.get_or_create(
-                clave='CAPACIDAD_REFORMERS',
-                defaults={'valor': 7}
-            )
+                clave='CAPACIDAD_REFORMERS', defaults={'valor': 7})
             obj.valor = int(reformers)
             obj.save()
 
         if cap_bb and cap_bb.isdigit():
             obj, _ = ConfiguracionGeneral.objects.get_or_create(
-                clave='CAPACIDAD_BODY_BALANCE',
-                defaults={'valor': 20}
-            )
+                clave='CAPACIDAD_BODY_BALANCE', defaults={'valor': 20})
             obj.valor = int(cap_bb)
             obj.save()
 
-        # Actualizar horarios — los que vienen en el POST están activos
-        activos = set()
-        for key in request.POST:
-            if key.startswith('slot_'):
-                activos.add(key)
-
+        activos = set(k for k in request.POST if k.startswith('slot_'))
         for ch in ConfiguracionHorario.objects.all():
             key = f'slot_{ch.dia}_{ch.hora}_{ch.tipo}'
             ch.activo = key in activos
@@ -143,29 +119,30 @@ def panel_horarios(request):
     reformers = ConfiguracionGeneral.get('CAPACIDAD_REFORMERS', 7)
     cap_bb    = ConfiguracionGeneral.get('CAPACIDAD_BODY_BALANCE', 20)
 
-    # Construir grilla para el template
-    DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-    TIPOS = ['PL', 'PV', 'BDB', 'TEST']
+    DIAS = [(0,'Lunes'),(1,'Martes'),(2,'Miércoles'),(3,'Jueves'),(4,'Viernes'),(5,'Sábado')]
     todas_horas = sorted(set(horarios.values_list('hora', flat=True)))
 
-    # {hora: {tipo: {dia: ConfiguracionHorario|None}}}
+    # {hora: {dia: {tipo: ConfiguracionHorario}}}
     grilla = {}
     for hora in todas_horas:
         grilla[hora] = {}
-        for tipo in TIPOS:
-            grilla[hora][tipo] = {}
-            for dia in range(6):
-                grilla[hora][tipo][dia] = None
+        for dia_num, _ in DIAS:
+            grilla[hora][dia_num] = {}
 
     for ch in horarios:
-        grilla[ch.hora][ch.tipo][ch.dia] = ch
+        grilla[ch.hora][ch.dia][ch.tipo] = ch
+
+    # Eliminar dias sin ningun tipo
+    for hora in todas_horas:
+        for dia_num, _ in DIAS:
+            if not grilla[hora][dia_num]:
+                del grilla[hora][dia_num]
 
     context = {
-        'grilla':     grilla,
-        'todas_horas': todas_horas,
-        'tipos':      TIPOS,
-        'dias':       DIAS,
-        'reformers':  reformers,
-        'cap_bb':     cap_bb,
+        'grilla':          grilla,
+        'todas_horas':     todas_horas,
+        'dias_enumerados': DIAS,
+        'reformers':       reformers,
+        'cap_bb':          cap_bb,
     }
     return render(request, 'reservas/panel_horarios.html', context)

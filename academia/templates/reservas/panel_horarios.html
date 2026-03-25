@@ -6,24 +6,22 @@
 {% block extra_head %}
 <style>
 :root {
-  --verde:       #2f6300;
-  --verde-light: #d4eac8;
-  --verde-pale:  #f0f7ea;
-  --gris:        #555;
-  --borde:       #e0e0e0;
-  --radio:       12px;
-  --font:        'Poppins', sans-serif;
-
-  --pl:   #2f6300;
-  --pv:   #1565c0;
-  --bdb:  #e65100;
-  --test: #6a1b9a;
+  --verde:        #2f6300;
+  --verde-light:  #d4eac8;
+  --verde-pale:   #f0f7ea;
+  --azul:         #1565c0;
+  --naranja:      #e65100;
+  --morado:       #6a1b9a;
+  --gris:         #555;
+  --borde:        #e0e0e0;
+  --radio:        12px;
+  --font:         'Poppins', sans-serif;
 }
 body { font-family: var(--font); }
 
 .panel-wrap {
-  width: 96%; max-width: 900px;
-  margin: 60px auto 80px;
+  width: 92%; max-width: 680px;
+  margin: 80px auto 80px;
 }
 .panel-nav {
   display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
@@ -42,90 +40,55 @@ body { font-family: var(--font); }
   font-size: .85rem; color: #2e7d32; margin-bottom: 20px;
 }
 
-.seccion-titulo {
-  font-size: .72rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--verde); margin: 24px 0 12px;
-  border-bottom: 2px solid var(--verde-light); padding-bottom: 6px;
+.dia-seccion { margin-bottom: 24px; }
+.dia-titulo {
+  font-size: .8rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--verde);
+  border-bottom: 2px solid var(--verde-light);
+  padding-bottom: 6px; margin-bottom: 10px;
 }
 
-/* ── Grilla de horarios ── */
-.grilla-wrap { overflow-x: auto; margin-bottom: 28px; }
+.hora-fila {
+  display: flex; align-items: center;
+  padding: 10px 14px; background: #fff;
+  border: 1px solid var(--borde); border-radius: 10px;
+  margin-bottom: 8px; gap: 12px; flex-wrap: wrap;
+}
+.hora-num {
+  font-size: .95rem; font-weight: 700;
+  color: var(--gris); min-width: 48px;
+}
 
-table.grilla {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: .78rem;
-  min-width: 500px;
-}
-.grilla th {
-  padding: 8px 6px; text-align: center;
-  font-weight: 700; font-size: .75rem; color: #fff;
-}
-.grilla th.th-hora { background: var(--verde); }
-.grilla th.th-tipo { background: #555; }
-.grilla th.th-dia  { background: var(--verde); }
+.tipo-chips { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
 
-.grilla td {
-  border: 1px solid var(--borde);
-  padding: 6px; text-align: center;
-  background: #fff;
+.tipo-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px;
+  font-size: .75rem; font-weight: 700;
+  cursor: pointer; transition: all .15s; user-select: none;
 }
-.grilla td.td-hora {
-  background: var(--verde-pale);
-  color: var(--verde); font-weight: 700;
-  white-space: nowrap; padding: 6px 10px;
-}
-.grilla td.td-tipo {
-  background: #f9f9f9;
-  font-size: .72rem; font-weight: 700;
-  text-align: left; padding: 6px 10px;
-}
-.td-tipo.PL   { color: var(--pl); }
-.td-tipo.PV   { color: var(--pv); }
-.td-tipo.BDB  { color: var(--bdb); }
-.td-tipo.TEST { color: var(--test); }
+.tipo-chip input { display: none; }
 
-/* ── Toggle checkbox ── */
-.toggle-wrap { display: flex; justify-content: center; }
-.toggle-input { display: none; }
-.toggle-label {
-  display: inline-block;
-  width: 36px; height: 20px;
-  background: #ddd;
-  border-radius: 10px;
-  position: relative;
-  cursor: pointer;
-  transition: background .2s;
-}
-.toggle-label::after {
-  content: '';
-  position: absolute;
-  width: 16px; height: 16px;
-  background: #fff;
-  border-radius: 50%;
-  top: 2px; left: 2px;
-  transition: left .2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,.2);
-}
-.toggle-input:checked + .toggle-label { background: var(--verde); }
-.toggle-input:checked + .toggle-label::after { left: 18px; }
+.chip-PL   { background: #f0f0f0; color: #aaa; border: 2px solid #e0e0e0; }
+.chip-PV   { background: #f0f0f0; color: #aaa; border: 2px solid #e0e0e0; }
+.chip-BDB  { background: #f0f0f0; color: #aaa; border: 2px solid #e0e0e0; }
+.chip-TEST { background: #f0f0f0; color: #aaa; border: 2px solid #e0e0e0; }
 
-/* Sin slot disponible */
-.sin-slot { color: #eee; font-size: .7rem; }
+.chip-PL.activo   { background: var(--verde-pale); color: var(--verde); border-color: var(--verde); }
+.chip-PV.activo   { background: #e3f2fd; color: var(--azul); border-color: var(--azul); }
+.chip-BDB.activo  { background: #fff3e0; color: var(--naranja); border-color: var(--naranja); }
+.chip-TEST.activo { background: #f3e5f5; color: var(--morado); border-color: var(--morado); }
 
-/* ── Config general ── */
-.config-row {
-  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;
+.chip-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+.config-fila {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; background: var(--verde-pale);
+  border: 1px solid var(--verde-light); border-radius: 10px; margin-bottom: 8px;
 }
-.config-card {
-  flex: 1; min-width: 200px;
-  background: var(--verde-pale); border: 1px solid var(--verde-light);
-  border-radius: var(--radio); padding: 16px 18px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.config-card .desc { font-size: .88rem; color: #333; font-weight: 500; }
+.config-fila .desc { font-size: .88rem; font-weight: 500; color: #333; }
 .config-input {
-  width: 60px; padding: 8px;
+  width: 60px; padding: 6px 8px;
   border: 2px solid var(--verde-light); border-radius: 8px;
   font-family: var(--font); font-size: .9rem; font-weight: 700;
   color: var(--verde); text-align: center;
@@ -147,7 +110,7 @@ table.grilla {
 <div class="panel-wrap">
 
   <div class="panel-nav">
-    <a href="{% url 'panel_principal' %}">📅 Calendario</a>
+    <a href="{% url 'panel_principal' %}">📅 Agenda</a>
     <a href="{% url 'panel_precios' %}">💰 Precios</a>
     <a href="{% url 'panel_horarios' %}" class="activo">⚙️ Horarios</a>
   </div>
@@ -161,77 +124,64 @@ table.grilla {
   <form method="POST">
     {% csrf_token %}
 
-    <!-- Grilla de horarios -->
-    <div class="seccion-titulo">Slots disponibles por día y tipo</div>
-    <div class="grilla-wrap">
-      <table class="grilla">
-        <thead>
-          <tr>
-            <th class="th-hora">Hora</th>
-            <th class="th-tipo">Tipo</th>
-            {% for dia in dias %}
-            <th class="th-dia">{{ dia }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for hora in todas_horas %}
-          {% for tipo in tipos %}
-          {% with fila=grilla|get_item:hora|get_item:tipo %}
-          {% comment %}Solo mostrar filas que tienen al menos un slot definido{% endcomment %}
-          {% with tiene_slots=False %}
-          <tr>
-            {% if forloop.parentloop.first and forloop.first %}
-            <td class="td-hora" rowspan="{{ tipos|length }}">{{ hora }}:00</td>
-            {% elif forloop.first %}
-            <td class="td-hora">{{ hora }}:00</td>
-            {% endif %}
-            <td class="td-tipo {{ tipo }}">{{ tipo }}</td>
-            {% for dia_num in "012345"|make_list %}
-            {% with dia_int=dia_num|add:0 ch=fila|get_item:dia_num %}
-            <td>
-              {% if ch is not None %}
-              <div class="toggle-wrap">
-                <input type="checkbox"
-                       name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ ch.tipo }}"
-                       id="slot_{{ ch.dia }}_{{ ch.hora }}_{{ ch.tipo }}"
-                       class="toggle-input"
-                       {% if ch.activo %}checked{% endif %}>
-                <label for="slot_{{ ch.dia }}_{{ ch.hora }}_{{ ch.tipo }}"
-                       class="toggle-label"></label>
-              </div>
-              {% else %}
-              <span class="sin-slot">·</span>
-              {% endif %}
-            </td>
-            {% endwith %}
-            {% endfor %}
-          </tr>
-          {% endwith %}
-          {% endwith %}
-          {% endfor %}
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    {% for dia_num, dia_nombre in dias_enumerados %}
+    <div class="dia-seccion">
+      <div class="dia-titulo">{{ dia_nombre }}</div>
 
-    <!-- Configuración general -->
-    <div class="seccion-titulo">Configuración General</div>
-    <div class="config-row">
-      <div class="config-card">
-        <div class="desc">Reformers disponibles</div>
-        <input type="number" name="reformers" value="{{ reformers }}"
-               class="config-input" min="1" max="20">
+      {% for hora in todas_horas %}
+      {% with fila=grilla|get_item:hora %}
+      {% with tipos_en_dia=fila|get_item:dia_num %}
+      {% if tipos_en_dia %}
+      <div class="hora-fila">
+        <span class="hora-num">{{ hora }}:00</span>
+        <div class="tipo-chips">
+          {% for tipo, ch in tipos_en_dia.items %}
+          <label class="tipo-chip chip-{{ tipo }} {% if ch.activo %}activo{% endif %}">
+            <input type="checkbox"
+                   name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                   {% if ch.activo %}checked{% endif %}
+                   onchange="toggleChip(this)">
+            <span class="chip-dot"></span>
+            {{ tipo }}
+          </label>
+          {% endfor %}
+        </div>
       </div>
-      <div class="config-card">
-        <div class="desc">Capacidad Body Balance</div>
-        <input type="number" name="cap_bb" value="{{ cap_bb }}"
-               class="config-input" min="1" max="100">
-      </div>
+      {% endif %}
+      {% endwith %}
+      {% endwith %}
+      {% endfor %}
+
+    </div>
+    {% endfor %}
+
+    <div class="dia-titulo" style="margin-top:8px;">Configuración General</div>
+    <div class="config-fila">
+      <span class="desc">Reformers disponibles</span>
+      <input type="number" name="reformers" value="{{ reformers }}"
+             class="config-input" min="1" max="20">
+    </div>
+    <div class="config-fila">
+      <span class="desc">Capacidad Body Balance</span>
+      <input type="number" name="cap_bb" value="{{ cap_bb }}"
+             class="config-input" min="1" max="100">
     </div>
 
     <button type="submit" class="btn-guardar">Guardar cambios</button>
   </form>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleChip(checkbox) {
+  const label = checkbox.closest('label');
+  if (checkbox.checked) {
+    label.classList.add('activo');
+  } else {
+    label.classList.remove('activo');
+  }
+}
+</script>
 {% endblock %}
