@@ -12,7 +12,7 @@ Los recursos son los slots de horas,  los reformers para Pilates y las salas.
 
 priv
 
-La selección de un día de partida y hora, genera un horario invariable en los días siguiente. El cliente no tiene liebertad para elegir otros horarios a medida que avanzan los días, sino que la HORA de las sesiones se establece el día de la reserva. 
+La selección de un día de partida y hora, genera un horario invariable en los días siguiente. El cliente no tiene libertad para elegir otros horarios a medida que avanzan los días, sino que la HORA de las sesiones se establece el día de la reserva. 
 La reserva del reformer se hace el mismo día en que quiere partir el cliente, ya que si reserva para partir la próxima semana, podria venir otro cliente hoy que quiere partir cuanto antes, Se perderían esos espacios de ingresos en lo que queda de días para la supuesta reserva futura.
 
 
@@ -72,15 +72,16 @@ Viernes     11, 16
 RECUPERACIÓN DE CLASES
 ----------------------
 En casos extremos como accidente, enfermedad GRAVE, muerte de familiar, etc, las clases se pueden congelar.
-Si una alumna no asiste a clases puede recuperar hasta  clases, siempre que haya disponibilidad. Pero debe recuperarla dentro de la semana.
-Tiene que ser al otro día de haber perdido la clase, no tiene que ser los mismos días que ella tomó (si el esquema que tomó es LU-MIE-VIE, puede recuperar el JUE también).
+Si una alumna no asiste a clases puede recuperar hasta 2 clases, siempre que haya disponibilidad. Pero debe recuperarla dentro de la semana.
+Tiene que ser al otro día de haber perdido la clase, y hasta las 12pm, si no, se desbloquea para otra alumna.
+No tiene que ser los mismos días que ella tomó (si el esquema que tomó es LU-MIE-VIE, puede recuperar el JUE también).
 
 
 
 CASOS ESPECIALES
 ----------------
 Terminó sus clases y quiere continuar al tiro:
-Si una alumna terminó hoy a las 10am la ultima clase. La app le pregunta si quiere continuar o no por ahora. SI continuar, darle tiempo para que renueve por ejm 2hrs, si a las 12 no ha renovado se desbloquea y ese cupo queda libre.
+Si una alumna terminó hoy a las 10am la ultima clase. La app le pregunta si quiere continuar o no por ahora. Si continuar, darle tiempo para que renueve por ejm 2hrs, si a las 12 no ha renovado se desbloquea y ese cupo queda libre.
 
 
 
