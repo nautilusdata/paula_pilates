@@ -1,6 +1,5 @@
 Paula Ayarza Pilates - Business Logic
 =====================================
-
 Paula Ayarza Pilates es una academia de Pilates y Body Balance. Paula como instructora hace personalmente las clases y al mismo tiempo es la dueña. 
 Opera en una propiedad en Punta Arenas con grandes espacios que tiene 2 salas, una con 6 (por ahora) reformers de Pilates y otra sala para hacer Body Balance. 
 Los recursos son los slots de horas,  los reformers para Pilates y las salas. 
@@ -9,9 +8,6 @@ Los recursos son los slots de horas,  los reformers para Pilates y las salas.
 =================================================
 1. Pilates
 =================================================
-
-priv
-
 La selección de un día de partida y hora, genera un horario invariable en los días siguiente. El cliente no tiene libertad para elegir otros horarios a medida que avanzan los días, sino que la HORA de las sesiones se establece el día de la reserva. 
 La reserva del reformer se hace el mismo día en que quiere partir el cliente, ya que si reserva para partir la próxima semana, podria venir otro cliente hoy que quiere partir cuanto antes, Se perderían esos espacios de ingresos en lo que queda de días para la supuesta reserva futura.
 
@@ -59,6 +55,7 @@ Mismas restricciones que los pack grupales anterioresen 1.1 y 1.2.....
 El horario es único para todos los días
 El pack no se puede dividir, las clases son seguidas, excepto cuando hay un feriado chileno entremedio, se salta y el pack continúa normalmente, *el calendario de clases no se corre*
 Sólo 1 alumna
+
 Días de la semana y horarios
 ----------------------------
 Lunes       11, 16
@@ -68,22 +65,19 @@ Jueves      11, 16
 Viernes     11, 16
 
 
-
 RECUPERACIÓN DE CLASES
 ----------------------
 En casos extremos como accidente, enfermedad GRAVE, muerte de familiar, etc, las clases se pueden congelar.
 Si una alumna no asiste a clases puede recuperar hasta 2 clases, siempre que haya disponibilidad. Pero debe recuperarla dentro de la semana.
+El limite son 2 recuperaciones por pack.
 Tiene que ser al otro día de haber perdido la clase, y hasta las 12pm, si no, se desbloquea para otra alumna.
 No tiene que ser los mismos días que ella tomó (si el esquema que tomó es LU-MIE-VIE, puede recuperar el JUE también).
-
 
 
 CASOS ESPECIALES
 ----------------
 Terminó sus clases y quiere continuar al tiro:
 Si una alumna terminó hoy a las 10am la ultima clase. La app le pregunta si quiere continuar o no por ahora. Si continuar, darle tiempo para que renueve por ejm 2hrs, si a las 12 no ha renovado se desbloquea y ese cupo queda libre.
-
-
 
 
 
@@ -104,47 +98,31 @@ Es estratégico porque si va 4 veces al mes son $60.000 igual
 
 
 
-
-*Pagos
+======================================================
+3. Pagos
+======================================================
 Los packS se pagan por adelantado, el 100 %.
 La dueña/administradora puede cambiar días y horas
+VER PAGO POR ADELANTADO: Si usas Webpay o Flow, recuerda que la reserva debe quedar en estado "Pendiente" hasta que el webhook del pago confirme el éxito.
+VER ESTADO "RESERVA TEMPORAL" mientras la alumna paga.
 
 
 
-
-INTERFAZ DE ADMINISTRADOR
+======================================================
+4. INTERFAZ DE ADMINISTRADOR
+======================================================
 
 Paula debe tener una vista de administrador donde ingrese REFORMERS DISPONIBLES, ESPACIOS EN SALA DE BODY BALANCE y PRECIOS DE LAS CLASES. Además tiene métricas de alumnos y mensuales por alumno y por clase.
 Botón AUSENTE si Paula se enferma o planea ausentarse -->  BULK RESCHEDULE de la base de datos de las clases, respetando feriados chilenos, magallánicos y días. Se respetan los horarios de pilates.
 Paula debe tener un calendario con vista mensual de los dias programados, con los nombres de clientes en los días con sus clases a lo mejor tipo agenda o sea un dia y lo que pasa ese dia y asi el dia siquiente mas abajo.
+ 
 
+======================================================
+5. INTERFAZ DE USUARIO
+======================================================
+Las alumnas entran al sistema con su usuario y password y gestionan sus reservas. 
+Pinchan el producto (Pilates o Body Balance), luego pinchan el subproducto en caso de Pilates (pack, pack reducido, clase suelta, clase de prueba, clases privadas). Elije el producto, se establece NOMBRE, DIA (o dias), HORA -->> WEBPAY se produce el pago, y queda la reserva en la base de datos establecida ya.
 
-Para que el sistema funcione, las alumnas entran al sistema con su usuario y password, y gestionan sus reservas. Pinchan el producto (Pilates o Body Balance), luego pinchan el subproducto en caso de Pilates (pack, pack reducido, clase suelta, clase de prueba, clases privadas). Elije el producto, se establece NOMBRE, DIA (o dias), HORA -->> WEBPAY se produce el pago, y queda la reserva en la base de datos establecida ya. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Flujo propuesto (lo que ve el usuario cuando navega en el sitio)
-======================================================================
 
 1. Usuario no logueado (visita la web pública)
 ----------------------------------------------------------------------
@@ -229,10 +207,25 @@ Fin del flujo.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Cuando usas IA para programar, dejas de ser solo un "picacodigo" para convertirte en un revisor crítico y arquitecto de soluciones. La IA es increíblemente rápida generando funciones, pero el sentido común es lo que evita que construyas un rascacielos sobre arena.
-
 El Papel del Sentido Común en Apps de Gimnasios
-
 La lógica de un gimnasio parece simple (clase + alumno = reserva), pero el "sentido común" te dicta reglas que la IA no siempre asume por defecto a menos que seas muy específico:
 
 
@@ -374,6 +367,4 @@ Hora	Capacidad Total	Reservas Activas	Disponibilidad
 
 Nota sobre las Privadas: Si alguien reserva una clase privada a las 11:00, tu lógica debe restar 5 cupos de ese slot inmediatamente para que nadie más pueda entrar, dejando la capacidad efectiva en 1.
 
-¿Ya tienes resuelta la parte del pago por adelantado? Si usas Webpay (Transbank) o Flow, recuerda que la reserva debe quedar en estado "Pendiente" hasta que el webhook del pago confirme el éxito.
 
-¿Te gustaría que veamos cómo manejar ese estado de "Reserva Temporal" mientras la alumna paga?
