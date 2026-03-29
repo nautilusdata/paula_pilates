@@ -206,6 +206,7 @@ class Sesion(models.Model):
         'self', null=True, blank=True, on_delete=models.SET_NULL,
         related_name='recuperaciones', help_text='Sesión original que se recupera'
     )
+    marcada_ausente_en = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['fecha', 'hora']
