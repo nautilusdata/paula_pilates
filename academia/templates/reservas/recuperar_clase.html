@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Recuperar Clase – Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --naranja:     #e65100;
+  --naranja-pale:#fff3e0;
+  --gris:        #555;
+  --borde:       #ddd;
+  --radio:       14px;
+  --font:        'Poppins', sans-serif;
+}
+body { font-family: var(--font); }
+
+.wrap {
+  width: 92%; max-width: 560px;
+  margin: 24px auto 100px;
+}
+
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .78rem; color: #999; margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--verde); text-decoration: none; }
+.breadcrumb .sep { color: #ccc; }
+
+.titulo { font-size: 1.3rem; font-weight: 700; color: var(--verde); margin-bottom: 4px; }
+.subtitulo { font-size: .85rem; color: var(--gris); margin-bottom: 24px; }
+
+/* Aviso de plazo */
+.aviso-plazo {
+  background: var(--naranja-pale);
+  border-left: 4px solid var(--naranja);
+  padding: 12px 14px; border-radius: 8px;
+  font-size: .82rem; color: #bf360c;
+  margin-bottom: 22px;
+}
+
+/* Info sesión original */
+.sesion-orig {
+  background: #fff; border: 1px solid var(--borde);
+  border-radius: var(--radio); padding: 16px 18px;
+  margin-bottom: 24px;
+}
+.sesion-orig .label {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: #999; margin-bottom: 8px;
+}
+.sesion-orig .valor {
+  font-size: .95rem; font-weight: 600; color: #333;
+}
+
+.seccion-label {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--verde); margin-bottom: 10px;
+}
+
+/* Slots disponibles */
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 26px;
+}
+.slot-opt { display: none; }
+.slot-label {
+  display: block; text-align: center; padding: 14px 8px;
+  border: 2px solid var(--borde); border-radius: 10px;
+  cursor: pointer; transition: all .15s;
+  background: #fff;
+}
+.slot-label .slot-hora {
+  display: block; font-size: .95rem; font-weight: 700; color: #555;
+}
+.slot-label .slot-cupos {
+  display: block; font-size: .68rem; color: #999; margin-top: 3px;
+}
+.slot-opt:checked + .slot-label {
+  border-color: var(--verde); background: var(--verde); 
+}
+.slot-opt:checked + .slot-label .slot-hora { color: #fff; }
+.slot-opt:checked + .slot-label .slot-cupos { color: rgba(255,255,255,.7); }
+
+.sin-slots {
+  text-align: center; padding: 30px;
+  background: #fafafa; border-radius: var(--radio);
+  color: #999; font-size: .88rem; margin-bottom: 24px;
+}
+
+.btn-confirmar {
+  display: block; width: 100%; padding: 16px;
+  background: var(--verde); color: #fff; border: none;
+  border-radius: var(--radio); font-family: var(--font);
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: background .15s; margin-bottom: 12px;
+}
+.btn-confirmar:hover { background: #245200; }
+
+.btn-volver {
+  display: block; width: 100%; padding: 14px;
+  background: transparent; color: var(--gris);
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  font-family: var(--font); font-size: .9rem;
+  cursor: pointer; text-align: center; text-decoration: none;
+}
+.btn-volver:hover { background: #f9f9f9; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='mis_clases' %}
+
+<div class="wrap">
+
+  <nav class="breadcrumb">
+    <a href="{% url 'mis_clases' %}">Mis Clases</a>
+    <span class="sep">›</span>
+    <span>Recuperar Clase</span>
+  </nav>
+
+  <p class="titulo">Recuperar Clase</p>
+  <p class="subtitulo">Elige un horario disponible para mañana.</p>
+
+  <!-- Aviso de plazo -->
+  <div class="aviso-plazo">
+    <strong>Tienes hasta las 12:00pm</strong> del {{ dia_siguiente|date:"j \d\e F" }} para reservar tu recuperación.
+  </div>
+
+  <!-- Sesión original -->
+  <div class="sesion-orig">
+    <div class="label">Clase que no pudiste asistir</div>
+    <div class="valor">
+      {{ sesion.fecha|date:"l j \d\e F" }} · {{ sesion.hora }}:00 hrs
+      · Clase {{ sesion.numero }}/{{ sesion.pack.cantidad }}
+    </div>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+
+    <div class="seccion-label">Elige tu horario para {{ dia_siguiente|date:"l j \d\e F" }}</div>
+
+    {% if slots_disponibles %}
+    <div class="slots-grid">
+      {% for slot in slots_disponibles %}
+      <input type="radio" name="hora" id="slot_{{ slot.hora }}"
+             value="{{ slot.hora }}" class="slot-opt" required>
+      <label for="slot_{{ slot.hora }}" class="slot-label">
+        <span class="slot-hora">{{ slot.label }}</span>
+        <span class="slot-cupos">{{ slot.cupos }} cupo{% if slot.cupos != 1 %}s{% endif %}</span>
+      </label>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn-confirmar">Confirmar recuperación →</button>
+    {% else %}
+    <div class="sin-slots">
+      Sin cupos disponibles para mañana. Consulta con Paula.
+    </div>
+    {% endif %}
+
+  </form>
+
+  <a href="{% url 'mis_clases' %}" class="btn-volver">← Volver a Mis Clases</a>
+
+</div>
+{% endblock %}
