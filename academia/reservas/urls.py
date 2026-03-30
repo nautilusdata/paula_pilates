@@ -23,5 +23,6 @@ urlpatterns = [
     path('panel/', views_panel_paula.panel_principal, name='panel_principal'),
     path('panel/precios/', views_panel_paula.panel_precios, name='panel_precios'),
     path('panel/horarios/', views_panel_paula.panel_horarios, name='panel_horarios'),
+    path('panel/ausente/<int:sesion_id>/', views_panel_paula.marcar_ausente, name='marcar_ausente'),
     
 ]
