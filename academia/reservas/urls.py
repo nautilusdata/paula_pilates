@@ -24,5 +24,6 @@ urlpatterns = [
     path('panel/precios/', views_panel_paula.panel_precios, name='panel_precios'),
     path('panel/horarios/', views_panel_paula.panel_horarios, name='panel_horarios'),
     path('panel/ausente/<int:sesion_id>/', views_panel_paula.marcar_ausente, name='marcar_ausente'),
+    path('recuperar/<int:sesion_id>/', views_mis_clases.recuperar_clase, name='recuperar_clase'),
     
 ]
