@@ -74,6 +74,28 @@ body { font-family: var(--font); }
 }
 .btn-hoy:hover { background: var(--verde-pale); }
 
+.btn-ausente {
+  font-size: .65rem; font-weight: 700;
+  padding: 4px 10px; border-radius: 10px;
+  border: 1.5px solid #e74c3c;
+  background: transparent; color: #e74c3c;
+  cursor: pointer; transition: all .15s;
+  white-space: nowrap;
+}
+.btn-ausente:hover { background: #e74c3c; color: #fff; }
+.badge-ausente {
+  font-size: .65rem; font-weight: 700;
+  padding: 4px 10px; border-radius: 10px;
+  background: #fff3e0; color: #e65100;
+  white-space: nowrap;
+}
+.badge-recuperada {
+  font-size: .65rem; font-weight: 700;
+  padding: 4px 10px; border-radius: 10px;
+  background: #e8f5e9; color: #388e3c;
+  white-space: nowrap;
+}
+
 .hora-bloque {
   margin-bottom: 16px;
   border-radius: var(--radio);
@@ -186,13 +208,26 @@ body { font-family: var(--font); }
             <span class="alumna-nombre">{{ sesion.pack.alumna.get_full_name }}</span>
             <span class="alumna-tipo">{{ sesion.pack.get_tipo_display }}</span>
           </div>
-          <span class="alumna-sesion">
+
+
+        <span class="alumna-sesion">
             {% if sesion.pack.cantidad > 1 %}
               Clase {{ sesion.numero }}/{{ sesion.pack.cantidad }}
             {% else %}
               Única
             {% endif %}
-          </span>
+        </span>
+        {% if sesion.estado == 'PROGRAMADA' %}
+        <button class="btn-ausente" onclick="marcarAusente({{ sesion.pk }}, this)">
+            Ausente
+        </button>
+        {% elif sesion.estado == 'RECUPERAR' %}
+        <span class="badge-ausente">Ausente</span>
+        {% elif sesion.estado == 'RECUPERADA' %}
+        <span class="badge-recuperada">✓ Recuperó</span>
+        {% endif %}
+
+
         </div>
         {% endfor %}
       </div>
