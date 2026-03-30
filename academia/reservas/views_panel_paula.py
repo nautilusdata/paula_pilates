@@ -7,6 +7,8 @@ from .models import (
     Sesion, ConfiguracionHorario, ConfiguracionGeneral,
     ConfiguracionPrecio
 )
+from django.utils import timezone
+from django.http import JsonResponse
 
 # Solo Paula (staff) puede entrar al panel
 def es_staff(user):
@@ -146,3 +148,29 @@ def panel_horarios(request):
         'cap_bb':          cap_bb,
     }
     return render(request, 'reservas/panel_horarios.html', context)
+
+
+@login_required
+@user_passes_test(es_staff, login_url='/')
+def marcar_ausente(request, sesion_id):
+    """Paula marca una alumna como ausente desde su panel."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+    try:
+        sesion = Sesion.objects.get(pk=sesion_id)
+    except Sesion.DoesNotExist:
+        return JsonResponse({'error': 'Sesión no encontrada'}, status=404)
+
+    if sesion.estado != 'PROGRAMADA':
+        return JsonResponse({'error': 'Solo se pueden marcar sesiones programadas'}, status=400)
+
+    sesion.estado = 'RECUPERAR'
+    sesion.marcada_ausente_en = timezone.now()
+    sesion.save()
+
+    return JsonResponse({
+        'ok': True,
+        'alumna': sesion.pack.alumna.get_full_name(),
+        'sesion_id': sesion.pk,
+    })
