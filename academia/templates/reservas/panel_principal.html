@@ -245,3 +245,28 @@ body { font-family: var(--font); }
 
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+function marcarAusente(sesionId, btn) {
+  if (!confirm('¿Marcar como ausente?')) return;
+  
+  fetch(`/panel/ausente/${sesionId}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/json',
+    },
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      btn.outerHTML = '<span class="badge-ausente">Ausente</span>';
+    } else {
+      alert('Error: ' + data.error);
+    }
+  })
+  .catch(() => alert('Error de conexión.'));
+}
+</script>
+{% endblock %}
