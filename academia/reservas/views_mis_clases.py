@@ -5,6 +5,8 @@ de sesiones con estado visual (próximas vs completadas).
 """
 
 from datetime import date, datetime
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.utils import timezone
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -78,3 +80,79 @@ def mis_clases(request):
         'hoy':            hoy,
     }
     return render(request, 'reservas/mis_clases.html', context)
+
+
+@login_required
+def recuperar_clase(request, sesion_id):
+    """Alumna elige slot para recuperar su clase perdida."""
+    hoy = date.today()
+    ahora = timezone.now()
+
+    sesion = get_object_or_404(Sesion, pk=sesion_id, pack__alumna=request.user)
+
+    # Validar que sea recuperable
+    if sesion.estado != 'RECUPERAR' or not sesion.marcada_ausente_en:
+        messages.error(request, 'Esta sesión no está disponible para recuperar.')
+        return redirect('mis_clases')
+
+    # Validar plazo (antes de las 12pm del día siguiente)
+    dia_siguiente = sesion.marcada_ausente_en.date() + date.resolution
+    plazo = timezone.make_aware(
+        datetime.combine(dia_siguiente, datetime.min.time().replace(hour=12))
+    )
+    if ahora >= plazo:
+        messages.error(request, 'El plazo para recuperar esta clase ya venció.')
+        return redirect('mis_clases')
+
+    # Validar máximo 2 recuperaciones por pack
+    recuperaciones_usadas = sesion.pack.sesiones.filter(es_recupero=True).count()
+    if recuperaciones_usadas >= 2:
+        messages.error(request, 'Ya usaste las 2 recuperaciones permitidas para este pack.')
+        return redirect('mis_clases')
+
+    # Slots disponibles — cualquier hora del día siguiente con cupo
+    from .models import DIAS_SEMANA_PILATES, horas_disponibles_por_tipo
+    horas_pl = horas_disponibles_por_tipo('PL')
+    slots_disponibles = []
+    for hora in horas_pl:
+        cupos = Sesion.cupos_disponibles(dia_siguiente, hora)
+        if cupos > 0:
+            slots_disponibles.append({
+                'hora':  hora,
+                'label': f'{hora:02d}:00',
+                'cupos': cupos,
+            })
+
+    if request.method == 'POST':
+        hora_str = request.POST.get('hora')
+        if not hora_str or not hora_str.isdigit():
+            messages.error(request, 'Elige una hora válida.')
+        else:
+            hora = int(hora_str)
+            if Sesion.cupos_disponibles(dia_siguiente, hora) < 1:
+                messages.error(request, 'Ese slot ya no tiene cupo. Elige otro.')
+            else:
+                # Crear sesión de recuperación
+                Sesion.objects.create(
+                    pack       = sesion.pack,
+                    fecha      = dia_siguiente,
+                    hora       = hora,
+                    numero     = sesion.numero,
+                    estado     = 'RECUPERADA',
+                    es_recupero = True,
+                    sesion_orig = sesion,
+                )
+                # Marcar sesión original como recuperada
+                sesion.estado = 'RECUPERADA'
+                sesion.save()
+
+                messages.success(request, f'¡Clase recuperada! Te esperamos el {dia_siguiente} a las {hora:02d}:00.')
+                return redirect('mis_clases')
+
+    context = {
+        'sesion':           sesion,
+        'dia_siguiente':    dia_siguiente,
+        'slots_disponibles': slots_disponibles,
+        'plazo':            plazo,
+    }
+    return render(request, 'reservas/recuperar_clase.html', context)
