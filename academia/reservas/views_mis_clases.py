@@ -132,18 +132,19 @@ def recuperar_clase(request, sesion_id):
             if Sesion.cupos_disponibles(dia_siguiente, hora) < 1:
                 messages.error(request, 'Ese slot ya no tiene cupo. Elige otro.')
             else:
-                # Crear sesión de recuperación
+                # Crear sesión de recuperación con número especial
+                ultimo_numero = sesion.pack.sesiones.count() + 1
                 Sesion.objects.create(
-                    pack       = sesion.pack,
-                    fecha      = dia_siguiente,
-                    hora       = hora,
-                    numero     = sesion.numero,
-                    estado     = 'RECUPERADA',
+                    pack        = sesion.pack,
+                    fecha       = dia_siguiente,
+                    hora        = hora,
+                    numero      = ultimo_numero,
+                    estado      = 'PROGRAMADA',
                     es_recupero = True,
                     sesion_orig = sesion,
                 )
-                # Marcar sesión original como recuperada
-                sesion.estado = 'RECUPERADA'
+                # Marcar sesión original como ausente recuperada
+                sesion.estado = 'RECUPERAR'
                 sesion.save()
 
                 messages.success(request, f'¡Clase recuperada! Te esperamos el {dia_siguiente} a las {hora:02d}:00.')
