@@ -300,11 +300,18 @@ def bulk_reschedule_preview(request):
     if request.method == 'POST':
         count = 0
         with transaction.atomic():
+            # Paso 1: mover todo a fechas temporales (muy lejanas) para evitar conflictos
             for preview in previews:
-                for sesion, nueva_fecha in reversed(preview['cambios']):
-                    sesion.fecha = nueva_fecha
+                for sesion, nueva_fecha in preview['cambios']:
+                    sesion.fecha = sesion.fecha + timedelta(days=3650)  # +10 años
                     sesion.save(update_fields=['fecha'])
                     count += 1
+
+            # Paso 2: mover a las fechas definitivas
+            for preview in previews:
+                for sesion, nueva_fecha in preview['cambios']:
+                    sesion.fecha = nueva_fecha
+                    sesion.save(update_fields=['fecha'])
 
         del request.session['bulk_data']
         messages.success(request, f'✓ {count} sesiones reprogramadas exitosamente.')
