@@ -10,6 +10,7 @@ from .models import (
 from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
+from django.db import transaction
 
 # Solo Paula (staff) puede entrar al panel
 def es_staff(user):
@@ -175,3 +176,135 @@ def marcar_ausente(request, sesion_id):
         'alumna': sesion.pack.alumna.get_full_name(),
         'sesion_id': sesion.pk,
     })
+
+
+@login_required
+@user_passes_test(es_staff, login_url='/')
+@require_http_methods(["GET", "POST"])
+def bulk_reschedule(request):
+    """Paula reprograma todas las clases futuras por ausencia."""
+    context = {'hoy': date.today()}
+
+    if request.method == 'POST':
+        fecha_inicio_str = request.POST.get('fecha_inicio')
+        fecha_regreso_str = request.POST.get('fecha_regreso')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+
+        errores = []
+
+        # Validar contraseñas
+        if password1 != password2:
+            errores.append('Las contraseñas no coinciden.')
+        else:
+            user = authenticate(username=request.user.username, password=password1)
+            if not user:
+                errores.append('Contraseña incorrecta.')
+
+        # Validar fechas
+        fecha_inicio = None
+        fecha_regreso = None
+        try:
+            fecha_inicio  = date.fromisoformat(fecha_inicio_str)
+            fecha_regreso = date.fromisoformat(fecha_regreso_str)
+            if fecha_inicio >= fecha_regreso:
+                errores.append('La fecha de regreso debe ser posterior a la de inicio.')
+            if fecha_inicio < date.today():
+                errores.append('La fecha de inicio no puede ser en el pasado.')
+        except (ValueError, TypeError):
+            errores.append('Fechas no válidas.')
+
+        if errores:
+            context['errores'] = errores
+            return render(request, 'reservas/bulk_reschedule.html', context)
+
+        # Guardar en sesión y redirigir a preview
+        request.session['bulk_data'] = {
+            'fecha_inicio':  fecha_inicio.isoformat(),
+            'fecha_regreso': fecha_regreso.isoformat(),
+        }
+        return redirect('bulk_reschedule_preview')
+
+    return render(request, 'reservas/bulk_reschedule.html', context)
+
+
+@login_required
+@user_passes_test(es_staff, login_url='/')
+@require_http_methods(["GET", "POST"])
+def bulk_reschedule_preview(request):
+    """Muestra preview de los cambios antes de ejecutar."""
+    bulk_data = request.session.get('bulk_data')
+    if not bulk_data:
+        return redirect('bulk_reschedule')
+
+    from .models import Pack, generar_fechas_pack, feriados_punta_arenas, DIAS_SEMANA_PILATES
+
+    fecha_inicio  = date.fromisoformat(bulk_data['fecha_inicio'])
+    fecha_regreso = date.fromisoformat(bulk_data['fecha_regreso'])
+
+    # Sesiones afectadas — programadas desde fecha_inicio en adelante
+    sesiones_afectadas = Sesion.objects.filter(
+        fecha__gte=fecha_inicio,
+        estado='PROGRAMADA',
+    ).select_related('pack__alumna').order_by('pack', 'fecha')
+
+    # Calcular nuevas fechas para cada pack afectado
+    feriados = feriados_punta_arenas()
+    previews = []
+    packs_procesados = set()
+
+    for sesion in sesiones_afectadas:
+        pack = sesion.pack
+        if pack.pk in packs_procesados:
+            continue
+        packs_procesados.add(pack.pk)
+
+        # Sesiones del pack que se van a mover
+        ses_pack = list(pack.sesiones.filter(
+            fecha__gte=fecha_inicio,
+            estado='PROGRAMADA'
+        ).order_by('fecha'))
+
+        if not ses_pack:
+            continue
+
+        # Calcular nuevas fechas desde fecha_regreso
+        if pack.frecuencia in DIAS_SEMANA_PILATES:
+            dias = DIAS_SEMANA_PILATES[pack.frecuencia]
+            nuevas_fechas = []
+            cursor = fecha_regreso
+            while len(nuevas_fechas) < len(ses_pack):
+                if cursor.weekday() in dias and cursor not in feriados:
+                    nuevas_fechas.append(cursor)
+                cursor += timedelta(days=1)
+        else:
+            # Body Balance u otros sin frecuencia LMV
+            nuevas_fechas = [fecha_regreso + timedelta(days=i) for i in range(len(ses_pack))]
+
+        previews.append({
+            'alumna':       pack.alumna.get_full_name(),
+            'pack':         pack.get_tipo_display(),
+            'hora':         pack.hora,
+            'cambios':      list(zip(ses_pack, nuevas_fechas)),
+        })
+
+    context = {
+        'previews':      previews,
+        'fecha_inicio':  fecha_inicio,
+        'fecha_regreso': fecha_regreso,
+        'total_sesiones': sesiones_afectadas.count(),
+    }
+
+    if request.method == 'POST':
+        # Ejecutar el bulk reschedule
+        with transaction.atomic():
+            for preview in previews:
+                for sesion, nueva_fecha in preview['cambios']:
+                    sesion.fecha = nueva_fecha
+                    sesion.save(update_fields=['fecha'])
+
+        del request.session['bulk_data']
+        messages.success(request, f'✓ {sesiones_afectadas.count()} sesiones reprogramadas exitosamente.')
+        return redirect('panel_principal')
+
+    return render(request, 'reservas/bulk_reschedule_preview.html', context)
