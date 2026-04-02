@@ -52,7 +52,8 @@ def mis_clases(request):
             puede_recuperar = False
             if s.estado == 'RECUPERAR' and s.marcada_ausente_en and puede_recuperar_mas:
                 # Plazo: hasta las 12pm del día siguiente a cuando Paula marcó
-                dia_siguiente = s.marcada_ausente_en.date() + date.resolution
+                marcada_local = timezone.localtime(s.marcada_ausente_en)
+                dia_siguiente = marcada_local.date() + date.resolution
                 plazo = timezone.make_aware(
                     datetime.combine(dia_siguiente, datetime.min.time().replace(hour=12))
                 )
@@ -96,7 +97,8 @@ def recuperar_clase(request, sesion_id):
         return redirect('mis_clases')
 
     # Validar plazo (antes de las 12pm del día siguiente)
-    dia_siguiente = sesion.marcada_ausente_en.date() + date.resolution
+    marcada_local = timezone.localtime(sesion.marcada_ausente_en)
+    dia_siguiente = marcada_local.date() + date.resolution
     plazo = timezone.make_aware(
         datetime.combine(dia_siguiente, datetime.min.time().replace(hour=12))
     )
