@@ -298,15 +298,16 @@ def bulk_reschedule_preview(request):
     }
 
     if request.method == 'POST':
-        # Ejecutar el bulk reschedule
+        count = 0
         with transaction.atomic():
             for preview in previews:
-                for sesion, nueva_fecha in preview['cambios']:
+                for sesion, nueva_fecha in reversed(preview['cambios']):
                     sesion.fecha = nueva_fecha
                     sesion.save(update_fields=['fecha'])
+                    count += 1
 
         del request.session['bulk_data']
-        messages.success(request, f'✓ {sesiones_afectadas.count()} sesiones reprogramadas exitosamente.')
+        messages.success(request, f'✓ {count} sesiones reprogramadas exitosamente.')
         return redirect('panel_principal')
 
     return render(request, 'reservas/bulk_reschedule_preview.html', context)
