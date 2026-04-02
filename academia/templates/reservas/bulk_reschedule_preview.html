@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Preview Reprogramación – Panel Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --rojo:        #c62828;
+  --rojo-pale:   #ffebee;
+  --naranja:     #e65100;
+  --gris:        #555;
+  --borde:       #e0e0e0;
+  --radio:       12px;
+  --font:        'Poppins', sans-serif;
+}
+body { font-family: var(--font); }
+
+.wrap {
+  width: 92%; max-width: 680px;
+  margin: 80px auto 100px;
+}
+
+.panel-nav {
+  display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.panel-nav a {
+  padding: 8px 16px; border-radius: 20px; text-decoration: none;
+  font-size: .82rem; font-weight: 600; background: #f0f0f0; color: var(--gris);
+}
+.panel-nav a:hover { background: var(--verde-light); color: var(--verde); }
+
+/* ── Resumen ── */
+.resumen-card {
+  background: var(--rojo-pale); border: 2px solid var(--rojo);
+  border-radius: var(--radio); padding: 18px 20px;
+  margin-bottom: 24px;
+}
+.resumen-card .titulo {
+  font-size: 1rem; font-weight: 700; color: var(--rojo); margin-bottom: 10px;
+}
+.resumen-fila {
+  display: flex; justify-content: space-between;
+  font-size: .85rem; padding: 5px 0;
+  border-bottom: 1px solid rgba(198,40,40,.15);
+}
+.resumen-fila:last-child { border-bottom: none; }
+.resumen-fila .etiq { color: #b71c1c; }
+.resumen-fila .valor { font-weight: 700; color: var(--rojo); }
+
+/* ── Lista de cambios ── */
+.seccion-titulo {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--gris);
+  border-bottom: 2px solid var(--borde); padding-bottom: 6px;
+  margin: 24px 0 12px;
+}
+
+.alumna-bloque {
+  background: #fff; border: 1px solid var(--borde);
+  border-radius: var(--radio); margin-bottom: 12px;
+  overflow: hidden;
+}
+.alumna-header {
+  background: var(--verde-pale); padding: 10px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.alumna-header .nombre { font-weight: 700; color: var(--verde); font-size: .9rem; }
+.alumna-header .pack-info { font-size: .75rem; color: #888; }
+
+.cambio-fila {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; border-bottom: 1px solid #f5f5f5;
+  font-size: .82rem;
+}
+.cambio-fila:last-child { border-bottom: none; }
+.fecha-orig { color: #aaa; text-decoration: line-through; flex: 1; }
+.flecha { color: var(--naranja); font-weight: 700; }
+.fecha-nueva { color: var(--verde); font-weight: 600; flex: 1; }
+.hora-tag {
+  background: var(--verde-pale); color: var(--verde);
+  border-radius: 6px; padding: 1px 7px;
+  font-size: .7rem; font-weight: 600;
+}
+
+/* ── Botones ── */
+.btn-confirmar {
+  display: block; width: 100%; padding: 16px;
+  background: var(--rojo); color: #fff; border: none;
+  border-radius: var(--radio); font-family: var(--font);
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: background .15s; margin-top: 24px;
+}
+.btn-confirmar:hover { background: #b71c1c; }
+
+.btn-cancelar {
+  display: block; width: 100%; padding: 14px;
+  background: transparent; color: var(--gris);
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  font-family: var(--font); font-size: .9rem;
+  cursor: pointer; text-align: center; text-decoration: none;
+  margin-top: 10px;
+}
+.btn-cancelar:hover { background: #f9f9f9; }
+
+.sin-cambios {
+  text-align: center; padding: 40px; color: #bbb; font-size: .9rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+
+  <div class="panel-nav">
+    <a href="{% url 'bulk_reschedule' %}">← Volver</a>
+  </div>
+
+  <!-- Resumen -->
+  <div class="resumen-card">
+    <div class="titulo">⚠️ Preview — Revisa antes de confirmar</div>
+    <div class="resumen-fila">
+      <span class="etiq">Inicio de ausencia</span>
+      <span class="valor">{{ fecha_inicio|date:"d/m/Y" }}</span>
+    </div>
+    <div class="resumen-fila">
+      <span class="etiq">Regreso a clases</span>
+      <span class="valor">{{ fecha_regreso|date:"d/m/Y" }}</span>
+    </div>
+    <div class="resumen-fila">
+      <span class="etiq">Total sesiones a mover</span>
+      <span class="valor">{{ total_sesiones }}</span>
+    </div>
+  </div>
+
+  {% if previews %}
+
+  <div class="seccion-titulo">Cambios por alumna</div>
+
+  {% for p in previews %}
+  <div class="alumna-bloque">
+    <div class="alumna-header">
+      <span class="nombre">{{ p.alumna }}</span>
+      <span class="pack-info">{{ p.pack }} · {{ p.hora }}:00</span>
+    </div>
+    {% for sesion, nueva_fecha in p.cambios %}
+    <div class="cambio-fila">
+      <span class="fecha-orig">{{ sesion.fecha|date:"d/m/Y" }}</span>
+      <span class="flecha">→</span>
+      <span class="fecha-nueva">{{ nueva_fecha|date:"d/m/Y" }}</span>
+      <span class="hora-tag">{{ p.hora }}:00</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <button type="submit" class="btn-confirmar">
+      ✓ Confirmar reprogramación de {{ total_sesiones }} sesiones
+    </button>
+  </form>
+
+  {% else %}
+  <div class="sin-cambios">
+    No hay sesiones programadas en ese rango de fechas.
+  </div>
+  {% endif %}
+
+  <a href="{% url 'panel_principal' %}" class="btn-cancelar">Cancelar</a>
+
+</div>
+{% endblock %}

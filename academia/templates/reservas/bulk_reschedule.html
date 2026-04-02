@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reprogramar Todo – Panel Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --rojo:        #c62828;
+  --rojo-pale:   #ffebee;
+  --gris:        #555;
+  --borde:       #e0e0e0;
+  --radio:       14px;
+  --font:        'Poppins', sans-serif;
+}
+body { font-family: var(--font); }
+
+.wrap {
+  width: 92%; max-width: 560px;
+  margin: 80px auto 100px;
+}
+
+.panel-nav {
+  display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.panel-nav a {
+  padding: 8px 16px; border-radius: 20px; text-decoration: none;
+  font-size: .82rem; font-weight: 600; background: #f0f0f0; color: var(--gris);
+}
+.panel-nav a:hover { background: var(--verde-light); color: var(--verde); }
+
+/* ── Warning card ── */
+.warning-card {
+  background: var(--rojo-pale);
+  border: 2px solid var(--rojo);
+  border-radius: var(--radio);
+  padding: 20px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.warning-card .icono { font-size: 2rem; margin-bottom: 8px; }
+.warning-card .titulo {
+  font-size: 1.1rem; font-weight: 700; color: var(--rojo); margin-bottom: 8px;
+}
+.warning-card .descripcion {
+  font-size: .85rem; color: #b71c1c; line-height: 1.5;
+}
+
+.errores {
+  background: #fff0f0; border-left: 4px solid var(--rojo);
+  padding: 12px 14px; border-radius: 8px;
+  font-size: .82rem; color: var(--rojo); margin-bottom: 20px;
+}
+.errores ul { margin: 6px 0 0; padding-left: 18px; }
+
+.seccion-label {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--gris); margin-bottom: 8px;
+  margin-top: 20px;
+}
+
+.campo {
+  width: 100%; padding: 14px 16px;
+  border: 2px solid var(--borde); border-radius: var(--radio);
+  font-family: var(--font); font-size: .95rem; color: #333;
+  background: #fff; box-sizing: border-box;
+  transition: border-color .15s; margin-bottom: 4px;
+}
+.campo:focus { outline: none; border-color: var(--rojo); }
+.campo-hint { font-size: .72rem; color: #999; margin-bottom: 16px; display: block; }
+
+/* ── Separador ── */
+.separador {
+  border: none; border-top: 2px solid var(--borde);
+  margin: 24px 0;
+}
+
+/* ── Botón rojo ── */
+.btn-danger {
+  display: block; width: 100%; padding: 16px;
+  background: var(--rojo); color: #fff; border: none;
+  border-radius: var(--radio); font-family: var(--font);
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: background .15s; margin-top: 8px;
+}
+.btn-danger:hover { background: #b71c1c; }
+
+.btn-cancelar {
+  display: block; width: 100%; padding: 14px;
+  background: transparent; color: var(--gris);
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  font-family: var(--font); font-size: .9rem;
+  cursor: pointer; text-align: center; text-decoration: none;
+  margin-top: 10px;
+}
+.btn-cancelar:hover { background: #f9f9f9; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+
+  <div class="panel-nav">
+    <a href="{% url 'panel_principal' %}">← Volver al panel</a>
+  </div>
+
+  <!-- Warning -->
+  <div class="warning-card">
+    <div class="icono">⚠️</div>
+    <div class="titulo">Reprogramación Masiva</div>
+    <div class="descripcion">
+      Esta acción moverá <strong>TODAS las clases futuras</strong> de todas las alumnas.<br>
+      Es irreversible. Úsala solo en caso de ausencia prolongada.
+    </div>
+  </div>
+
+  {% if errores %}
+  <div class="errores">
+    <strong>Por favor corrige lo siguiente:</strong>
+    <ul>{% for e in errores %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <form method="POST">
+    {% csrf_token %}
+
+    <!-- Fechas -->
+    <div class="seccion-label">① Fecha de inicio de ausencia</div>
+    <input type="date" name="fecha_inicio" class="campo"
+           min="{{ hoy|date:'Y-m-d' }}" required>
+    <span class="campo-hint">Primer día que no habrá clases.</span>
+
+    <div class="seccion-label">② Fecha de regreso a clases</div>
+    <input type="date" name="fecha_regreso" class="campo"
+           min="{{ hoy|date:'Y-m-d' }}" required>
+    <span class="campo-hint">Primer día que se reanudan las clases.</span>
+
+    <hr class="separador">
+
+    <!-- Doble contraseña -->
+    <div class="seccion-label">③ Confirma tu contraseña (dos veces)</div>
+    <input type="password" name="password1" class="campo"
+           placeholder="Contraseña" required>
+    <input type="password" name="password2" class="campo"
+           placeholder="Repite la contraseña" required>
+    <span class="campo-hint">Por seguridad debes ingresar tu contraseña dos veces.</span>
+
+    <button type="submit" class="btn-danger">Ver preview de cambios →</button>
+  </form>
+
+  <a href="{% url 'panel_principal' %}" class="btn-cancelar">Cancelar</a>
+
+</div>
+{% endblock %}
