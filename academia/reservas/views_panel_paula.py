@@ -197,7 +197,9 @@ def bulk_reschedule(request):
         if password1 != password2:
             errores.append('Las contraseñas no coinciden.')
         else:
-            user = authenticate(username=request.user.username, password=password1)
+            from allauth.account.auth_backends import AuthenticationBackend
+            backend = AuthenticationBackend()
+            user = backend.authenticate(request, username=request.user.email, password=password1)
             if not user:
                 errores.append('Contraseña incorrecta.')
 
