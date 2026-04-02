@@ -9,6 +9,7 @@ from .models import (
 )
 from django.utils import timezone
 from django.http import JsonResponse
+from django.contrib.auth import authenticate
 
 # Solo Paula (staff) puede entrar al panel
 def es_staff(user):
