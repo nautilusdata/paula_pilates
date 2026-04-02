@@ -112,16 +112,22 @@ def recuperar_clase(request, sesion_id):
 
     # Slots disponibles — cualquier hora del día siguiente con cupo
     from .models import DIAS_SEMANA_PILATES, horas_disponibles_por_tipo
+    from .models import feriados_punta_arenas
     horas_pl = horas_disponibles_por_tipo('PL')
+    feriados = feriados_punta_arenas()
     slots_disponibles = []
-    for hora in horas_pl:
-        cupos = Sesion.cupos_disponibles(dia_siguiente, hora)
-        if cupos > 0:
-            slots_disponibles.append({
-                'hora':  hora,
-                'label': f'{hora:02d}:00',
-                'cupos': cupos,
-            })
+
+    if dia_siguiente in feriados:
+        slots_disponibles = []  # No hay clases en feriado
+    else:
+        for hora in horas_pl:
+            cupos = Sesion.cupos_disponibles(dia_siguiente, hora)
+            if cupos > 0:
+                slots_disponibles.append({
+                    'hora':  hora,
+                    'label': f'{hora:02d}:00',
+                    'cupos': cupos,
+                })
 
     if request.method == 'POST':
         hora_str = request.POST.get('hora')
