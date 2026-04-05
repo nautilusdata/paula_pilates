@@ -178,8 +178,9 @@ Template del Brick — la modal de pago
 Una pregunta antes de escribir código: ¿tienes configurado ngrok o algo similar para exponer localhost al webhook de MP? En sandbox MP necesita una URL pública real para mandarte la notificación de pago. Si no, lo resolvemos con polling como alternativa más simple para desarrollo.
 ¿Cómo prefieres manejarlo?
 
+Número 
+4009 1753 3280 6176
 
-Número 4009 1753 3280 6176
 Vencimiento cualquier fecha futura, ej 12/30
 CVV 123
 Nombre APRO
