@@ -1,5 +1,5 @@
-{% raw %}{% extends 'base.html' %}
-{% block content %}{% endraw %}
+{% extends 'base.html' %}
+{% block content %}
 
 <style>
   .pago-wrap {
@@ -18,7 +18,6 @@
   }
 
   .pago-resumen h2 {
-    font-size: 1.1rem;
     font-weight: normal;
     color: #555;
     margin: 0 0 1rem 0;
@@ -65,11 +64,6 @@
     font-size: 0.8rem;
   }
 
-  .pago-seguro svg {
-    vertical-align: middle;
-    margin-right: 4px;
-  }
-
   .btn-volver {
     display: inline-block;
     margin-bottom: 1.5rem;
@@ -88,85 +82,68 @@
 
   <div class="pago-resumen">
     <h2>Resumen de tu reserva</h2>
-    <div class="producto">{% raw %}{{ pack.get_tipo_display }}{% endraw %}</div>
-    <div class="detalle">{% raw %}{{ pack.fecha_inicio|date:"d/m/Y" }}{% endraw %} · {% raw %}{{ pack.hora }}{% endraw %}:00 hrs</div>
-    {% raw %}{% if pack.frecuencia %}{% endraw %}
-      <div class="detalle">Frecuencia: {% raw %}{{ pack.get_frecuencia_display }}{% endraw %}</div>
-    {% raw %}{% endif %}{% endraw %}
+    <div class="producto">{{ pack.get_tipo_display }}</div>
+    <div class="detalle">{{ pack.fecha_inicio|date:"d/m/Y" }} · {{ pack.hora }}:00 hrs</div>
+    {% if pack.frecuencia %}
+      <div class="detalle">Frecuencia: {{ pack.get_frecuencia_display }}</div>
+    {% endif %}
     <div class="precio">
-      ${% raw %}{{ pack.precio_total|floatformat:0 }}{% endraw %}<span>CLP</span>
+      ${{ pack.precio_total|floatformat:0 }}<span>CLP</span>
     </div>
   </div>
 
-  <!-- Aquí monta MercadoPago el Brick -->
   <div id="brick-container"></div>
 
   <p class="pago-seguro">
-    <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
-      <path d="M6 0L0 2.5V6.5C0 10 3 13 6 14C9 13 12 10 12 6.5V2.5L6 0Z" fill="#ccc"/>
-    </svg>
-    Pago 100% seguro · Procesado por MercadoPago
+    🔒 Pago 100% seguro · Procesado por MercadoPago
   </p>
 
 </div>
 
-<!-- SDK de MercadoPago Bricks -->
 <script src="https://sdk.mercadopago.com/js/v2"></script>
 <script>
-  const mp = new MercadoPago('{% raw %}{{ public_key }}{% endraw %}', { locale: 'es-CL' });
-
+  const mp = new MercadoPago('{{ public_key }}', { locale: 'es-CL' });
   const bricksBuilder = mp.bricks();
 
-  const renderPaymentBrick = async (bricksBuilder) => {
-    await bricksBuilder.create('payment', 'brick-container', {
-      initialization: {
-        amount: {% raw %}{{ pack.precio_total }}{% endraw %},
-        preferenceId: '{% raw %}{{ preference_id }}{% endraw %}',
+  bricksBuilder.create('payment', 'brick-container', {
+    initialization: {
+      amount: {{ pack.precio_total }},
+      preferenceId: '{{ preference_id }}',
+    },
+    customization: {
+      paymentMethods: {
+        creditCard: 'all',
+        debitCard:  'all',
       },
-      customization: {
-        paymentMethods: {
-          creditCard: 'all',
-          debitCard:  'all',
-        },
-        visual: {
-          style: {
-            theme: 'default',
-          }
-        }
+    },
+    callbacks: {
+      onReady: () => {},
+      onSubmit: ({ formData }) => {
+        return new Promise((resolve, reject) => {
+          fetch('/pago/procesar/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify(formData),
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === 'approved') {
+              window.location.href = data.redirect_url;
+            } else {
+              resolve();
+            }
+          })
+          .catch(() => reject());
+        });
       },
-      callbacks: {
-        onReady: () => {
-          // Brick listo
-        },
-        onSubmit: ({ selectedPaymentMethod, formData }) => {
-          return new Promise((resolve, reject) => {
-            fetch('/pago/procesar/', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{% raw %}{{ csrf_token }}{% endraw %}',
-              },
-              body: JSON.stringify(formData),
-            })
-            .then(res => res.json())
-            .then(data => {
-              if (data.status === 'approved') {
-                window.location.href = data.redirect_url;
-              } else {
-                resolve();
-              }
-            })
-            .catch(() => reject());
-          });
-        },
-        onError: (error) => {
-          console.error('Brick error:', error);
-        },
+      onError: (error) => {
+        console.error('Brick error:', error);
       },
-    });
-  };
-
-  renderPaymentBrick(bricksBuilder);
+    },
+  });
 </script>
 
-{% raw %}{% endblock %}{% endraw %}
+{% endblock %}
