@@ -3,7 +3,7 @@ from . import views_reservar_pack10
 from . import views_mis_clases
 from . import views_body_balance
 from . import views_panel_paula
-
+from . import views_pago
 
 urlpatterns = [
     path('reservar/pack10/', views_reservar_pack10.reservar_pack10, name='reservar_pack10'),
@@ -27,5 +27,8 @@ urlpatterns = [
     path('recuperar/<int:sesion_id>/', views_mis_clases.recuperar_clase, name='recuperar_clase'),
     path('panel/bulk-reschedule/', views_panel_paula.bulk_reschedule, name='bulk_reschedule'),
     path('panel/bulk-reschedule/preview/', views_panel_paula.bulk_reschedule_preview, name='bulk_reschedule_preview'),
-    
+    # Pago MercadoPago
+    path('pago/exitoso/',   views_pago.pago_exitoso,   name='pago_exitoso'),
+    path('pago/fallido/',   views_pago.pago_fallido,   name='pago_fallido'),
+    path('pago/pendiente/', views_pago.pago_pendiente, name='pago_pendiente'),
 ]
