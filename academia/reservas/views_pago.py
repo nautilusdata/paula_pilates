@@ -159,7 +159,7 @@ def pago_procesar(request):
     external_reference = f"{pack.tipo}-{pack.pk}-{request.user.pk}"
 
     payment_data = {
-        "transaction_amount": float(pack.precio_total),
+        "transaction_amount": int(pack.precio_total),
         "token":              data.get("token"),
         "payment_method_id":  data.get("payment_method_id"),
         "installments":       data.get("installments", 1),
