@@ -101,49 +101,24 @@
 </div>
 
 <script src="https://sdk.mercadopago.com/js/v2"></script>
-<script>
-  const mp = new MercadoPago('{{ public_key }}', { locale: 'es-CL' });
-  const bricksBuilder = mp.bricks();
+<a href="{{ init_point }}" class="btn-pagar">
+  Pagar ${{ pack.precio_total|floatformat:0 }} con MercadoPago
+</a>
 
-  bricksBuilder.create('payment', 'brick-container', {
-    initialization: {
-      amount: {{ pack.precio_total }},
-      preferenceId: '{{ preference_id }}',
-    },
-    customization: {
-      paymentMethods: {
-        creditCard: 'all',
-        debitCard:  'all',
-      },
-    },
-    callbacks: {
-      onReady: () => {},
-      onSubmit: ({ formData }) => {
-        return new Promise((resolve, reject) => {
-          fetch('/pago/procesar/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': '{{ csrf_token }}',
-            },
-            body: JSON.stringify(formData),
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.status === 'approved') {
-              window.location.href = data.redirect_url;
-            } else {
-              resolve();
-            }
-          })
-          .catch(() => reject());
-        });
-      },
-      onError: (error) => {
-        console.error('Brick error:', error);
-      },
-    },
-  });
-</script>
+<style>
+.btn-pagar {
+  display: block;
+  background: #009ee3;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-family: sans-serif;
+  margin-top: 1rem;
+}
+.btn-pagar:hover { background: #007fc0; }
+</style>
 
 {% endblock %}

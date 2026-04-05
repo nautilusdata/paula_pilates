@@ -40,7 +40,7 @@ def crear_preferencia_mp(pack: Pack, request) -> str:
     result     = sdk.preference().create(preference_data)
     preference = result["response"]
     print(">>> MP RESPONSE:", preference)  # ← debug temporal
-    return preference["id"]
+    return preference["id"], preference["sandbox_init_point"]
 
 
 @login_required
@@ -56,6 +56,7 @@ def pago_brick(request, pack_id):
         'pack':           pack,
         'preference_id':  preference_id,
         'public_key':     settings.MERCADOPAGO_PUBLIC_KEY,
+        'init_point':    request.session.get(f'mp_init_{pack_id}', ''),
     })
 
 
