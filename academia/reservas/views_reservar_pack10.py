@@ -191,25 +191,24 @@ def reservar_pack10_confirmar(request):
     }
 
     if request.method == 'POST':
-        # Crear Pack en estado PENDIENTE_PAGO
-        pack = Pack.objects.create(
-            alumna       = request.user,
-            tipo         = 'PACK10',
-            frecuencia   = borrador['frecuencia'],
-            hora         = borrador['hora'],
-            fecha_inicio = date.fromisoformat(borrador['fecha_inicio']),
-            cantidad     = 10,
-        )
-        # Limpiar borrador de sesión
-        del request.session['pack10_borrador']
+            pack = Pack.objects.create(
+                alumna       = request.user,
+                tipo         = 'PACK10',
+                frecuencia   = borrador['frecuencia'],
+                hora         = borrador['hora'],
+                fecha_inicio = date.fromisoformat(borrador['fecha_inicio']),
+                cantidad     = 10,
+            )
+            del request.session['pack10_borrador']
 
-        # TODO: Integrar Transbank / Flow aquí.
-        # Por ahora simulamos pago exitoso directo (para desarrollo):
-        crear_sesiones_pack(pack)
-        messages.success(request, f'¡Reserva confirmada! Tu primer clase es el {fmt_fecha(fechas[0])} a las {borrador["hora"]:02d}:00.')
-        return redirect('mis_clases')
+            # Crear preferencia en MercadoPago
+            from .views_pago import crear_preferencia_mp
+            preference_id = crear_preferencia_mp(pack, request)
+            request.session[f'mp_pref_{pack.pk}'] = preference_id
 
-    return render(request, 'reservas/reservar_pack10_confirmar.html', context)
+            return redirect('pago_brick', pack_id=pack.pk)
+
+            return render(request, 'reservas/reservar_pack10_confirmar.html', context)
 
 
 # ─── AJAX: horas disponibles para una frecuencia + fecha ──────────────────────
