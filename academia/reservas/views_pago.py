@@ -14,7 +14,7 @@ sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
 
 
 def crear_preferencia_mp(pack: Pack, request) -> str:
-    base_url = request.build_absolute_uri('/')[:-1]
+    base_url = "https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev"
     preference_data = {
         "items": [{
             "id":          f"{pack.tipo}-{pack.pk}",
