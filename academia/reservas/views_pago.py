@@ -166,7 +166,7 @@ def pago_procesar(request):
         "issuer_id":          data.get("issuer_id"),
         "external_reference": external_reference,
         "payer": {
-            "email":          request.user.email,
+            "email": "test_user_3313855946@testuser.com",
             "identification": data.get("payer", {}).get("identification", {}),
         },
     }
