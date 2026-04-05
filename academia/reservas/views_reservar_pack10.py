@@ -202,9 +202,9 @@ def reservar_pack10_confirmar(request):
         del request.session['pack10_borrador']
 
         from .views_pago import crear_preferencia_mp
-        preference_id, init_point = crear_preferencia_mp(pack, request)
+        preference_id = crear_preferencia_mp(pack, request)
         request.session[f'mp_pref_{pack.pk}'] = preference_id
-        request.session[f'mp_init_{pack.pk}'] = init_point
+
 
         return redirect('pago_brick', pack_id=pack.pk)
 
