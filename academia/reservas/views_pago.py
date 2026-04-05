@@ -162,11 +162,12 @@ def pago_procesar(request):
         "transaction_amount": int(pack.precio_total),
         "token":              data.get("token"),
         "payment_method_id":  data.get("payment_method_id"),
-        "installments":       data.get("installments", 1),
-        "issuer_id":          data.get("issuer_id"),
+        "installments":       int(data.get("installments", 1)),
+        "issuer_id":          int(data.get("issuer_id")) if data.get("issuer_id") else None,
+        "three_d_secure_mode": "optional",
         "external_reference": external_reference,
         "payer": {
-            "email": "test_user_3313855946@testuser.com",
+            "email":          request.user.email,
             "identification": data.get("payer", {}).get("identification", {}),
         },
     }
