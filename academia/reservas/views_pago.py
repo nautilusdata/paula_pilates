@@ -143,13 +143,11 @@ def pago_pendiente(request):
 @login_required
 @require_POST
 def pago_procesar(request):
-    """Recibe formData del Brick, procesa el pago con MP SDK."""
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Datos inválidos'}, status=400)
 
-    # Obtener el pack pendiente de este usuario
     pack = Pack.objects.filter(
         alumna=request.user,
         estado='PENDIENTE_PAGO'
@@ -158,13 +156,28 @@ def pago_procesar(request):
     if not pack:
         return JsonResponse({'error': 'No hay reserva pendiente'}, status=404)
 
-    # Agregar external_reference al pago
-    data['external_reference'] = f"{pack.tipo}-{pack.pk}-{request.user.pk}"
+    external_reference = f"{pack.tipo}-{pack.pk}-{request.user.pk}"
 
-    result = sdk.payment().create(data)
+    payment_data = {
+        "transaction_amount": float(pack.precio_total),
+        "token":              data.get("token"),
+        "payment_method_id":  data.get("payment_method_id"),
+        "installments":       data.get("installments", 1),
+        "issuer_id":          data.get("issuer_id"),
+        "external_reference": external_reference,
+        "payer": {
+            "email":          request.user.email,
+            "identification": data.get("payer", {}).get("identification", {}),
+        },
+    }
+
+    print(">>> PAYMENT DATA:", payment_data)
+
+    result = sdk.payment().create(payment_data)
     pago   = result['response']
     status = pago.get('status')
-    print(">>> PAGO RESPONSE:", pago)  # ← agrega esta línea
+
+    print(">>> PAGO RESPONSE:", pago)
     print(">>> STATUS:", status)
 
     if status == 'approved':
@@ -172,12 +185,10 @@ def pago_procesar(request):
             f"/pago/exitoso/"
             f"?payment_id={pago['id']}"
             f"&status=approved"
-            f"&external_reference={data['external_reference']}"
+            f"&external_reference={external_reference}"
         )
         return JsonResponse({'status': 'approved', 'redirect_url': redirect_url})
-
     elif status == 'in_process':
         return JsonResponse({'status': 'pending'})
-
     else:
-        return JsonResponse({'status': 'rejected'})
+        return JsonResponse({'status': 'rejected', 'detail': pago.get('status_detail', '')})
