@@ -40,7 +40,7 @@ def crear_preferencia_mp(pack: Pack, request) -> str:
     result     = sdk.preference().create(preference_data)
     preference = result["response"]
     print(">>> MP RESPONSE:", preference)  # ← debug temporal
-    return preference["id"], preference["sandbox_init_point"]
+    return preference["id"]
 
 
 @login_required
