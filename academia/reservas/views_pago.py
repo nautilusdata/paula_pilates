@@ -56,7 +56,6 @@ def pago_brick(request, pack_id):
         'pack':           pack,
         'preference_id':  preference_id,
         'public_key':     settings.MERCADOPAGO_PUBLIC_KEY,
-        'init_point':    request.session.get(f'mp_init_{pack_id}', ''),
     })
 
 
