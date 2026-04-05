@@ -161,7 +161,20 @@ El models_reservas.py que te entregué no es un archivo separado — es código 
 
 
 
+MERCADOPAGO
+===========
+
+pip install mercadopago --break-system-packages
+pip show mercadopago
 
 
+El plan de ataque:
 
+settings.py — agregar las credenciales
+views_pago.py — endpoint que crea la preferencia MP + webhook
+Modificar las vistas de confirmación — en lugar de crear el pack directo, crear en PENDIENTE_PAGO y abrir el Brick
+Template del Brick — la modal de pago
+
+Una pregunta antes de escribir código: ¿tienes configurado ngrok o algo similar para exponer localhost al webhook de MP? En sandbox MP necesita una URL pública real para mandarte la notificación de pago. Si no, lo resolvemos con polling como alternativa más simple para desarrollo.
+¿Cómo prefieres manejarlo?
 
