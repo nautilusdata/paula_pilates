@@ -208,7 +208,7 @@ def reservar_pack10_confirmar(request):
 
             return redirect('pago_brick', pack_id=pack.pk)
 
-            return render(request, 'reservas/reservar_pack10_confirmar.html', context)
+    return render(request, 'reservas/reservar_pack10_confirmar.html', context)
 
 
 # ─── AJAX: horas disponibles para una frecuencia + fecha ──────────────────────
