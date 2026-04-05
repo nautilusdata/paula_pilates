@@ -164,6 +164,8 @@ def pago_procesar(request):
     result = sdk.payment().create(data)
     pago   = result['response']
     status = pago.get('status')
+    print(">>> PAGO RESPONSE:", pago)  # ← agrega esta línea
+    print(">>> STATUS:", status)
 
     if status == 'approved':
         redirect_url = (
