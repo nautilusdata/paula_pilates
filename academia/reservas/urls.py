@@ -32,4 +32,5 @@ urlpatterns = [
     path('pago/fallido/',   views_pago.pago_fallido,   name='pago_fallido'),
     path('pago/pendiente/', views_pago.pago_pendiente, name='pago_pendiente'),
     path('pago/brick/<int:pack_id>/', views_pago.pago_brick, name='pago_brick'),
+    path('pago/procesar/', views_pago.pago_procesar, name='pago_procesar'),
 ]

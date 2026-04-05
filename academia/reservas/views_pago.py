@@ -1,10 +1,14 @@
 # views_pago.py  — reemplaza el archivo completo
+from django.http import JsonResponse
 import mercadopago
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Pack, Sesion, crear_sesiones_pack, generar_fechas_pack
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
 
@@ -133,3 +137,44 @@ def pago_fallido(request):
 def pago_pendiente(request):
     messages.warning(request, 'Tu pago está pendiente. Te avisaremos cuando se confirme.')
     return redirect('mis_clases')
+
+
+@login_required
+@require_POST
+def pago_procesar(request):
+    """Recibe formData del Brick, procesa el pago con MP SDK."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Datos inválidos'}, status=400)
+
+    # Obtener el pack pendiente de este usuario
+    pack = Pack.objects.filter(
+        alumna=request.user,
+        estado='PENDIENTE_PAGO'
+    ).order_by('-creado_en').first()
+
+    if not pack:
+        return JsonResponse({'error': 'No hay reserva pendiente'}, status=404)
+
+    # Agregar external_reference al pago
+    data['external_reference'] = f"{pack.tipo}-{pack.pk}-{request.user.pk}"
+
+    result = sdk.payment().create(data)
+    pago   = result['response']
+    status = pago.get('status')
+
+    if status == 'approved':
+        redirect_url = (
+            f"/pago/exitoso/"
+            f"?payment_id={pago['id']}"
+            f"&status=approved"
+            f"&external_reference={data['external_reference']}"
+        )
+        return JsonResponse({'status': 'approved', 'redirect_url': redirect_url})
+
+    elif status == 'in_process':
+        return JsonResponse({'status': 'pending'})
+
+    else:
+        return JsonResponse({'status': 'rejected'})
