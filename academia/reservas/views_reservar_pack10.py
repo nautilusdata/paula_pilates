@@ -165,7 +165,7 @@ def reservar_pack10(request):
 def reservar_pack10_confirmar(request):
     """
     Paso 3: Muestra el resumen con las 10 fechas calculadas.
-    POST: Crea el Pack (estado PENDIENTE_PAGO) y redirige a WebPay.
+    POST: Crea el Pack (estado PENDIENTE_PAGO) y redirige a MercadoPago.
     """
     borrador = request.session.get('pack10_borrador')
     if not borrador:
@@ -174,7 +174,7 @@ def reservar_pack10_confirmar(request):
 
     fechas = [date.fromisoformat(f) for f in borrador['fechas']]
     feriados = feriados_punta_arenas()
-    feriados_en_pack = [f for f in fechas if f in feriados]   # debería ser vacío, pero por si acaso
+    feriados_en_pack = [f for f in fechas if f in feriados]
 
     context = {
         'frecuencia_label': {
@@ -182,31 +182,30 @@ def reservar_pack10_confirmar(request):
             'LM':  'Lun · Miérc',
             'MJ':  'Mar · Jue',
         }[borrador['frecuencia']],
-        'hora':         borrador['hora'],
-        'fecha_inicio': date.fromisoformat(borrador['fecha_inicio']),
-        'fecha_fin':    fechas[-1],
-        'fechas':       [(i + 1, f, fmt_fecha(f)) for i, f in enumerate(fechas)],
-        'precio_total': ConfiguracionPrecio.get('PACK10', 140_000),
+        'hora':             borrador['hora'],
+        'fecha_inicio':     date.fromisoformat(borrador['fecha_inicio']),
+        'fecha_fin':        fechas[-1],
+        'fechas':           [(i + 1, f, fmt_fecha(f)) for i, f in enumerate(fechas)],
+        'precio_total':     ConfiguracionPrecio.get('PACK10', 140_000),
         'precio_por_clase': 14_000,
     }
 
     if request.method == 'POST':
-            pack = Pack.objects.create(
-                alumna       = request.user,
-                tipo         = 'PACK10',
-                frecuencia   = borrador['frecuencia'],
-                hora         = borrador['hora'],
-                fecha_inicio = date.fromisoformat(borrador['fecha_inicio']),
-                cantidad     = 10,
-            )
-            del request.session['pack10_borrador']
+        pack = Pack.objects.create(
+            alumna       = request.user,
+            tipo         = 'PACK10',
+            frecuencia   = borrador['frecuencia'],
+            hora         = borrador['hora'],
+            fecha_inicio = date.fromisoformat(borrador['fecha_inicio']),
+            cantidad     = 10,
+        )
+        del request.session['pack10_borrador']
 
-            # Crear preferencia en MercadoPago
-            from .views_pago import crear_preferencia_mp
-            preference_id = crear_preferencia_mp(pack, request)
-            request.session[f'mp_pref_{pack.pk}'] = preference_id
+        from .views_pago import crear_preferencia_mp
+        preference_id = crear_preferencia_mp(pack, request)
+        request.session[f'mp_pref_{pack.pk}'] = preference_id
 
-            return redirect('pago_brick', pack_id=pack.pk)
+        return redirect('pago_brick', pack_id=pack.pk)
 
     return render(request, 'reservas/reservar_pack10_confirmar.html', context)
 
