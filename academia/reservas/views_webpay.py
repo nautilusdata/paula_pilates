@@ -7,7 +7,6 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from .models import Pack, Sesion, crear_sesiones_pack
 from transbank.webpay.webpay_plus.transaction import Transaction
-from transbank.common.integration_type import IntegrationType
 import random
 import string
 
@@ -23,16 +22,17 @@ def _headers():
 def _session_id():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
 
+
 def crear_transaccion(pack: Pack, return_url: str) -> dict:
-    tx = Transaction(IntegrationType.TEST)
-    response = tx.create(
+    Transaction.configure_for_testing()
+    response = Transaction.create(
         buy_order  = f"PACK-{pack.pk}",
         session_id = _session_id(),
         amount     = pack.precio_total,
         return_url = return_url,
     )
     print(">>> WEBPAY CREAR:", response)
-    return response
+    return {'token': response.token, 'url': response.url}
 
 
 def verificar_transaccion(token: str) -> dict:
