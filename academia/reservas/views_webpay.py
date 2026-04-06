@@ -70,29 +70,34 @@ def webpay_iniciar(request, pack_id):
     })
 
 
-@login_required
+
 def webpay_retorno(request):
     token = request.GET.get('token_ws') or request.POST.get('token_ws')
 
     if not token:
         messages.error(request, 'No se recibió confirmación de Webpay.')
-        return redirect('mis_clases')
+        return redirect('/')
 
-    pack_id = request.session.get('webpay_pack_id')
-    if not pack_id:
-        messages.error(request, 'Sesión expirada.')
-        return redirect('mis_clases')
-
-    pack = get_object_or_404(Pack, pk=pack_id, alumna=request.user)
-
-    if pack.estado != 'PENDIENTE_PAGO':
-        messages.info(request, 'Tu reserva ya estaba activada.')
-        return redirect('mis_clases')
-
+    # Verificar con Transbank primero para obtener el buy_order
     data = verificar_transaccion(token)
+    print(">>> RETORNO DATA:", data)
 
     response_code = data.get('response_code')
     status        = data.get('status')
+    buy_order     = data.get('buy_order', '')
+
+    # Extraer pack_id del buy_order (formato "PACK-48")
+    try:
+        pack_id = int(buy_order.replace('PACK-', ''))
+    except (ValueError, AttributeError):
+        messages.error(request, 'Error al identificar tu reserva.')
+        return redirect('/')
+
+    pack = get_object_or_404(Pack, pk=pack_id)
+
+    if pack.estado != 'PENDIENTE_PAGO':
+        messages.info(request, 'Tu reserva ya estaba activada.')
+        return redirect('/')
 
     if response_code == 0 and status == 'AUTHORIZED':
         if pack.tipo in ('PACK10', 'REDUCIDO', 'PRIVADA'):
@@ -115,12 +120,9 @@ def webpay_retorno(request):
             pack.estado = 'ACTIVO'
             pack.save(update_fields=['estado'])
 
-        request.session.pop('webpay_pack_id', None)
-        request.session.pop(f'webpay_token_{pack_id}', None)
-
         messages.success(request, f'¡Pago confirmado! Tu {pack.get_tipo_display()} está activo. 🎉')
-        return redirect('mis_clases')
+        return redirect('/')
 
     else:
         messages.error(request, 'El pago fue rechazado o cancelado. Puedes intentarlo de nuevo.')
-        return redirect('mis_clases')
+        return redirect('/')
