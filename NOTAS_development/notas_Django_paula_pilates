@@ -80,82 +80,6 @@ usuarias = [
     ("Pilar", "Vodanovic", "56912345640", "Sergio Vodanovic", "56912345680", date(1993, 4, 5)),
 ]
 
-def generar_email(first_name, last_name):
-    # Quitar tildes básicos
-    reemplazos = {'á':'a','é':'e','í':'i','ó':'o','ú':'u','ñ':'n','ü':'u'}
-    nombre = first_name.lower()
-    apellido = last_name.lower()
-    for k, v in reemplazos.items():
-        nombre = nombre.replace(k, v)
-        apellido = apellido.replace(k, v)
-    parte = nombre[0] + apellido[0]
-    dominio = apellido[0] + nombre[0]
-    return f"{parte}@{dominio}.cl"
-
-creadas = 0
-for first_name, last_name, telefono, contacto_emergencia, telefono_emergencia, fecha_nacimiento in usuarias:
-    email = generar_email(first_name, last_name)
-    username = email.split('@')[0] + str(random.randint(1,99))
-    
-    if User.objects.filter(email=email).exists():
-        print(f"Ya existe: {email}")
-        continue
-
-    user = User.objects.create_user(
-        username=username,
-        email=email,
-        password='Pilates2024!',
-        first_name=first_name,
-        last_name=last_name,
-    )
-
-    # El signal crea el UserMetadata, solo actualizamos los campos extra
-    user.usermetadata.telefono = telefono
-    user.usermetadata.contacto_emergencia = contacto_emergencia
-    user.usermetadata.telefono_emergencia = telefono_emergencia
-    user.usermetadata.fecha_nacimiento = fecha_nacimiento
-    user.usermetadata.save()
-
-    print(f"✓ {first_name} {last_name} — {email}")
-    creadas += 1
-
-print(f"\n{creadas} usuarias creadas.")
-
-
-
-
-Estructura de carpetas CREANDO RESERVAS primero Pack de 10
-----------------------------------------------------------
-academia/                        ← carpeta raíz del proyecto
-│
-├── academia/                    ← app de configuración
-│   └── urls.py                  ← aquí incluyes las URLs de reservas
-│
-├── reservas/                    ← app existente (ya tienes esto)
-│   ├── apps.py                  ← ya existe
-│   ├── models.py                ← PEGAR el contenido de models_reservas.py aquí (al final)
-│   ├── views.py                 ← ya existe
-│   ├── views_reservar_pack10.py ← NUEVO archivo aquí
-│   └── urls.py                  ← agregar las 3 rutas nuevas aquí
-│
-└── templates/                   ← ya configurado en settings.py (BASE_DIR / 'templates')
-    ├── base.html                ← ya existe
-    ├── _menu_alumno.html        ← ya existe (lo usas en reservar.html)
-    └── reservas/                ← NUEVA subcarpeta (crearla)
-        ├── reservar_pack10.html
-        └── reservar_pack10_confirmar.html
-
-
-Los únicos pasos de estructura son:
-
-Crear la carpeta templates/reservas/
-Mover los 2 HTML ahí
-Crear reservas/views_reservar_pack10.py como archivo nuevo
-Pegar el contenido de models_reservas.py al final de tu reservas/models.py existente (no reemplazar, los modelos se acumulan en el mismo archivo)
-
-El models_reservas.py que te entregué no es un archivo separado — es código para agregar a tu models.py actual, debajo del UserMetadata que ya tienes.
-
-
 
 
 WEBPAY VISA
@@ -176,3 +100,10 @@ RUT
 Contraseña
 123
 
+Mañana cuando arranques haces:
+
+Terminal 1: python manage.py runserver 0.0.0.0:8000
+Terminal 2: ngrok http 8000
+
+Y ngrok te dará una URL nueva. La copias, la pones en ALLOWED_HOSTS y CSRF_TRUSTED_ORIGINS del settings.py, y también en el return_url hardcodeado en cada vista confirmar.
+Para producción en GCP esto desaparece — usas tu dominio real fijo. Pero por ahora es el proceso cada vez.

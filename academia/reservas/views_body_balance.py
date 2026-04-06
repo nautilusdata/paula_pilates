@@ -154,6 +154,7 @@ def reservar_body_balance_confirmar(request):
         'es_full':      tipo == 'BB_FULL',
     }
 
+
     if request.method == 'POST':
             pack = Pack.objects.create(
                 alumna       = request.user,
