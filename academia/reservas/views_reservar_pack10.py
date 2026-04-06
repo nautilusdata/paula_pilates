@@ -165,7 +165,7 @@ def reservar_pack10(request):
 def reservar_pack10_confirmar(request):
     """
     Paso 3: Muestra el resumen con las 10 fechas calculadas.
-    POST: Crea el Pack (estado PENDIENTE_PAGO) y redirige a MercadoPago.
+    POST: Crea el Pack (estado PENDIENTE_PAGO) y redirige a Webpay.
     """
     borrador = request.session.get('pack10_borrador')
     if not borrador:
@@ -201,12 +201,7 @@ def reservar_pack10_confirmar(request):
         )
         del request.session['pack10_borrador']
 
-        from .views_pago import crear_preferencia_mp
-        preference_id = crear_preferencia_mp(pack, request)
-        request.session[f'mp_pref_{pack.pk}'] = preference_id
-
-
-        return redirect('pago_brick', pack_id=pack.pk)
+        return redirect('webpay_iniciar', pack_id=pack.pk)
 
     return render(request, 'reservas/reservar_pack10_confirmar.html', context)
 
