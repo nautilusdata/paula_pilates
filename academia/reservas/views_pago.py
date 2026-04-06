@@ -33,7 +33,7 @@ def crear_preferencia_mp(pack: Pack, request) -> str:
             "failure": f"{base_url}/pago/fallido/",
             "pending": f"{base_url}/pago/pendiente/",
         },
-        #"auto_return":          "approved",
+        "auto_return":          "approved",
         "external_reference":   f"{pack.tipo}-{pack.pk}-{request.user.pk}",
         "statement_descriptor": "PAULA PILATES",
     }
