@@ -461,11 +461,10 @@ def reservar_clase_suelta_confirmar(request):
         'fecha':       fecha,
         'fecha_label': fmt_fecha(fecha),
         'hora':        hora,
-        'precio': ConfiguracionPrecio.get('CLASE_SUELTA', 25_000),
+        'precio':      ConfiguracionPrecio.get('CLASE_SUELTA', 25_000),
     }
 
     if request.method == 'POST':
-        # Verificar cupo de nuevo antes de crear
         if Sesion.cupos_disponibles(fecha, hora) < 1:
             messages.error(request, 'Lo sentimos, el cupo se ocupó mientras confirmabas. Elige otro horario.')
             return redirect('reservar_clase_suelta')
@@ -477,19 +476,26 @@ def reservar_clase_suelta_confirmar(request):
             fecha_inicio = fecha,
             cantidad     = 1,
         )
-        Sesion.objects.create(
-            pack   = pack,
-            fecha  = fecha,
-            hora   = hora,
-            numero = 1,
-        )
-        pack.fecha_fin = fecha
-        pack.estado    = 'ACTIVO'
-        pack.save(update_fields=['fecha_fin', 'estado'])
-
         del request.session['clase_suelta_borrador']
-        messages.success(request, f'¡Clase reservada! Te esperamos el {fmt_fecha(fecha)} a las {hora:02d}:00.')
-        return redirect('mis_clases')
+
+        from .views_webpay import crear_transaccion
+        return_url = 'https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev/pago/webpay/retorno/'
+        data = crear_transaccion(pack, return_url)
+
+        token = data.get('token')
+        url   = data.get('url')
+
+        if not token or not url:
+            pack.delete()
+            messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+            return redirect('reservar_clase_suelta')
+
+        request.session['webpay_pack_id'] = pack.pk
+
+        return render(request, 'reservas/webpay_redirect.html', {
+            'url':   url,
+            'token': token,
+        })
 
     return render(request, 'reservas/reservar_clase_suelta_confirmar.html', context)
 
