@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div style="text-align:center; padding: 3rem; font-family: Georgia, serif;">
+  <h2 style="color: #444; font-weight: normal;">Redirigiendo a Webpay...</h2>
+  <p style="color: #999; font-size: 0.9rem;">Serás redirigida automáticamente para completar tu pago.</p>
+</div>
+
+<form id="webpay-form" action="{{ url }}" method="POST">
+  <input type="hidden" name="token_ws" value="{{ token }}">
+</form>
+
+<script>
+  document.getElementById('webpay-form').submit();
+</script>
+
+{% endblock %}
