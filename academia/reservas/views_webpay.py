@@ -16,8 +16,8 @@ def _session_id():
 
 def _tx():
     return Transaction.build_for_integration(
-        settings.WEBPAY_COMMERCE_CODE,
-        settings.WEBPAY_API_KEY,
+        '597055555532',
+        '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1',
     )
 
 
