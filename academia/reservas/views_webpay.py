@@ -6,6 +6,10 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from .models import Pack, Sesion, crear_sesiones_pack
 from transbank.webpay.webpay_plus.transaction import Transaction
+from transbank.common.integration_commerce_codes import IntegrationCommerceCodes
+from transbank.common.integration_api_keys import IntegrationApiKeys
+from transbank.common.options import WebpayOptions
+from transbank.common.integration_type import IntegrationType
 import random
 import string
 
@@ -15,10 +19,12 @@ def _session_id():
 
 
 def _tx():
-    return Transaction.build_for_integration(
-        '597055555532',
-        '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1',
+    options = WebpayOptions(
+        IntegrationCommerceCodes.WEBPAY_PLUS,
+        IntegrationApiKeys.WEBPAY,
+        IntegrationType.TEST
     )
+    return Transaction(options)
 
 
 def crear_transaccion(pack: Pack, return_url: str) -> dict:
