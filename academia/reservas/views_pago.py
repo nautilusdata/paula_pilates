@@ -167,7 +167,7 @@ def pago_procesar(request):
         "three_d_secure_mode": "optional",
         "external_reference": external_reference,
         "payer": {
-            "email":          request.user.email,
+            "email":"alumna@paulapilates.cl",
             "identification": data.get("payer", {}).get("identification", {}),
         },
     }
