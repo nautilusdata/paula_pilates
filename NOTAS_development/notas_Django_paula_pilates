@@ -158,50 +158,8 @@ El models_reservas.py que te entregué no es un archivo separado — es código 
 
 
 
-
-
-
-MERCADOPAGO
+WEBPAY VISA
 ===========
-
-pip install mercadopago --break-system-packages
-pip show mercadopago
-
-
-El plan de ataque:
-
-settings.py — agregar las credenciales
-views_pago.py — endpoint que crea la preferencia MP + webhook
-Modificar las vistas de confirmación — en lugar de crear el pack directo, crear en PENDIENTE_PAGO y abrir el Brick
-Template del Brick — la modal de pago
-
-Una pregunta antes de escribir código: ¿tienes configurado ngrok o algo similar para exponer localhost al webhook de MP? En sandbox MP necesita una URL pública real para mandarte la notificación de pago. Si no, lo resolvemos con polling como alternativa más simple para desarrollo.
-¿Cómo prefieres manejarlo?
-
-Número 
-4009 1753 3280 6176
-
-Vencimiento cualquier fecha futura, ej 12/30
-CVV 123
-Nombre APRO
-
-
-
-USUARIO DE PRUEBA PACK 10 / INCOGNITO
--------------------------
-192.168.43.170:8000
-testuser8742@testuser.com
-TESTUSER8742081299620497919
-4TCGScqWnG
-
-4009 1753 3280 6176
-12/30 123
-APRO
-
-
-
-WEBPAY
-======
 
 Número
 4051 8856 0044 6623
@@ -217,11 +175,4 @@ RUT
 
 Contraseña
 123
-
-
-
-
-
-
-
 
