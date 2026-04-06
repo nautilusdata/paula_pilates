@@ -35,7 +35,7 @@ def crear_transaccion(pack: Pack, return_url: str) -> dict:
         return_url = return_url,
     )
     print(">>> WEBPAY CREAR:", response)
-    return {'token': response.token, 'url': response.url}
+    return response  # ya es dict con 'token' y 'url'
 
 
 def verificar_transaccion(token: str) -> dict:
