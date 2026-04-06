@@ -4,6 +4,7 @@ from . import views_mis_clases
 from . import views_body_balance
 from . import views_panel_paula
 from . import views_pago
+from . import views_webpay
 
 urlpatterns = [
     path('reservar/pack10/', views_reservar_pack10.reservar_pack10, name='reservar_pack10'),
@@ -33,4 +34,6 @@ urlpatterns = [
     path('pago/pendiente/', views_pago.pago_pendiente, name='pago_pendiente'),
     path('pago/brick/<int:pack_id>/', views_pago.pago_brick, name='pago_brick'),
     path('pago/procesar/', views_pago.pago_procesar, name='pago_procesar'),
+    path('pago/webpay/iniciar/<int:pack_id>/', views_webpay.webpay_iniciar, name='webpay_iniciar'),
+    path('pago/webpay/retorno/', views_webpay.webpay_retorno, name='webpay_retorno'),
 ]
