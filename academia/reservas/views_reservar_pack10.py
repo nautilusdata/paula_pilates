@@ -567,30 +567,37 @@ def reservar_clase_prueba_confirmar(request):
     }
 
     if request.method == 'POST':
-        if Sesion.cupos_disponibles(fecha, 12) < 1:
-            messages.error(request, 'Lo sentimos, el cupo se ocupó. Elige otro sábado.')
-            return redirect('reservar_clase_prueba')
+            if Sesion.cupos_disponibles(fecha, 12) < 1:
+                messages.error(request, 'Lo sentimos, el cupo se ocupó. Elige otro sábado.')
+                return redirect('reservar_clase_prueba')
 
-        pack = Pack.objects.create(
-            alumna       = request.user,
-            tipo         = 'PRUEBA',
-            hora         = 12,
-            fecha_inicio = fecha,
-            cantidad     = 1,
-        )
-        Sesion.objects.create(
-            pack   = pack,
-            fecha  = fecha,
-            hora   = 12,
-            numero = 1,
-        )
-        pack.fecha_fin = fecha
-        pack.estado    = 'ACTIVO'
-        pack.save(update_fields=['fecha_fin', 'estado'])
+            pack = Pack.objects.create(
+                alumna       = request.user,
+                tipo         = 'PRUEBA',
+                hora         = 12,
+                fecha_inicio = fecha,
+                cantidad     = 1,
+            )
+            del request.session['clase_prueba_borrador']
 
-        del request.session['clase_prueba_borrador']
-        messages.success(request, f'¡Clase de prueba reservada! Te esperamos el {fmt_fecha(fecha)} a las 12:30.')
-        return redirect('mis_clases')
+            from .views_webpay import crear_transaccion
+            return_url = 'https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev/pago/webpay/retorno/'
+            data = crear_transaccion(pack, return_url)
+
+            token = data.get('token')
+            url   = data.get('url')
+
+            if not token or not url:
+                pack.delete()
+                messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+                return redirect('reservar_clase_prueba')
+
+            request.session['webpay_pack_id'] = pack.pk
+
+            return render(request, 'reservas/webpay_redirect.html', {
+                'url':   url,
+                'token': token,
+            })
 
     return render(request, 'reservas/reservar_clase_prueba_confirmar.html', context)
 
