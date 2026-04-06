@@ -382,18 +382,34 @@ def reservar_pack_reducido_confirmar(request):
     }
 
     if request.method == 'POST':
-        pack = Pack.objects.create(
-            alumna       = request.user,
-            tipo         = 'REDUCIDO',
-            frecuencia   = borrador['frecuencia'],
-            hora         = borrador['hora'],
-            fecha_inicio = date.fromisoformat(borrador['fecha_inicio']),
-            cantidad     = cantidad,
-        )
-        del request.session['pack_reducido_borrador']
-        crear_sesiones_pack(pack)
-        messages.success(request, f'¡Reserva confirmada! Tu primera clase es el {fmt_fecha(fechas[0])} a las {borrador["hora"]:02d}:00.')
-        return redirect('mis_clases')
+            pack = Pack.objects.create(
+                alumna       = request.user,
+                tipo         = 'REDUCIDO',
+                frecuencia   = borrador['frecuencia'],
+                hora         = borrador['hora'],
+                fecha_inicio = date.fromisoformat(borrador['fecha_inicio']),
+                cantidad     = cantidad,
+            )
+            del request.session['pack_reducido_borrador']
+
+            from .views_webpay import crear_transaccion
+            return_url = 'https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev/pago/webpay/retorno/'
+            data = crear_transaccion(pack, return_url)
+
+            token = data.get('token')
+            url   = data.get('url')
+
+            if not token or not url:
+                pack.delete()
+                messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+                return redirect('reservar_pack_reducido')
+
+            request.session['webpay_pack_id'] = pack.pk
+
+            return render(request, 'reservas/webpay_redirect.html', {
+                'url':   url,
+                'token': token,
+            })
 
     return render(request, 'reservas/reservar_pack_reducido_confirmar.html', context)
 
