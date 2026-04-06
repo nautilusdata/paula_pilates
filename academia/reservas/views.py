@@ -4,6 +4,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .forms import RegistroForm, PerfilForm
 from .models import UserMetadata
+from .models import ConfiguracionPrecio
 
 
 def registro(request):
@@ -57,3 +58,16 @@ def perfil(request):
             'fecha_nacimiento': metadata.fecha_nacimiento,
         })
     return render(request, 'perfil.html', {'form': form, 'metadata': metadata})
+
+
+@login_required
+def reservar(request):
+    return render(request, 'reservar.html', {
+        'precio_pack10':        ConfiguracionPrecio.get('PACK10', 0),
+        'precio_reducido_clase': ConfiguracionPrecio.get('PACK_REDUCIDO_CLASE', 0),
+        'precio_suelta':        ConfiguracionPrecio.get('CLASE_SUELTA', 0),
+        'precio_prueba':        ConfiguracionPrecio.get('CLASE_PRUEBA', 0),
+        'precio_privada':       ConfiguracionPrecio.get('PRIVADA_PACK10', 0),
+        'precio_bb_full':       ConfiguracionPrecio.get('BB_FULL', 0),
+        'precio_bb_semanal':    ConfiguracionPrecio.get('BB_SEMANAL', 0),
+    })

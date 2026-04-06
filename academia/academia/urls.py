@@ -11,7 +11,8 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
     path('registro/', reservas_views.registro, name='registro'),
     path('dashboard/', TemplateView.as_view(template_name='dashboard.html'), name='dashboard'),
-    path('reservar/', TemplateView.as_view(template_name='reservar.html'), name='reservar'),
+    #path('reservar/', TemplateView.as_view(template_name='reservar.html'), name='reservar'), -->> Antiguo fuente del hardcodeo mal hecho
+    path('reservar/', reservas_views.reservar, name='reservar'),
     path('perfil/', reservas_views.perfil, name='perfil'),
     path('reglamento/', TemplateView.as_view(template_name='reglamento.html'), name='reglamento'),
     path('', include('reservas.urls')),  # ← agregar esta línea

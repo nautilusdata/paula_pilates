@@ -111,7 +111,7 @@
         <span class="titulo">Pack 10 Clases</span>
         <span class="subtitulo">Horario fijo • Recomendado</span>
       </div>
-      <div class="precio">$140.000</div>
+      <div class="precio">${{ precio_pack10|floatformat:0 }}</div>
     </a>
 
     <a href="{% url 'reservar_pack_reducido' %}" class="btn-producto">
@@ -119,7 +119,7 @@
         <span class="titulo">Pack Reducido (2 a 9)</span>
         <span class="subtitulo">Elige cantidad de sesiones</span>
       </div>
-      <div class="precio">$20k c/u</div>
+      <div class="precio">${{ precio_reducido_clase|floatformat:0 }} c/u</div>
     </a>
 
     <a href="{% url 'reservar_clase_suelta' %}" class="btn-producto">
@@ -127,7 +127,7 @@
         <span class="titulo">Clase Suelta</span>
         <span class="subtitulo">Sesión única individual</span>
       </div>
-      <div class="precio">$25.000</div>
+      <div class="precio">${{ precio_suelta|floatformat:0 }}</div>
     </a>
 
     <a href="{% url 'reservar_clase_prueba' %}" class="btn-producto">
@@ -135,7 +135,7 @@
         <span class="titulo">Clase de Prueba</span>
         <span class="subtitulo">Sábados • Solo alumnas nuevas</span>
       </div>
-      <div class="precio">$15.000</div>
+      <div class="precio">${{ precio_prueba|floatformat:0 }}</div>
     </a>
 
     <a href="{% url 'reservar_clase_privada' %}" class="btn-producto">
@@ -143,7 +143,7 @@
         <span class="titulo">Clase Privada</span>
         <span class="subtitulo">Personalizado 1 a 1</span>
       </div>
-      <div class="precio">Consultar</div>
+      <div class="precio">${{ precio_privada|floatformat:0 }}</div>
     </a>
   </div>
 
@@ -155,7 +155,7 @@
         <span class="titulo">Mensualidad Full</span>
         <span class="subtitulo">3 veces por semana</span>
       </div>
-      <div class="precio">$60.000</div>
+      <div class="precio">${{ precio_bb_full|floatformat:0 }}</div>
     </a>
 
     <a href="{% url 'reservar_body_balance' %}" class="btn-producto">
@@ -163,7 +163,7 @@
         <span class="titulo">Clase Semanal</span>
         <span class="subtitulo">1 vez por semana</span>
       </div>
-      <div class="precio">$15.000</div>
+      <div class="precio">${{ precio_bb_semanal|floatformat:0 }}</div>
     </a>
 
   </div>
