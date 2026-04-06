@@ -202,7 +202,7 @@ def reservar_pack10_confirmar(request):
         del request.session['pack10_borrador']
 
         from .views_webpay import crear_transaccion
-        return_url = request.build_absolute_uri('/pago/webpay/retorno/')
+        return_url = 'https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev/pago/webpay/retorno/'
         data = crear_transaccion(pack, return_url)
 
         token = data.get('token')
