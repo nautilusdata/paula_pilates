@@ -41,10 +41,7 @@ def crear_transaccion(pack: Pack, return_url: str) -> dict:
 def verificar_transaccion(token: str) -> dict:
     response = _tx().commit(token)
     print(">>> WEBPAY VERIFICAR:", response)
-    return {
-        'response_code': response.response_code,
-        'status':        response.status,
-    }
+    return response  # ya es dict
 
 
 @login_required
