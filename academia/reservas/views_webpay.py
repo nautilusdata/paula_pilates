@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from .models import Pack, Sesion, crear_sesiones_pack
+from transbank.webpay.webpay_plus.transaction import Transaction
+from transbank.common.integration_type import IntegrationType
 import random
 import string
 
@@ -22,20 +24,15 @@ def _session_id():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
 
 def crear_transaccion(pack: Pack, return_url: str) -> dict:
-    """Crea transacción en Transbank y retorna {token, url}."""
-    endpoint = f"{settings.WEBPAY_URL_BASE}/rswebpaytransaction/api/webpay/v1.2/transactions"
-
-    payload = {
-        "buy_order":  f"PACK-{pack.pk}",
-        "session_id": _session_id(),
-        "amount":     pack.precio_total,
-        "return_url": return_url,
-    }
-
-    response = requests.post(endpoint, json=payload, headers=_headers())
-    data = response.json()
-    print(">>> WEBPAY CREAR:", data)
-    return data
+    tx = Transaction(IntegrationType.TEST)
+    response = tx.create(
+        buy_order  = f"PACK-{pack.pk}",
+        session_id = _session_id(),
+        amount     = pack.precio_total,
+        return_url = return_url,
+    )
+    print(">>> WEBPAY CREAR:", response)
+    return response
 
 
 def verificar_transaccion(token: str) -> dict:

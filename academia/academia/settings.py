@@ -162,4 +162,4 @@ MERCADOPAGO_ACCESS_TOKEN = 'TEST-4260410057747727-040421-fdec762c5ec01feb4d2661f
 # ─── Webpay ───────────────────────────────────────────────────────────────────
 WEBPAY_COMMERCE_CODE = '597055555532'
 WEBPAY_API_KEY       = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1'
-WEBPAY_URL_BASE      = 'https://webpay3gint.transbank.cl'  # integración/pruebas
+WEBPAY_URL_BASE = 'https://webpay3g.transbank.cl'
