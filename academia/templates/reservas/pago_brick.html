@@ -108,7 +108,6 @@
   bricksBuilder.create('payment', 'brick-container', {
     initialization: {
       amount: {{ pack.precio_total }},
-      preferenceId: '{{ preference_id }}',
     },
     customization: {
       paymentMethods: {
@@ -118,6 +117,27 @@
     },
     callbacks: {
       onReady: () => {},
+      onSubmit: ({ formData }) => {
+        return new Promise((resolve, reject) => {
+          fetch('/pago/procesar/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify(formData),
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === 'approved') {
+              window.location.href = data.redirect_url;
+            } else {
+              resolve();
+            }
+          })
+          .catch(() => reject());
+        });
+      },
       onError: (error) => {
         console.error('Brick error:', error);
       },
