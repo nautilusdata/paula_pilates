@@ -23,6 +23,7 @@ DEBUG = os.getenv('DEBUG') == 'True'
 
 # Leemos el texto del .env y lo dividimos por las comas
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '192.168.43.170', 'gabriela-nonacceleratory-nonelectrically.ngrok-free.dev']
+CSRF_TRUSTED_ORIGINS = ['https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev']
 
 # Application definition
 
