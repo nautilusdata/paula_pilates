@@ -201,7 +201,24 @@ def reservar_pack10_confirmar(request):
         )
         del request.session['pack10_borrador']
 
-        return redirect('webpay_iniciar', pack_id=pack.pk)
+        from .views_webpay import crear_transaccion
+        return_url = request.build_absolute_uri('/pago/webpay/retorno/')
+        data = crear_transaccion(pack, return_url)
+
+        token = data.get('token')
+        url   = data.get('url')
+
+        if not token or not url:
+            pack.delete()
+            messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+            return redirect('reservar_pack10')
+
+        request.session['webpay_pack_id'] = pack.pk
+
+        return render(request, 'reservas/webpay_redirect.html', {
+            'url':   url,
+            'token': token,
+        })
 
     return render(request, 'reservas/reservar_pack10_confirmar.html', context)
 
