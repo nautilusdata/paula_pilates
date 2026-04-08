@@ -21,7 +21,7 @@ def mis_clases(request):
     packs = (
         Pack.objects
         .filter(alumna=request.user)
-        .exclude(estado='CANCELADO')
+        .exclude(estado__in=['CANCELADO', 'PENDIENTE_PAGO']) # excluyendo mostrar packs huerfanos
         .prefetch_related('sesiones')
         .order_by('-fecha_inicio')
     )
