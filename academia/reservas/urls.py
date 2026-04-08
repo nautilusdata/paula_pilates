@@ -36,4 +36,5 @@ urlpatterns = [
     path('pago/procesar/', views_pago.pago_procesar, name='pago_procesar'),
     path('pago/webpay/iniciar/<int:pack_id>/', views_webpay.webpay_iniciar, name='webpay_iniciar'),
     path('pago/webpay/retorno/', views_webpay.webpay_retorno, name='webpay_retorno'),
+    path('pago/reintentar/<int:pack_id>/', views_webpay.reintentar_pago, name='reintentar_pago'),
 ]
