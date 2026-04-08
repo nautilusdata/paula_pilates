@@ -89,7 +89,7 @@ def reservar_pack10(request):
             for h in horas_disponibles_por_tipo('PL')
         ],
         'precio_total': ConfiguracionPrecio.get('PACK10', 140_000),
-        'precio_por_clase': 14_000,
+        'precio_por_clase': ConfiguracionPrecio.get('PACK10', 0) // 10,
     }
 
     if request.method == 'POST':
@@ -187,7 +187,7 @@ def reservar_pack10_confirmar(request):
         'fecha_fin':        fechas[-1],
         'fechas':           [(i + 1, f, fmt_fecha(f)) for i, f in enumerate(fechas)],
         'precio_total':     ConfiguracionPrecio.get('PACK10', 140_000),
-        'precio_por_clase': 14_000,
+        'precio_por_clase': ConfiguracionPrecio.get('PACK10', 0) // 10,
     }
 
     if request.method == 'POST':
