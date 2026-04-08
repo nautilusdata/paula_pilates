@@ -88,7 +88,7 @@ def reservar_pack10(request):
             {'valor': h, 'label': f'{h:02d}:00'}
             for h in horas_disponibles_por_tipo('PL')
         ],
-        'precio_total': ConfiguracionPrecio.get('PACK10', 140_000),
+        'precio_total': ConfiguracionPrecio.get('PACK10', 0),
         'precio_por_clase': ConfiguracionPrecio.get('PACK10', 0) // 10,
     }
 
@@ -186,7 +186,7 @@ def reservar_pack10_confirmar(request):
         'fecha_inicio':     date.fromisoformat(borrador['fecha_inicio']),
         'fecha_fin':        fechas[-1],
         'fechas':           [(i + 1, f, fmt_fecha(f)) for i, f in enumerate(fechas)],
-        'precio_total':     ConfiguracionPrecio.get('PACK10', 140_000),
+        'precio_total': ConfiguracionPrecio.get('PACK10', 0),
         'precio_por_clase': ConfiguracionPrecio.get('PACK10', 0) // 10,
     }
 
