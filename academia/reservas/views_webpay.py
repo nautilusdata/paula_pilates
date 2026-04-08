@@ -127,3 +127,24 @@ def webpay_retorno(request):
     else:
         messages.error(request, 'El pago fue rechazado o cancelado. Puedes intentarlo de nuevo.')
         return redirect('/')
+    
+@login_required
+def reintentar_pago(request, pack_id):
+    pack = get_object_or_404(Pack, pk=pack_id, alumna=request.user, estado='PENDIENTE_PAGO')
+    
+    return_url = request.build_absolute_uri('/pago/webpay/retorno/')
+    data = crear_transaccion(pack, return_url)
+    
+    token = data.get('token')
+    url   = data.get('url')
+    
+    if not token or not url:
+        messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+        return redirect('mis_clases')
+    
+    request.session['webpay_pack_id'] = pack.pk
+    
+    return render(request, 'reservas/webpay_redirect.html', {
+        'url':   url,
+        'token': token,
+    })
