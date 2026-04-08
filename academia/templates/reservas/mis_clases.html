@@ -186,7 +186,13 @@
 .badge-programada { background: transparent; color: #ccc; }
 .badge-completada { background: #eee; color: #aaa; }
 .badge-congelada  { background: #e3f2fd; color: #1565c0; }
-.badge-recuperar  { background: #fff3e0; color: #e65100; }
+.badge-ausente    { background: #fff3e0; color: #e65100; }
+.badge-recuperar  {
+  background: #e65100; color: #fff;
+  font-size: .65rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 10px;
+  text-decoration: none; cursor: pointer;
+}
 
 /* ── Sin clases ─────────────────────────────────────── */
 .sin-clases {
@@ -206,20 +212,6 @@
   font-weight: 600;
   font-size: .9rem;
 }
-
-.badge-ausente {
-  background: #fff3e0; color: #e65100;
-  font-size: .65rem; font-weight: 700;
-  padding: 3px 8px; border-radius: 10px;
-}
-.badge-recuperar {
-  background: #e65100; color: #fff;
-  font-size: .65rem; font-weight: 700;
-  padding: 3px 8px; border-radius: 10px;
-  text-decoration: none; cursor: pointer;
-}
-
-
 </style>
 {% endblock %}
 
@@ -260,7 +252,7 @@
           <div style="font-weight:700; color:#856404; font-size:.9rem;">{{ pd.pack.get_tipo_display }}</div>
           <div style="font-size:.78rem; color:#aaa; margin-top:2px;">Reserva sin pagar — completa tu pago para activarla</div>
         </div>
-        <a href="{% url 'reintentar_pago' pd.pack.pk %}" 
+        <a href="{% url 'reintentar_pago' pd.pack.pk %}"
           style="background:#856404; color:#fff; padding:8px 16px; border-radius:10px; font-size:.82rem; font-weight:700; text-decoration:none; white-space:nowrap;">
           Pagar →
         </a>
@@ -268,89 +260,83 @@
       {% endif %}
     {% endfor %}
 
-    <!-- Un bloque por cada pack -->
+    <!-- Un bloque por cada pack activo -->
     {% for pd in packs_data %}
       {% if pd.pack.estado != 'PENDIENTE_PAGO' %}
-       <div class="pack-seccion">
+      <div class="pack-seccion">
 
-        <!-- todo el contenido actual sin cambios -->
+        <!-- Header del pack -->
+        <div class="pack-header">
+          <div class="pack-titulo">
+            {{ pd.pack.get_tipo_display }}
+            · {{ pd.pack.get_frecuencia_display }}
+            · {{ pd.pack.hora }}:00
+          </div>
+          <span class="pack-estado estado-{{ pd.pack.estado }}">
+            {{ pd.pack.get_estado_display }}
+          </span>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="progreso-wrap">
+          <div class="progreso-puntos">
+            {% for s in pd.sesiones %}
+            <div class="punto
+              {% if s.sesion.estado == 'COMPLETADA' %}hecho
+              {% elif s.es_proxima %}proxima
+              {% endif %}
+            "></div>
+            {% endfor %}
+          </div>
+          <span class="progreso-texto">{{ pd.completadas }}/{{ pd.total }}</span>
+        </div>
+
+        <!-- Lista de sesiones -->
+        <div class="sesiones-lista">
+          {% for s in pd.sesiones %}
+          <div class="sesion-item
+            {% if s.pasada %}pasada{% elif s.es_proxima %}es-proxima{% endif %}
+          ">
+            <!-- Número -->
+            <div class="sesion-num
+              {% if s.sesion.estado == 'COMPLETADA' %}pasada
+              {% elif s.es_proxima %}proxima
+              {% else %}futura{% endif %}
+            ">{{ s.sesion.numero }}</div>
+
+            <!-- Info -->
+            <div class="sesion-info">
+              <div class="sesion-fecha">{{ s.sesion.fecha|date:"l j \d\e F" }}</div>
+              <div class="sesion-hora">{{ s.sesion.hora }}:00 hrs</div>
+            </div>
+
+            <!-- Badge -->
+            {% if s.es_proxima %}
+              <span class="sesion-badge badge-proxima">Próxima</span>
+            {% elif s.sesion.estado == 'COMPLETADA' %}
+              <span class="sesion-badge badge-completada">✓ Hecha</span>
+            {% elif s.sesion.estado == 'CONGELADA' %}
+              <span class="sesion-badge badge-congelada">Congelada</span>
+            {% elif s.sesion.estado == 'RECUPERAR' %}
+              {% if s.puede_recuperar %}
+                <a href="{% url 'recuperar_clase' s.sesion.pk %}" class="sesion-badge badge-recuperar">
+                  Recuperar →
+                </a>
+              {% else %}
+                <span class="sesion-badge badge-ausente">Ausente</span>
+              {% endif %}
+            {% elif s.sesion.estado == 'RECUPERADA' %}
+              <span class="sesion-badge badge-completada">✓ Recuperada</span>
+            {% else %}
+              <span class="sesion-badge badge-programada">—</span>
+            {% endif %}
+
+          </div>
+          {% endfor %}
+        </div>
 
       </div>
       {% endif %}
-    {% endfor %}
-
-      <!-- Header del pack -->
-      <div class="pack-header">
-        <div class="pack-titulo">
-          {{ pd.pack.get_tipo_display }}
-          · {{ pd.pack.get_frecuencia_display }}
-          · {{ pd.pack.hora }}:00
-        </div>
-        <span class="pack-estado estado-{{ pd.pack.estado }}">
-          {{ pd.pack.get_estado_display }}
-        </span>
-      </div>
-
-      <!-- Barra de progreso -->
-      <div class="progreso-wrap">
-        <div class="progreso-puntos">
-          {% for s in pd.sesiones %}
-          <div class="punto
-            {% if s.sesion.estado == 'COMPLETADA' %}hecho
-            {% elif s.es_proxima %}proxima
-            {% endif %}
-          "></div>
-          {% endfor %}
-        </div>
-        <span class="progreso-texto">{{ pd.completadas }}/{{ pd.total }}</span>
-      </div>
-
-      <!-- Lista de sesiones -->
-      <div class="sesiones-lista">
-        {% for s in pd.sesiones %}
-        <div class="sesion-item
-          {% if s.pasada %}pasada{% elif s.es_proxima %}es-proxima{% endif %}
-        ">
-          <!-- Número -->
-          <div class="sesion-num
-            {% if s.sesion.estado == 'COMPLETADA' %}pasada
-            {% elif s.es_proxima %}proxima
-            {% else %}futura{% endif %}
-          ">{{ s.sesion.numero }}</div>
-
-          <!-- Info -->
-          <div class="sesion-info">
-            <div class="sesion-fecha">{{ s.sesion.fecha|date:"l j \d\e F" }}</div>
-            <div class="sesion-hora">{{ s.sesion.hora }}:00 hrs</div>
-          </div>
-
-        <!-- Badge -->
-        {% if s.es_proxima %}
-          <span class="sesion-badge badge-proxima">Próxima</span>
-        {% elif s.sesion.estado == 'COMPLETADA' %}
-          <span class="sesion-badge badge-completada">✓ Hecha</span>
-        {% elif s.sesion.estado == 'CONGELADA' %}
-          <span class="sesion-badge badge-congelada">Congelada</span>
-        {% elif s.sesion.estado == 'RECUPERAR' %}
-          {% if s.puede_recuperar %}
-            <a href="{% url 'recuperar_clase' s.sesion.pk %}" class="sesion-badge badge-recuperar">
-              Recuperar →
-            </a>
-          {% else %}
-            <span class="sesion-badge badge-ausente">Ausente</span>
-          {% endif %}
-        {% elif s.sesion.estado == 'RECUPERADA' %}
-          <span class="sesion-badge badge-completada">✓ Recuperada</span>
-        {% else %}
-          <span class="sesion-badge badge-programada">—</span>
-        {% endif %}
-
-
-        </div>
-        {% endfor %}
-      </div>
-
-    </div>
     {% endfor %}
 
   {% endif %}
