@@ -202,7 +202,7 @@ def reservar_pack10_confirmar(request):
         del request.session['pack10_borrador']
 
         from .views_webpay import crear_transaccion
-        return_url = 'https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev/pago/webpay/retorno/'
+        return_url = request.build_absolute_uri('/pago/webpay/retorno/')
         data = crear_transaccion(pack, return_url)
 
         token = data.get('token')
@@ -393,7 +393,7 @@ def reservar_pack_reducido_confirmar(request):
             del request.session['pack_reducido_borrador']
 
             from .views_webpay import crear_transaccion
-            return_url = 'https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev/pago/webpay/retorno/'
+            return_url = request.build_absolute_uri('/pago/webpay/retorno/')
             data = crear_transaccion(pack, return_url)
 
             token = data.get('token')
@@ -495,7 +495,7 @@ def reservar_clase_suelta_confirmar(request):
         del request.session['clase_suelta_borrador']
 
         from .views_webpay import crear_transaccion
-        return_url = 'https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev/pago/webpay/retorno/'
+        return_url = request.build_absolute_uri('/pago/webpay/retorno/')
         data = crear_transaccion(pack, return_url)
 
         token = data.get('token')
@@ -597,7 +597,7 @@ def reservar_clase_prueba_confirmar(request):
             del request.session['clase_prueba_borrador']
 
             from .views_webpay import crear_transaccion
-            return_url = 'https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev/pago/webpay/retorno/'
+            return_url = request.build_absolute_uri('/pago/webpay/retorno/')
             data = crear_transaccion(pack, return_url)
 
             token = data.get('token')
@@ -776,7 +776,7 @@ def reservar_clase_privada_confirmar(request):
             del request.session['privada_borrador']
 
             from .views_webpay import crear_transaccion
-            return_url = 'https://gabriela-nonacceleratory-nonelectrically.ngrok-free.dev/pago/webpay/retorno/'
+            return_url = request.build_absolute_uri('/pago/webpay/retorno/')
             data = crear_transaccion(pack, return_url)
 
             token = data.get('token')
