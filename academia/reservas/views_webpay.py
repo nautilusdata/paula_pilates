@@ -29,7 +29,7 @@ def _tx():
 
 def crear_transaccion(pack: Pack, return_url: str) -> dict:
     # el if siguiene es debido a que los fallback son precio 0 si hay desconexión con la DB. Y para evitar compras en 0$ hacemos el if.
-    if pack.preio_total == 0:
+    if pack.precio_total == 0:
         raise ValueError('Precio inválido. Verifica la configuración de precios.')
     
     response = _tx().create(
