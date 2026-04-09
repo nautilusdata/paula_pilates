@@ -55,6 +55,57 @@
   opacity: .7;
 }
 
+/* ── Card pago pendiente ────────────────────────────── */
+.pendiente-card {
+  background: #fff5f5;
+  border: 1.5px solid #e53935;
+  border-left: 5px solid #e53935;
+  border-radius: var(--radio);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 10px rgba(229,57,53,.1);
+}
+.pendiente-card .pendiente-icono {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.pendiente-card .pendiente-body {
+  flex: 1;
+}
+.pendiente-card .pendiente-titulo {
+  font-weight: 700;
+  color: #c62828;
+  font-size: .92rem;
+  margin-bottom: 2px;
+}
+.pendiente-card .pendiente-detalle {
+  font-size: .78rem;
+  color: #e53935;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.pendiente-card .pendiente-sub {
+  font-size: .74rem;
+  color: #999;
+}
+.btn-pagar {
+  background: #e53935;
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: .82rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.btn-pagar:hover { background: #c62828; }
+
 /* ── Sección de pack ────────────────────────────────── */
 .pack-seccion {
   margin-bottom: 36px;
@@ -81,7 +132,7 @@
 .estado-ACTIVO     { background: #e8f5e9; color: #388e3c; }
 .estado-COMPLETADO { background: #f5f5f5; color: #999; }
 .estado-CONGELADO  { background: #e3f2fd; color: #1565c0; }
-.estado-PENDIENTE_PAGO { background: #fff9e6; color: #856404; }
+.estado-PENDIENTE_PAGO { background: #ffebee; color: #c62828; }
 
 /* ── Barra de progreso ──────────────────────────────── */
 .progreso-wrap {
@@ -120,7 +171,6 @@
   border-radius: var(--radio);
   overflow: hidden;
 }
-
 .sesion-item {
   display: flex;
   align-items: center;
@@ -131,8 +181,6 @@
   transition: background .15s;
 }
 .sesion-item:last-child { border-bottom: none; }
-
-/* Estados visuales */
 .sesion-item.pasada {
   background: var(--gris-claro);
   opacity: .65;
@@ -154,11 +202,10 @@
   font-weight: 700;
   flex-shrink: 0;
 }
-.sesion-num.futura   { background: var(--verde-pale); color: var(--verde); border: 1.5px solid var(--verde-light); }
-.sesion-num.pasada   { background: #eee; color: #bbb; }
-.sesion-num.proxima  { background: var(--verde); color: #fff; }
+.sesion-num.futura  { background: var(--verde-pale); color: var(--verde); border: 1.5px solid var(--verde-light); }
+.sesion-num.pasada  { background: #eee; color: #bbb; }
+.sesion-num.proxima { background: var(--verde); color: #fff; }
 
-/* Fecha y hora */
 .sesion-info { flex: 1; }
 .sesion-fecha {
   font-size: .88rem;
@@ -221,7 +268,6 @@
 <div class="misclases-wrap">
 
   {% if not packs_data %}
-    <!-- Sin clases -->
     <div class="sin-clases">
       <div class="icono">🧘</div>
       <p>Todavía no tienes clases reservadas.</p>
@@ -234,38 +280,34 @@
     {% if proxima_global %}
     <div class="proxima-card">
       <div class="eyebrow">Tu próxima clase</div>
-      <div class="fecha-grande">
-        {{ proxima_global.fecha|date:"l j \d\e F" }}
-      </div>
+      <div class="fecha-grande">{{ proxima_global.fecha|date:"l j \d\e F" }}</div>
       <div class="hora-grande">{{ proxima_global.hora }}:00 hrs · Pilates Reformer</div>
-      <div class="clase-num">
-        Clase {{ proxima_global.numero }} de {{ proxima_global.pack.cantidad }}
-      </div>
+      <div class="clase-num">Clase {{ proxima_global.numero }} de {{ proxima_global.pack.cantidad }}</div>
     </div>
     {% endif %}
 
     <!-- Pagos pendientes -->
     {% for pd in packs_data %}
       {% if pd.pack.estado == 'PENDIENTE_PAGO' %}
-      <div style="background:#fff9e6; border:1px solid #f1c40f; border-radius:14px; padding:16px 20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
-        <div>
-          <div style="font-weight:700; color:#856404; font-size:.9rem;">{{ pd.pack.get_tipo_display }}</div>
-          <div style="font-size:.78rem; color:#aaa; margin-top:2px;">Reserva sin pagar — completa tu pago para activarla</div>
+      <div class="pendiente-card">
+        <div class="pendiente-icono">⚠️</div>
+        <div class="pendiente-body">
+          <div class="pendiente-titulo">{{ pd.pack.get_tipo_display }} — Pago pendiente</div>
+          <div class="pendiente-detalle">
+            {{ pd.pack.fecha_inicio|date:"l j \d\e F" }} · {{ pd.pack.hora }}:00 hrs
+          </div>
+          <div class="pendiente-sub">Tu reserva está bloqueada hasta completar el pago</div>
         </div>
-        <a href="{% url 'reintentar_pago' pd.pack.pk %}"
-          style="background:#856404; color:#fff; padding:8px 16px; border-radius:10px; font-size:.82rem; font-weight:700; text-decoration:none; white-space:nowrap;">
-          Pagar →
-        </a>
+        <a href="{% url 'reintentar_pago' pd.pack.pk %}" class="btn-pagar">Pagar →</a>
       </div>
       {% endif %}
     {% endfor %}
 
-    <!-- Un bloque por cada pack activo -->
+    <!-- Packs activos -->
     {% for pd in packs_data %}
       {% if pd.pack.estado != 'PENDIENTE_PAGO' %}
       <div class="pack-seccion">
 
-        <!-- Header del pack -->
         <div class="pack-header">
           <div class="pack-titulo">
             {{ pd.pack.get_tipo_display }}
@@ -277,7 +319,6 @@
           </span>
         </div>
 
-        <!-- Barra de progreso -->
         <div class="progreso-wrap">
           <div class="progreso-puntos">
             {% for s in pd.sesiones %}
@@ -291,26 +332,21 @@
           <span class="progreso-texto">{{ pd.completadas }}/{{ pd.total }}</span>
         </div>
 
-        <!-- Lista de sesiones -->
         <div class="sesiones-lista">
           {% for s in pd.sesiones %}
-          <div class="sesion-item
-            {% if s.pasada %}pasada{% elif s.es_proxima %}es-proxima{% endif %}
-          ">
-            <!-- Número -->
+          <div class="sesion-item {% if s.pasada %}pasada{% elif s.es_proxima %}es-proxima{% endif %}">
+
             <div class="sesion-num
               {% if s.sesion.estado == 'COMPLETADA' %}pasada
               {% elif s.es_proxima %}proxima
               {% else %}futura{% endif %}
             ">{{ s.sesion.numero }}</div>
 
-            <!-- Info -->
             <div class="sesion-info">
               <div class="sesion-fecha">{{ s.sesion.fecha|date:"l j \d\e F" }}</div>
               <div class="sesion-hora">{{ s.sesion.hora }}:00 hrs</div>
             </div>
 
-            <!-- Badge -->
             {% if s.es_proxima %}
               <span class="sesion-badge badge-proxima">Próxima</span>
             {% elif s.sesion.estado == 'COMPLETADA' %}
@@ -319,9 +355,7 @@
               <span class="sesion-badge badge-congelada">Congelada</span>
             {% elif s.sesion.estado == 'RECUPERAR' %}
               {% if s.puede_recuperar %}
-                <a href="{% url 'recuperar_clase' s.sesion.pk %}" class="sesion-badge badge-recuperar">
-                  Recuperar →
-                </a>
+                <a href="{% url 'recuperar_clase' s.sesion.pk %}" class="sesion-badge badge-recuperar">Recuperar →</a>
               {% else %}
                 <span class="sesion-badge badge-ausente">Ausente</span>
               {% endif %}
