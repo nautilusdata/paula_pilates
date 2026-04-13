@@ -88,18 +88,10 @@ DATABASES = {
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
 
@@ -154,10 +146,6 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
-
-# ─── MercadoPago ──────────────────────────────────────────────────────────────
-MERCADOPAGO_PUBLIC_KEY   = 'TEST-37fcb023-74fb-49b3-b63c-8c444b160bdd'
-MERCADOPAGO_ACCESS_TOKEN = 'TEST-4260410057747727-040421-fdec762c5ec01feb4d2661f81df0b021-213735912'
 
 # ─── Webpay ───────────────────────────────────────────────────────────────────
 WEBPAY_COMMERCE_CODE = '597055555532'
