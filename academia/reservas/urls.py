@@ -3,7 +3,6 @@ from . import views_reservar_pack10
 from . import views_mis_clases
 from . import views_body_balance
 from . import views_panel_paula
-from . import views_pago
 from . import views_webpay
 
 urlpatterns = [
@@ -28,12 +27,7 @@ urlpatterns = [
     path('recuperar/<int:sesion_id>/', views_mis_clases.recuperar_clase, name='recuperar_clase'),
     path('panel/bulk-reschedule/', views_panel_paula.bulk_reschedule, name='bulk_reschedule'),
     path('panel/bulk-reschedule/preview/', views_panel_paula.bulk_reschedule_preview, name='bulk_reschedule_preview'),
-    # Pago MercadoPago
-    path('pago/exitoso/',   views_pago.pago_exitoso,   name='pago_exitoso'),
-    path('pago/fallido/',   views_pago.pago_fallido,   name='pago_fallido'),
-    path('pago/pendiente/', views_pago.pago_pendiente, name='pago_pendiente'),
-    path('pago/brick/<int:pack_id>/', views_pago.pago_brick, name='pago_brick'),
-    path('pago/procesar/', views_pago.pago_procesar, name='pago_procesar'),
+    # Pago Webpay
     path('pago/webpay/iniciar/<int:pack_id>/', views_webpay.webpay_iniciar, name='webpay_iniciar'),
     path('pago/webpay/retorno/', views_webpay.webpay_retorno, name='webpay_retorno'),
     path('pago/reintentar/<int:pack_id>/', views_webpay.reintentar_pago, name='reintentar_pago'),
