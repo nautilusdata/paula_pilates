@@ -1,16 +1,13 @@
-Paula Ayarza Pilates - Business Logic
-=====================================
+Paula Ayarza Pilates - Business Logic 	       EN MAYUSCULAS ULTIMOS CAMBIOS
+================================================================
 Paula Ayarza Pilates es una academia de Pilates y Body Balance. Paula como instructora hace personalmente las clases y al mismo tiempo es la dueña. 
-Opera en una propiedad en Punta Arenas con grandes espacios que tiene 2 salas, una con 6 (por ahora) reformers de Pilates y otra sala para hacer Body Balance. 
-Los recursos son los slots de horas,  los reformers para Pilates y las salas. 
+Opera en una propiedad en Punta Arenas con grandes espacios que tiene 2 salas, una con 7 (por ahora) reformers de Pilates y otra sala para hacer Body Balance. 
+Los recursos son los slots de horas, los reformers para Pilates y las salas. 
 
 
 =================================================
 1. Pilates
 =================================================
-La selección de un día de partida y hora, genera un horario invariable en los días siguiente. El cliente no tiene libertad para elegir otros horarios a medida que avanzan los días, sino que la HORA de las sesiones se establece el día de la reserva. 
-La reserva del reformer se hace el mismo día en que quiere partir el cliente, ya que si reserva para partir la próxima semana, podria venir otro cliente hoy que quiere partir cuanto antes, Se perderían esos espacios de ingresos en lo que queda de días para la supuesta reserva futura.
-
 
 1.1 PACK de 10 clases      
 ---------------------
@@ -19,6 +16,10 @@ $14.000 por clase
 - Si el alumno quiere reservar 2 días las clases pueden ser: Lunes y Miercoles, o Martes y Jueves.
 El horario es único para todos los días
 El pack no se puede dividir, las clases son seguidas, excepto cuando hay un feriado chileno entremedio, se salta y el pack continúa normalmente, *el calendario de clases no se corre*
+*****************************************************************************************************************************************************************
+LA ALUMNA RESERVA DIA Y HORA CUANDO QUIERE LAS 10 CLASES -->> ARMA SU PLAN SEGUN REFORMER DISPONIBLES ES DIA Y ESA HORA. UNA VEZ LISTA LAS 10 SESIONES, CONFIRMA, PAGA, SE BLOQUEAN.
+ACLARAR SI SE CONSERVA LMV / LM, MJ → IMPORTANTE
+
 
 
 1.2 PACK de 2 a 9 clases
@@ -28,6 +29,9 @@ $30.000 por clase
 - Si el alumno quiere reservar 2 días las clases pueden ser: Lunes y Miercoles, o Martes y Jueves.
 El horario es único para todos los días
 El pack no se puede dividir, las clases son seguidas, excepto cuando hay un feriado chileno entremedio, se salta y el pack continúa normalmente, *el calendario de clases no se corre*
+*****************************************************************************************************************************************************************
+LA ALUMNA RESERVA DIA Y HORA CUANDO QUIERE LAS n CLASES -->> ARMA SU PLAN SEGUN REFORMER DISPONIBLES ES DIA Y ESA HORA. UNA VEZ LISTA LAS n SESIONES, CONFIRMA, PAGA, SE BLOQUEAN.
+
 
 
 1.3 Clase suelta
@@ -35,14 +39,20 @@ El pack no se puede dividir, las clases son seguidas, excepto cuando hay un feri
 $25.000 por clase
 Un alumno con pack activo puede tomar una clase suelta en otro horario el mimso día que tenga una clase de Pack. 
 La clase suelta se puede comprar en cualquier momento. Habiendo disponibilidad no hay problema.
+*****************************************************************************************************************************************************************
+SIGUE IGUAL
+
 
 
 1.5 Clase de prueba
 -------------------
-$20.000 por clase
+$20.000 por clase (ULTIMO 13 abril)
 Sábado a las 12:30
 Duración 45 minutos
 Es para una alumna solamente pero mejor no pongamos esta restricción de cantidad de alumnos, tal vez Paula pueda hacerle a 2.
+*****************************************************************************************************************************************************************
+SIGUE IGUAL
+
 
 
 1.5 Clases privadas (personalizadas)
@@ -64,6 +74,13 @@ Miercoles   11, 16
 Jueves      11, 16
 Viernes     11, 16
 
+*****************************************************************************************************************************************************************
+LA ALUMNA RESERVA DIA Y HORA 11HRS o 16 HRS CUANDO QUIERE LAS 10 CLASES -->> ARMA SU PLAN SEGUN REFORMER DISPONIBLES ES DIA Y ESA HORA. UNA VEZ LISTA LAS 10 SESIONES, CONFIRMA, PAGA, SE BLOQUEAN.
+LA ALUMNA RESERVA DIA Y HORA 11HRS O 16 HRS CUANDO QUIERE LAS n CLASES -->> ARMA SU PLAN SEGUN REFORMER DISPONIBLES ES DIA Y ESA HORA. UNA VEZ LISTA LAS n SESIONES, CONFIRMA, PAGA, SE BLOQUEAN.
+
+
+
+
 
 RECUPERACIÓN DE CLASES
 ----------------------
@@ -72,6 +89,8 @@ Si una alumna no asiste a clases puede recuperar hasta 2 clases, siempre que hay
 El limite son 2 recuperaciones por pack.
 Tiene que ser al otro día de haber perdido la clase, y hasta las 12pm, si no, se desbloquea para otra alumna.
 No tiene que ser los mismos días que ella tomó (si el esquema que tomó es LU-MIE-VIE, puede recuperar el JUE también).
+*****************************************************************************************************************************************************************
+PUEDEN RECUPERAR TODAS LAS CLASES QUE PIERDEN
 
 
 CASOS ESPECIALES
@@ -95,6 +114,8 @@ Máximo 10 alumnos!
 $60.000 mensual los 3 días. No tiene modo pack, es sólo mensual
 $15.000 1 clase a la semana
 Es estratégico porque si va 4 veces al mes son $60.000 igual
+******************************************************************************
+SIGUE IGUAL
 
 
 
@@ -113,7 +134,7 @@ VER ESTADO "RESERVA TEMPORAL" mientras la alumna paga.
 ======================================================
 
 Paula debe tener una vista de administrador donde ingrese REFORMERS DISPONIBLES, ESPACIOS EN SALA DE BODY BALANCE y PRECIOS DE LAS CLASES. Además tiene métricas de alumnos y mensuales por alumno y por clase.
-Botón AUSENTE si Paula se enferma o planea ausentarse -->  BULK RESCHEDULE de la base de datos de las clases, respetando feriados chilenos, magallánicos y días. Se respetan los horarios de pilates.
+Botón si Paula se enferma o planea ausentarse -->  BULK RESCHEDULE de la base de datos de las clases, respetando feriados chilenos, magallánicos y días. Se respetan los horarios de pilates.
 Paula debe tener un calendario con vista mensual de los dias programados, con los nombres de clientes en los días con sus clases a lo mejor tipo agenda o sea un dia y lo que pasa ese dia y asi el dia siquiente mas abajo.
  
 
@@ -249,8 +270,8 @@ Un error común de la IA es crear modelos demasiado rígidos. El sentido común 
 
 Por qué la IA necesita tu "Curaduría"
 La IA tiende a ser optimista. Escribe código asumiendo que el usuario siempre hará lo correcto. Tu rol como desarrollador asistido es aplicar el pesimismo preventivo:
-Lo que hace la IA /	Lo que aporta tu Sentido Común
-Crea un formulario de reserva simple. Valida que la fecha de la clase no sea en el pasado. Genera un modelo Clase.	
+Lo que hace la IA /    Lo que aporta tu Sentido Común
+Crea un formulario de reserva simple. Valida que la fecha de la clase no sea en el pasado. Genera un modelo Clase.    
 Escribe un script de borrado de usuarios. Advierte que no puedes borrar un usuario si tiene pagos o reservas activas (integridad referencial).
 
 
@@ -287,10 +308,10 @@ Si alguien cancela, el sistema puede:
 
 
 Tabla de Reglas de Negocio a Confirmar
-Situación	Lógica de Sentido Común
-Cancelación tardía	¿Se le devuelve el dinero/crédito si cancela 1 hora antes? (Normalmente no).
-Doble reserva	¿Puede un alumno reservar dos máquinas el mismo día/hora? (Bloquear por User).
-Mantenimiento	¿Qué pasa si se rompe un Reformer? Debes poder bajar la capacidad a 5 globalmente.
+Situación    Lógica de Sentido Común
+Cancelación tardía    ¿Se le devuelve el dinero/crédito si cancela 1 hora antes? (Normalmente no).
+Doble reserva    ¿Puede un alumno reservar dos máquinas el mismo día/hora? (Bloquear por User).
+Mantenimiento    ¿Qué pasa si se rompe un Reformer? Debes poder bajar la capacidad a 5 globalmente.
 
 Siguiente paso recomendado:
 ¿Ya tienes implementada la lógica de "créditos" o "bonos" (ej. el cliente compra un pack de 10 clases)? Si quieres, podemos ver cómo descontar automáticamente esos créditos cada vez que el calendario confirme una reserva.
@@ -342,11 +363,7 @@ feriados_cl = holidays.Chile(prov='AP') (Para Arica y Parinacota).
 Podemos armar la lógica para que, si el alumno elige el "Pack Reducido" (2 a 9 clases), el sistema le cobre automáticamente los $20.000 por clase en lugar del precio del pack completo. ¿Te gustaría ver cómo estructurar ese validador de precios?
 Tú dijiste
 
-es en punta arenas
-Gemini dijo
-
-¡Punta Arenas! Eso cambia un detalle legal y de "sentido común" muy importante para tu lógica de feriados.
-
+es en punta arenas: detalle legal y de "sentido común" muy importante para tu lógica de feriados.
 En la Región de Magallanes y de la Antártica Chilena tienen un feriado regional propio: el 21 de septiembre (Conmemoración de la toma de posesión del Estrecho de Magallanes). Si tu app no lo considera, vas a tener a 6 alumnas llegando al gimnasio un día que probablemente cierres.
 
 
@@ -360,11 +377,13 @@ Como dato de "sentido común" local: en Punta Arenas, a veces hay temporales de 
 4. Estructura de Horarios (Slots)
 
 Dado que tienes 6 reformers, tu calendario JS debería consultar un endpoint que devuelva los "Slots" disponibles.
-Hora	Capacidad Total	Reservas Activas	Disponibilidad
-09:00	6	6	AGOTADO
-10:00	6	4	2 Cupos
-11:00	1	0	1 Cupo (Privada)
+Hora    Capacidad Total    Reservas Activas    Disponibilidad
+09:00    6    6    AGOTADO
+10:00    6    4    2 Cupos
+11:00    1    0    1 Cupo (Privada)
 
 Nota sobre las Privadas: Si alguien reserva una clase privada a las 11:00, tu lógica debe restar 5 cupos de ese slot inmediatamente para que nadie más pueda entrar, dejando la capacidad efectiva en 1.
+
+
 
 
