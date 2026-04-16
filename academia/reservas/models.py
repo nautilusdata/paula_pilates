@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from datetime import date, timedelta
 import holidays
 
@@ -239,6 +240,8 @@ class Sesion(models.Model):
 def crear_sesiones_pack(pack: Pack):
     if pack.tipo not in ('PACK10', 'REDUCIDO', 'PRIVADA'):
         raise ValueError('Solo packs tienen sesiones múltiples con esta función.')
+    
+    
 
     # PRIVADA usa una sola hora para todos los días
     if pack.tipo == 'PRIVADA':
@@ -248,22 +251,35 @@ def crear_sesiones_pack(pack: Pack):
 
     pares = generar_fechas_pack(pack.fecha_inicio, pack.frecuencia, horas, pack.cantidad)
 
-    sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
-    if sin_cupo:
-        fechas_str = ', '.join(str(f) for f, _ in sin_cupo)
-        raise ValidationError(f'Sin cupo disponible en: {fechas_str}')
+    with transaction.atomic():
 
-    sesiones = [
-        Sesion(pack=pack, fecha=f, hora=h, numero=i + 1)
-        for i, (f, h) in enumerate(pares)
-    ]
-    Sesion.objects.bulk_create(sesiones)
+        # Bloqueo — ninguna otra transacción puede leer estos slots hasta que terminemos
+        Sesion.objects.select_for_update().filter(
+            fecha__in=[f for f, h in pares],
+            hora__in=list(set(h for f, h in pares)),
+        )
 
-    pack.fecha_fin = pares[-1][0]
-    pack.estado    = 'ACTIVO'
-    pack.save(update_fields=['fecha_fin', 'estado'])
+        sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
+        if sin_cupo:
+            fechas_str = ', '.join(str(f) for f, _ in sin_cupo)
+            raise ValidationError(f'Sin cupo disponible en: {fechas_str}')
 
-    return sesiones
+        sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
+        if sin_cupo:
+            fechas_str = ', '.join(str(f) for f, _ in sin_cupo)
+            raise ValidationError(f'Sin cupo disponible en: {fechas_str}')
+
+        sesiones = [
+            Sesion(pack=pack, fecha=f, hora=h, numero=i + 1)
+            for i, (f, h) in enumerate(pares)
+        ]
+        Sesion.objects.bulk_create(sesiones)
+
+        pack.fecha_fin = pares[-1][0]
+        pack.estado    = 'ACTIVO'
+        pack.save(update_fields=['fecha_fin', 'estado'])
+
+        return sesiones
 
 
 # ─── Panel de instructor ──────────────────────────────────────────────────────
