@@ -237,17 +237,17 @@ class Sesion(models.Model):
 # ─── Helper: crear sesiones al confirmar pago ─────────────────────────────────
 
 def crear_sesiones_pack(pack: Pack):
-    """
-    Genera las Sesion del pack después de confirmación de pago.
-    Cada fecha tiene su hora específica según el día de la semana.
-    """
     if pack.tipo not in ('PACK10', 'REDUCIDO', 'PRIVADA'):
         raise ValueError('Solo packs tienen sesiones múltiples con esta función.')
 
-    horas = horas_para_pack(pack)
+    # PRIVADA usa una sola hora para todos los días
+    if pack.tipo == 'PRIVADA':
+        horas = {d: pack.hora for d in DIAS_SEMANA_PILATES[pack.frecuencia]}
+    else:
+        horas = horas_para_pack(pack)
+
     pares = generar_fechas_pack(pack.fecha_inicio, pack.frecuencia, horas, pack.cantidad)
 
-    # Verificar disponibilidad en cada slot
     sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
     if sin_cupo:
         fechas_str = ', '.join(str(f) for f, _ in sin_cupo)
