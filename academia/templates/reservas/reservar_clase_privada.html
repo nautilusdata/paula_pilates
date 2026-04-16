@@ -181,7 +181,7 @@
   </div>
   {% endif %}
 
-  <form method="POST" id="form-privada">
+  <form method="POST" action="{% url 'reservar_clase_privada' %}" id="form-privada">
     {% csrf_token %}
 
     <!-- TIPO -->
