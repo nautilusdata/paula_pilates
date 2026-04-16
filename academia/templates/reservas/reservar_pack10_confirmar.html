@@ -23,7 +23,6 @@
   font-family: var(--font);
 }
 
-/* ── Breadcrumb ── */
 .breadcrumb {
   display: flex; align-items: center; gap: 6px;
   font-size: .78rem; color: #999; margin-bottom: 20px;
@@ -32,13 +31,11 @@
 .breadcrumb .sep { color: #ccc; }
 .breadcrumb .actual { color: var(--gris); font-weight: 600; }
 
-/* ── Pasos ── */
 .pasos { display: flex; gap: 0; margin-bottom: 28px; border-radius: 30px; overflow: hidden; background: #f5f5f5; }
 .paso  { flex: 1; text-align: center; padding: 8px 4px; font-size: .75rem; color: #aaa; font-weight: 500; }
 .paso.activo { background: var(--verde); color: #fff; border-radius: 30px; }
 .paso.hecho  { background: #c8e6a0; color: var(--verde); }
 
-/* ── Resumen card ── */
 .resumen-card {
   background: #fff;
   border: 1px solid var(--borde);
@@ -64,10 +61,33 @@
   font-size: .88rem;
 }
 .resumen-fila:last-child { border-bottom: none; }
-.resumen-fila .etiq { color: #888; }
+.resumen-fila .etiq  { color: #888; }
 .resumen-fila .valor { font-weight: 600; color: #333; }
 
-/* ── Timeline de fechas ── */
+/* Horario por día */
+.horario-dias {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.horario-dias .etiq {
+  font-size: .88rem;
+  color: #888;
+  margin-bottom: 8px;
+}
+.horario-dias-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.horario-dia-fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: .85rem;
+}
+.horario-dia-nombre { color: #555; font-weight: 500; }
+.horario-dia-hora   { font-weight: 700; color: var(--verde); }
+
+/* Timeline */
 .timeline-titulo {
   font-size: .72rem;
   font-weight: 700;
@@ -76,11 +96,7 @@
   color: var(--verde);
   margin: 24px 0 12px;
 }
-.timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
+.timeline { display: flex; flex-direction: column; gap: 0; }
 .timeline-item {
   display: flex;
   align-items: center;
@@ -91,29 +107,16 @@
 }
 .timeline-item:last-child { border-bottom: none; }
 .timeline-num {
-  width: 26px;
-  height: 26px;
+  width: 26px; height: 26px;
   background: var(--verde-pale);
   border: 2px solid var(--verde-light);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .7rem;
-  font-weight: 700;
-  color: var(--verde);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 700; color: var(--verde);
   flex-shrink: 0;
 }
-.timeline-item.primera .timeline-num {
-  background: var(--verde);
-  color: #fff;
-  border-color: var(--verde);
-}
-.timeline-item.ultima .timeline-num {
-  background: #408601;
-  color: #fff;
-  border-color: #408601;
-}
+.timeline-item.primera .timeline-num { background: var(--verde); color: #fff; border-color: var(--verde); }
+.timeline-item.ultima  .timeline-num { background: #408601;      color: #fff; border-color: #408601; }
 .timeline-fecha { flex: 1; color: #333; }
 .timeline-fecha .dia { font-weight: 600; }
 .timeline-fecha .hora-tag {
@@ -126,18 +129,10 @@
   font-weight: 600;
   margin-left: 6px;
 }
-.timeline-badge {
-  font-size: .7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  padding: 3px 9px;
-  border-radius: 20px;
-}
+.timeline-badge { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 3px 9px; border-radius: 20px; }
 .badge-inicio { background: #e8f5e9; color: #388e3c; }
 .badge-fin    { background: #fce4ec; color: #c62828; }
 
-/* ── Precio total ── */
 .precio-bloque {
   background: var(--verde-pale);
   border: 1px solid var(--verde-light);
@@ -148,37 +143,30 @@
   align-items: center;
   margin: 22px 0;
 }
-.precio-bloque .etiq { font-size: .82rem; color: var(--gris); }
+.precio-bloque .etiq  { font-size: .82rem; color: var(--gris); }
 .precio-bloque .monto { font-size: 1.6rem; font-weight: 700; color: var(--verde); }
 .precio-bloque .sub   { font-size: .73rem; color: #999; }
 
-/* ── Botones ── */
 .btn-pagar {
   display: block; width: 100%; padding: 16px;
   background: var(--verde); color: #fff; border: none; border-radius: var(--radio);
   font-family: var(--font); font-size: 1rem; font-weight: 700;
-  cursor: pointer; transition: background .15s, transform .1s;
-  text-align: center; margin-bottom: 12px;
+  cursor: pointer; transition: background .15s; text-align: center; margin-bottom: 12px;
 }
-.btn-pagar:active { transform: scale(.98); background: #245200; }
+.btn-pagar:active { background: #245200; }
 
 .btn-volver {
   display: block; width: 100%; padding: 14px;
   background: transparent; color: var(--gris);
   border: 1px solid var(--borde); border-radius: var(--radio);
   font-family: var(--font); font-size: .9rem; font-weight: 500;
-  cursor: pointer; transition: background .15s;
-  text-align: center; text-decoration: none;
+  cursor: pointer; text-align: center; text-decoration: none;
 }
 .btn-volver:hover { background: #f9f9f9; }
 
-/* ── Nota legal ── */
 .nota-pago {
-  font-size: .73rem;
-  color: #aaa;
-  text-align: center;
-  margin-top: 14px;
-  line-height: 1.5;
+  font-size: .73rem; color: #aaa;
+  text-align: center; margin-top: 14px; line-height: 1.5;
 }
 </style>
 {% endblock %}
@@ -188,7 +176,6 @@
 
 <div class="confirmar-wrap">
 
-  <!-- Breadcrumb -->
   <nav class="breadcrumb">
     <a href="{% url 'reservar' %}">Reservar</a>
     <span class="sep">›</span>
@@ -197,14 +184,12 @@
     <span class="actual">Confirmar</span>
   </nav>
 
-  <!-- Pasos -->
   <div class="pasos">
     <div class="paso hecho">✓ Configurar</div>
     <div class="paso activo">2 · Confirmar</div>
     <div class="paso">3 · Pagar</div>
   </div>
 
-  <!-- Resumen de la reserva -->
   <div class="resumen-card">
     <div class="card-titulo">Resumen de tu reserva</div>
 
@@ -216,10 +201,20 @@
       <span class="etiq">Frecuencia</span>
       <span class="valor">{{ frecuencia_label }}</span>
     </div>
-    <div class="resumen-fila">
-      <span class="etiq">Horario fijo</span>
-      <span class="valor">{{ hora }}:00 hrs (todas las sesiones)</span>
+
+    <!-- Horario por día (reemplaza la línea "Horario fijo: X:00") -->
+    <div class="horario-dias">
+      <div class="etiq">Horario</div>
+      <div class="horario-dias-lista">
+        {% for d in horario_dias %}
+        <div class="horario-dia-fila">
+          <span class="horario-dia-nombre">{{ d.nombre }}</span>
+          <span class="horario-dia-hora">{{ d.hora }}:00 hrs</span>
+        </div>
+        {% endfor %}
+      </div>
     </div>
+
     <div class="resumen-fila">
       <span class="etiq">Primera clase</span>
       <span class="valor">{{ fecha_inicio|date:"d/m/Y" }}</span>
@@ -234,10 +229,10 @@
     </div>
   </div>
 
-  <!-- Timeline de las 10 fechas -->
+  <!-- Timeline -->
   <div class="timeline-titulo">Tus 10 clases programadas</div>
   <div class="timeline">
-    {% for num, fecha, label in fechas %}
+    {% for num, fecha, hora, label in sesiones %}
     <div class="timeline-item {% if forloop.first %}primera{% elif forloop.last %}ultima{% endif %}">
       <div class="timeline-num">{{ num }}</div>
       <div class="timeline-fecha">
@@ -253,16 +248,14 @@
     {% endfor %}
   </div>
 
-  <!-- Precio -->
   <div class="precio-bloque">
     <div>
       <div class="etiq">Total a pagar</div>
-      <div class="sub">Pago único · ${{ precio_por_clase|floatformat:0 }} por 10 clases</div>
+      <div class="sub">Pago único · ${{ precio_por_clase|floatformat:0 }} por clase</div>
     </div>
     <div class="monto">${{ precio_total|floatformat:0 }}</div>
   </div>
 
-  <!-- Botones de acción -->
   <form method="POST" action="{% url 'reservar_pack10_confirmar' %}">
     {% csrf_token %}
     <button type="submit" class="btn-pagar">Pagar con WebPay →</button>
