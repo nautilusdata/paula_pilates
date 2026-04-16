@@ -663,9 +663,8 @@ def reservar_clase_privada(request):
         'hoy':   date.today(),
         'horas': [{'valor': h, 'label': f'{h:02d}:00'} for h in HORAS_PRIVADAS],
         'frecuencias': [
-            {'codigo': 'LMV', 'label': 'Lun · Miérc · Vier', 'dias': '3 días/semana'},
-            {'codigo': 'LM',  'label': 'Lun · Miérc',         'dias': '2 días/semana'},
-            {'codigo': 'MJ',  'label': 'Mar · Jue',            'dias': '2 días/semana'},
+            {'codigo': 'LM',  'label': 'Lun · Miérc', 'dias': '2 días/semana'},
+            {'codigo': 'MJ',  'label': 'Mar · Jue',    'dias': '2 días/semana'},
         ],
         'precio_pack10':   ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000),
         'precio_reducido': ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000),
