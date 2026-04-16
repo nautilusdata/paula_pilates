@@ -33,7 +33,6 @@ MES_ES = {
 NOMBRE_DIA_CORTO = {0: 'Lun', 1: 'Mar', 2: 'Mié', 3: 'Jue', 4: 'Vie'}
 
 NOMBRES_FRECUENCIA = {
-    'LMV': 'lunes, miércoles o viernes',
     'LM':  'lunes o miércoles',
     'MJ':  'martes o jueves',
 }
