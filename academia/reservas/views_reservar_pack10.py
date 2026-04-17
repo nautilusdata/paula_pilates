@@ -349,8 +349,13 @@ def reservar_pack_reducido(request):
             errores.append('Selecciona la fecha de inicio.')
 
         if not errores:
-            horas = _horas_dict_desde_post(frecuencia, hora_dia1, hora_dia2, hora_dia3)
-            pares, sin_cupo = _slots_disponibles(frecuencia, horas, fecha_inicio, cantidad)
+            pares = []
+            sin_cupo = []
+            try:
+                horas = _horas_dict_desde_post(frecuencia, hora_dia1, hora_dia2, hora_dia3)
+                pares, sin_cupo = _slots_disponibles(frecuencia, horas, fecha_inicio, cantidad)
+            except ValidationError as e:
+                errores.extend(e.messages)
 
             if sin_cupo:
                 dias_str = ', '.join(f"{fmt_fecha(f)} {h:02d}:00" for f, h in sin_cupo[:3])
