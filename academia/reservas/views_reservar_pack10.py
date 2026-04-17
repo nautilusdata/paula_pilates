@@ -355,6 +355,7 @@ def reservar_pack_reducido(request):
                 horas = _horas_dict_desde_post(frecuencia, hora_dia1, hora_dia2, hora_dia3)
                 pares, sin_cupo = _slots_disponibles(frecuencia, horas, fecha_inicio, cantidad)
             except ValidationError as e:
+                print(">>> ValidationError:", e, e.messages)
                 errores.extend(e.messages)
 
             if sin_cupo:
