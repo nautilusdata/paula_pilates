@@ -289,6 +289,26 @@ def crear_sesiones_pack(pack: Pack):
         pack.save(update_fields=['fecha_fin', 'estado'])
 
         return sesiones
+    
+
+def detectar_overlap(alumna, pares: list) -> list:
+    """
+    Verifica si la alumna ya tiene sesiones activas que colisionen
+    con alguna de las (fecha, hora) del nuevo pack.
+    Retorna lista de (fecha, hora) con colisión.
+    """
+    colisiones = []
+    for f, h in pares:
+        ya_tiene = Sesion.objects.filter(
+            pack__alumna=alumna,
+            pack__estado__in=['ACTIVO', 'PENDIENTE_PAGO'],
+            fecha=f,
+            hora=h,
+            estado__in=['PROGRAMADA', 'RECUPERAR'],
+        ).exists()
+        if ya_tiene:
+            colisiones.append((f, h))
+    return colisiones
 
 
 # ─── Panel de instructor ──────────────────────────────────────────────────────
