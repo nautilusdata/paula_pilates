@@ -44,10 +44,19 @@ def generar_fechas_pack(fecha_inicio: date, frecuencia: str,
     dias = DIAS_SEMANA_PILATES[frecuencia]
     feriados = feriados_punta_arenas()
 
+
     if fecha_inicio.weekday() not in dias:
         raise ValidationError(
             "La fecha de inicio no corresponde a un día válido para la frecuencia elegida."
         )
+
+    # No se puede iniciar un pack en feriado — la función lo saltaría silenciosamente generando una fecha de inicio distinta a la elegida,
+    # lo que confundiría a la alumna en el resumen de confirmación.
+    if fecha_inicio in feriados:
+        raise ValidationError(
+            "La fecha de inicio es un feriado. Por favor elige otro día."
+        )
+
 
     resultado = []
     cursor = fecha_inicio
