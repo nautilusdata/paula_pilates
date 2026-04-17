@@ -231,9 +231,11 @@
   <p class="pack-subtitulo">Pilates Reformer · ${{ precio_por_clase|floatformat:0 }} por clase · Horario fijo</p>
 
   <div class="aviso">
+  {% if not errores %}
     <strong>Horario fijo:</strong> Elige una hora distinta para cada día de tu semana.
     Ese esquema se repetirá en todas las sesiones del pack.
   </div>
+  {% endif %}
 
   {% if errores %}
   <div class="errores">
