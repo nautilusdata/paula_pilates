@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 
 from .models import (
     Pack, Sesion, DIAS_SEMANA_PILATES,
@@ -184,8 +185,11 @@ def reservar_pack10(request):
             errores.append('Selecciona la fecha de inicio.')
 
         if not errores:
-            horas = _horas_dict_desde_post(frecuencia, hora_dia1, hora_dia2, hora_dia3)
-            pares, sin_cupo = _slots_disponibles(frecuencia, horas, fecha_inicio)
+            try:
+                horas = _horas_dict_desde_post(frecuencia, hora_dia1, hora_dia2, hora_dia3)
+                pares, sin_cupo = _slots_disponibles(frecuencia, horas, fecha_inicio)
+            except ValidationError as e:
+                errores.extend(e.messages)
 
             if sin_cupo:
                 dias_str = ', '.join(
