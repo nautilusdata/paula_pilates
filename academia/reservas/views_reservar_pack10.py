@@ -189,6 +189,19 @@ def reservar_pack10(request):
             except ValidationError as e:
                 errores.extend(e.messages)
 
+            
+            # Chequeo de colisión con packs existentes de la alumna
+            if not errores and pares:
+                from .models import detectar_overlap
+                colisiones = detectar_overlap(request.user, pares)
+                if colisiones:
+                    dias_str = ', '.join(
+                        f"{fmt_fecha(f)} {h:02d}:00" for f, h in colisiones[:3]
+                    )
+                    errores.append(
+                        f'Colisión de horarios en: {dias_str}. Elige otro horario.'
+                    )
+
             if sin_cupo:
                 dias_str = ', '.join(
                     f"{fmt_fecha(f)} {h:02d}:00" for f, h in sin_cupo[:3]
@@ -220,7 +233,7 @@ def reservar_pack10(request):
         }
         return redirect('reservar_pack10_confirmar')
 
-    return render(request, 'reservas/reservar_pack10.html', context)
+    return render(request, 'reservas/reservar_pack10.html', context)                    
 
 
 @login_required
@@ -355,8 +368,20 @@ def reservar_pack_reducido(request):
                 horas = _horas_dict_desde_post(frecuencia, hora_dia1, hora_dia2, hora_dia3)
                 pares, sin_cupo = _slots_disponibles(frecuencia, horas, fecha_inicio, cantidad)
             except ValidationError as e:
-                print(">>> ValidationError:", e, e.messages)
                 errores.extend(e.messages)
+
+            # Chequeo de colisión con packs existentes de la alumna
+            if not errores and pares:
+                from .models import detectar_overlap
+                colisiones = detectar_overlap(request.user, pares)
+                if colisiones:
+                    dias_str = ', '.join(
+                        f"{fmt_fecha(f)} {h:02d}:00" for f, h in colisiones[:3]
+                    )
+                    errores.append(
+                        f'Colisión de horarios en: {dias_str}. Elige otro horario.'
+                    )
+
 
             if sin_cupo:
                 dias_str = ', '.join(f"{fmt_fecha(f)} {h:02d}:00" for f, h in sin_cupo[:3])
