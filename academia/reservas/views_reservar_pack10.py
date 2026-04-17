@@ -144,21 +144,18 @@ def reservar_pack10(request):
         fecha_str    = request.POST.get('fecha_inicio')
         hora1_str    = request.POST.get('hora_dia1')
         hora2_str    = request.POST.get('hora_dia2')
-        hora3_str    = request.POST.get('hora_dia3')  # solo LMV
+        hora3_str    = request.POST.get('hora_dia3')
 
         errores = []
 
-        # Validar frecuencia
         if frecuencia not in DIAS_SEMANA_PILATES:
             errores.append('Selecciona una frecuencia válida.')
 
-        # Validar horas
         def parse_hora(s, label):
             if not s or not s.isdigit():
                 errores.append(f'Selecciona la hora del {label}.')
                 return None
-            h = int(s)
-            return h
+            return int(s)
 
         hora_dia1 = parse_hora(hora1_str, 'primer día')
         hora_dia2 = parse_hora(hora2_str, 'segundo día')
@@ -166,7 +163,6 @@ def reservar_pack10(request):
         if frecuencia == 'LMV':
             hora_dia3 = parse_hora(hora3_str, 'viernes')
 
-        # Validar fecha
         fecha_inicio = None
         if fecha_str:
             try:
@@ -185,6 +181,8 @@ def reservar_pack10(request):
             errores.append('Selecciona la fecha de inicio.')
 
         if not errores:
+            pares = []
+            sin_cupo = []
             try:
                 horas = _horas_dict_desde_post(frecuencia, hora_dia1, hora_dia2, hora_dia3)
                 pares, sin_cupo = _slots_disponibles(frecuencia, horas, fecha_inicio)
@@ -203,16 +201,15 @@ def reservar_pack10(request):
 
         if errores:
             context.update({
-                'errores':       errores,
+                'errores':        errores,
                 'sel_frecuencia': frecuencia,
-                'sel_fecha':     fecha_str,
-                'sel_hora_dia1': hora1_str,
-                'sel_hora_dia2': hora2_str,
-                'sel_hora_dia3': hora3_str,
+                'sel_fecha':      fecha_str,
+                'sel_hora_dia1':  hora1_str,
+                'sel_hora_dia2':  hora2_str,
+                'sel_hora_dia3':  hora3_str,
             })
             return render(request, 'reservas/reservar_pack10.html', context)
 
-        # Guardar borrador en sesión
         request.session['pack10_borrador'] = {
             'frecuencia':   frecuencia,
             'hora_dia1':    hora_dia1,
