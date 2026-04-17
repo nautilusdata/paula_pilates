@@ -18,8 +18,7 @@
 }
 
 .pack-wrap {
-  width: 92%;
-  max-width: 580px;
+  width: 92%; max-width: 580px;
   margin: 24px auto 100px;
   font-family: var(--font);
 }
@@ -36,19 +35,17 @@
   display: flex; gap: 0; margin-bottom: 28px;
   border-radius: 30px; overflow: hidden; background: #f5f5f5;
 }
-.paso {
-  flex: 1; text-align: center; padding: 8px 4px;
-  font-size: .75rem; color: #aaa; font-weight: 500;
-}
+.paso { flex: 1; text-align: center; padding: 8px 4px; font-size: .75rem; color: #aaa; font-weight: 500; }
 .paso.activo { background: var(--verde); color: #fff; border-radius: 30px; }
 
+.pack-titulo    { font-size: 1.3rem; font-weight: 700; color: var(--verde); margin-bottom: 4px; }
+.pack-subtitulo { font-size: .85rem; color: var(--gris); margin-bottom: 24px; }
+
 .aviso {
-  background: #fff9e6;
-  border-left: 4px solid var(--amarillo);
+  background: #fff9e6; border-left: 4px solid var(--amarillo);
   padding: 12px 14px; border-radius: 8px;
   font-size: .82rem; color: #856404; margin-bottom: 22px;
 }
-
 .errores {
   background: #fff0f0; border-left: 4px solid #e74c3c;
   padding: 12px 14px; border-radius: 8px;
@@ -56,119 +53,93 @@
 }
 .errores ul { margin: 6px 0 0; padding-left: 18px; }
 
-.pack-titulo { font-size: 1.3rem; font-weight: 700; color: var(--verde); margin-bottom: 4px; }
-.pack-subtitulo { font-size: .85rem; color: var(--gris); margin-bottom: 24px; }
-
 .seccion-label {
   font-size: .7rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .08em; color: var(--verde); margin-bottom: 10px;
 }
 
-/* ── Selector de cantidad ── */
-.cantidad-wrap {
-  margin-bottom: 26px;
-}
-.cantidad-slider-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-}
+/* Cantidad */
+.cantidad-wrap { margin-bottom: 26px; }
+.cantidad-slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .cantidad-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  height: 6px;
-  border-radius: 3px;
-  background: var(--verde-light);
-  outline: none;
+  flex: 1; -webkit-appearance: none; height: 6px;
+  border-radius: 3px; background: var(--verde-light); outline: none;
 }
 .cantidad-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--verde);
-  cursor: pointer;
+  -webkit-appearance: none; width: 22px; height: 22px;
+  border-radius: 50%; background: var(--verde); cursor: pointer;
   box-shadow: 0 2px 6px rgba(47,99,0,.3);
 }
-.cantidad-num {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--verde);
-  min-width: 32px;
-  text-align: center;
-}
+.cantidad-num { font-size: 1.6rem; font-weight: 700; color: var(--verde); min-width: 32px; text-align: center; }
 .cantidad-hint { font-size: .75rem; color: #999; }
 
-/* ── Precio dinámico ── */
+/* Precio dinámico */
 .precio-dinamico {
-  background: var(--verde-pale);
-  border: 1px solid var(--verde-light);
-  border-radius: var(--radio);
-  padding: 16px 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: var(--verde-pale); border: 1px solid var(--verde-light);
+  border-radius: var(--radio); padding: 16px 18px;
+  display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 26px;
-  transition: all .2s;
 }
 .precio-dinamico .det { font-size: .82rem; color: var(--gris); }
 .precio-dinamico .det strong { display: block; color: var(--verde); font-size: 1.4rem; }
-.precio-dinamico .formula { font-size: .75rem; color: #999; text-align: right; }
 
-/* ── Frecuencias ── */
+/* Frecuencias */
 .frecuencias { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
 .frec-option { display: none; }
 .frec-label {
   display: flex; justify-content: space-between; align-items: center;
   padding: 16px 18px; border: 2px solid var(--borde); border-radius: var(--radio);
-  cursor: pointer; transition: all .15s ease; background: #fff; box-shadow: var(--sombra);
+  cursor: pointer; background: #fff; box-shadow: var(--sombra); transition: all .15s;
 }
 .frec-label .frec-nombre { font-weight: 600; color: #333; font-size: .95rem; }
-.frec-label .frec-sub { font-size: .78rem; color: #999; margin-top: 2px; }
-.frec-label .frec-pill {
-  background: #f0f0f0; color: #777; padding: 4px 10px;
-  border-radius: 20px; font-size: .72rem; font-weight: 600;
-}
+.frec-label .frec-sub    { font-size: .78rem; color: #999; margin-top: 2px; }
+.frec-label .frec-pill   { background: #f0f0f0; color: #777; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; }
 .frec-option:checked + .frec-label { border-color: var(--verde); background: var(--verde-pale); }
 .frec-option:checked + .frec-label .frec-pill { background: var(--verde); color: #fff; }
 
-/* ── Fecha ── */
+/* Fecha */
 .fecha-field {
   width: 100%; padding: 14px 16px;
   border: 2px solid var(--borde); border-radius: var(--radio);
   font-family: var(--font); font-size: .95rem; color: #333;
   background: #fff; box-sizing: border-box;
-  transition: border-color .15s; margin-bottom: 6px;
+  transition: border-color .15s; margin-bottom: 8px;
 }
 .fecha-field:focus { outline: none; border-color: var(--verde); }
 .fecha-hint { font-size: .75rem; color: #999; margin-bottom: 22px; display: block; }
 
-/* ── Horas ── */
-.horas-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 8px; margin-bottom: 26px;
+/* Selectores de hora por día */
+.horas-por-dia { display: none; margin-bottom: 26px; }
+.horas-por-dia.visible { display: block; }
+
+.dia-grupo { margin-bottom: 18px; }
+.dia-titulo {
+  font-size: .78rem; font-weight: 700; color: var(--verde);
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
 }
+.dia-titulo::after { content: ''; flex: 1; height: 1px; background: var(--verde-light); }
+
+.horas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .hora-opt { display: none; }
 .hora-label {
   display: block; text-align: center; padding: 12px 6px;
   border: 2px solid var(--borde); border-radius: 10px;
   cursor: pointer; font-size: .9rem; font-weight: 600;
-  color: #555; background: #fff; transition: all .15s ease;
+  color: #555; background: #fff; transition: all .15s;
 }
-.hora-label.sin-cupo { opacity: .4; cursor: not-allowed; text-decoration: line-through; }
 .hora-opt:checked + .hora-label { border-color: var(--verde); background: var(--verde); color: #fff; }
-.hora-cupos { display: block; font-size: .62rem; font-weight: 400; margin-top: 2px; opacity: .75; }
 .hora-loading { text-align: center; color: #aaa; font-size: .8rem; padding: 12px 0; }
 
-/* ── CTA ── */
+/* CTA */
 .btn-continuar {
   display: block; width: 100%; padding: 16px;
   background: var(--verde); color: #fff; border: none;
   border-radius: var(--radio); font-family: var(--font);
   font-size: 1rem; font-weight: 700; cursor: pointer;
-  transition: background .15s, transform .1s; text-align: center;
+  transition: background .15s; text-align: center;
 }
-.btn-continuar:active { transform: scale(.98); background: #245200; }
+.btn-continuar:active { background: #245200; }
 </style>
 {% endblock %}
 
@@ -195,7 +166,8 @@
   <p class="pack-subtitulo">Pilates Reformer · $20.000 por clase · 2 a 9 clases</p>
 
   <div class="aviso">
-    <strong>Horario fijo:</strong> La hora y días que elijas se mantienen en todas tus sesiones.
+    <strong>Horario fijo:</strong> Elige una hora distinta para cada día de tu semana.
+    Ese esquema se repetirá en todas las sesiones del pack.
   </div>
 
   {% if errores %}
@@ -205,33 +177,31 @@
   </div>
   {% endif %}
 
-  <form method="POST" id="form-pack-reducido">
+  <form method="POST" action="{% url 'reservar_pack_reducido' %}" id="form-pack-reducido">
     {% csrf_token %}
 
-    <!-- CANTIDAD -->
+    <!-- ① Cantidad -->
     <div class="seccion-label">① ¿Cuántas clases quieres?</div>
     <div class="cantidad-wrap">
       <div class="cantidad-slider-row">
-        <input
-          type="range" min="2" max="9" value="{{ sel_cantidad|default:5 }}"
-          id="slider-cantidad" class="cantidad-slider"
-        >
+        <input type="range" min="2" max="9" value="{{ sel_cantidad|default:5 }}"
+               id="slider-cantidad" class="cantidad-slider">
         <div class="cantidad-num" id="num-cantidad">{{ sel_cantidad|default:5 }}</div>
       </div>
       <div class="cantidad-hint">Desliza para elegir entre 2 y 9 clases</div>
       <input type="hidden" name="cantidad" id="cantidad-valor" value="{{ sel_cantidad|default:5 }}">
     </div>
 
-    <!-- PRECIO DINÁMICO -->
-    <div class="precio-dinamico" id="precio-bloque">
+    <!-- Precio dinámico -->
+    <div class="precio-dinamico">
       <div class="det">
         <strong id="precio-total">$100.000</strong>
         <span id="precio-detalle">5 clases · $20.000 c/u</span>
       </div>
-      <div class="formula">Pago único<br>por adelantado</div>
+      <div style="font-size:.75rem; color:#999; text-align:right;">Pago único<br>por adelantado</div>
     </div>
 
-    <!-- FRECUENCIA -->
+    <!-- ② Frecuencia -->
     <div class="seccion-label">② ¿Con qué frecuencia?</div>
     <div class="frecuencias">
       {% for f in frecuencias %}
@@ -248,19 +218,23 @@
       {% endfor %}
     </div>
 
-    <!-- FECHA -->
+    <!-- ③ Fecha -->
     <div class="seccion-label">③ ¿Cuándo empieza tu primera clase?</div>
     <input type="date" name="fecha_inicio" id="fecha_inicio"
            class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
            value="{{ sel_fecha|default:'' }}" required>
     <span class="fecha-hint" id="fecha-hint">Selecciona la frecuencia primero.</span>
 
-    <!-- HORA -->
-    <div class="seccion-label">④ ¿A qué hora?</div>
-    <div id="horas-container">
-      <div class="hora-loading">Elige frecuencia y fecha para ver disponibilidad.</div>
+    <!-- ④ Hora por día -->
+    <div class="seccion-label">④ ¿A qué hora cada día?</div>
+    <div id="horas-por-dia" class="horas-por-dia">
+      <div class="hora-loading">Selecciona la frecuencia para ver los horarios disponibles.</div>
     </div>
-    <input type="hidden" name="hora" id="hora-valor" value="{{ sel_hora|default:'' }}">
+
+    <!-- Campos ocultos para las horas -->
+    <input type="hidden" name="hora_dia1" id="hora_dia1" value="{{ sel_hora_dia1|default:'' }}">
+    <input type="hidden" name="hora_dia2" id="hora_dia2" value="{{ sel_hora_dia2|default:'' }}">
+    <input type="hidden" name="hora_dia3" id="hora_dia3" value="{{ sel_hora_dia3|default:'' }}">
 
     <button type="submit" class="btn-continuar">Ver resumen →</button>
   </form>
@@ -271,98 +245,112 @@
 {% block extra_js %}
 <script>
 const PRECIO_CLASE = 20000;
-const DIAS_FRECUENCIA = { LMV: [1,3,5], LM: [1,3], MJ: [2,4] };
-const NOMBRE_DIA_CORTO = { LMV: 'lunes, miércoles o viernes', LM: 'lunes o miércoles', MJ: 'martes o jueves' };
+const DIAS_FRECUENCIA_JS = { LMV: [1,3,5], LM: [1,3], MJ: [2,4] };
+const NOMBRES_DIA_JS = {
+  LMV: 'lunes, miércoles o viernes',
+  LM:  'lunes o miércoles',
+  MJ:  'martes o jueves',
+};
 
 let frecuenciaActual = null;
 
-const slider       = document.getElementById('slider-cantidad');
-const numCantidad  = document.getElementById('num-cantidad');
-const cantidadVal  = document.getElementById('cantidad-valor');
-const precioTotal  = document.getElementById('precio-total');
+const slider        = document.getElementById('slider-cantidad');
+const numCantidad   = document.getElementById('num-cantidad');
+const cantidadVal   = document.getElementById('cantidad-valor');
+const precioTotal   = document.getElementById('precio-total');
 const precioDetalle = document.getElementById('precio-detalle');
-const inputFecha   = document.getElementById('fecha_inicio');
-const hintFecha    = document.getElementById('fecha-hint');
-const horasDiv     = document.getElementById('horas-container');
-const horaOculto   = document.getElementById('hora-valor');
+const inputFecha    = document.getElementById('fecha_inicio');
+const hintFecha     = document.getElementById('fecha-hint');
+const horasDivWrap  = document.getElementById('horas-por-dia');
 
-// ── Slider de cantidad ──
 function actualizarPrecio(cantidad) {
-  numCantidad.textContent  = cantidad;
-  cantidadVal.value        = cantidad;
+  numCantidad.textContent   = cantidad;
+  cantidadVal.value         = cantidad;
   const total = cantidad * PRECIO_CLASE;
-  precioTotal.textContent  = '$' + total.toLocaleString('es-CL');
+  precioTotal.textContent   = '$' + total.toLocaleString('es-CL');
   precioDetalle.textContent = `${cantidad} clase${cantidad > 1 ? 's' : ''} · $20.000 c/u`;
 }
 slider.addEventListener('input', () => actualizarPrecio(parseInt(slider.value)));
 actualizarPrecio(parseInt(slider.value));
 
-// ── Frecuencia ──
+// ── Al elegir frecuencia → cargar horas por día ──
 document.querySelectorAll('.frec-option').forEach(radio => {
   radio.addEventListener('change', () => {
     frecuenciaActual = radio.value;
-    hintFecha.textContent = `Elige un ${NOMBRE_DIA_CORTO[frecuenciaActual]} como día de inicio.`;
+    hintFecha.textContent = `Elige un ${NOMBRES_DIA_JS[frecuenciaActual]} como día de inicio.`;
     inputFecha.value = '';
-    horasDiv.innerHTML = '<div class="hora-loading">Selecciona la fecha de inicio.</div>';
-    horaOculto.value = '';
+    limpiarHoras();
+    cargarHorasPorDia(frecuenciaActual);
   });
 });
 
-// ── Fecha → cargar horas ──
+// ── Al elegir fecha → validar día correcto ──
 inputFecha.addEventListener('change', () => {
-  if (!frecuenciaActual) { alert('Primero elige la frecuencia.'); inputFecha.value = ''; return; }
+  if (!frecuenciaActual) {
+    alert('Primero elige la frecuencia.');
+    inputFecha.value = '';
+    return;
+  }
   const fecha = inputFecha.value;
   if (!fecha) return;
   const jsDate = new Date(fecha + 'T12:00:00');
-  if (!DIAS_FRECUENCIA[frecuenciaActual].includes(jsDate.getDay())) {
-    alert(`Para ${frecuenciaActual}, la primera clase debe ser un ${NOMBRE_DIA_CORTO[frecuenciaActual]}.`);
-    inputFecha.value = ''; return;
+  if (!DIAS_FRECUENCIA_JS[frecuenciaActual].includes(jsDate.getDay())) {
+    alert(`Para ${frecuenciaActual}, la primera clase debe ser un ${NOMBRES_DIA_JS[frecuenciaActual]}.`);
+    inputFecha.value = '';
   }
-  horasDiv.innerHTML = '<div class="hora-loading">Consultando disponibilidad…</div>';
-  horaOculto.value = '';
-  const cantidad = parseInt(cantidadVal.value);
-  fetch(`{% url 'horas_disponibles_ajax' %}?frecuencia=${frecuenciaActual}&fecha=${fecha}&cantidad=${cantidad}`)
-    .then(r => r.json())
-    .then(data => { if (!data.error) renderHoras(data.horas); })
-    .catch(() => { horasDiv.innerHTML = '<div class="hora-loading" style="color:red">Error. Intenta de nuevo.</div>'; });
 });
 
-// ── Si cambia cantidad y ya hay fecha, recargar horas ──
-slider.addEventListener('change', () => {
-  if (frecuenciaActual && inputFecha.value) inputFecha.dispatchEvent(new Event('change'));
-});
-
-function renderHoras(horas) {
-  let html = '<div class="horas-grid">';
-  horas.forEach(h => {
-    const id = `hora_${h.hora}`;
-    const disabled = !h.disponible ? 'disabled' : '';
-    const clsSinCupo = !h.disponible ? 'sin-cupo' : '';
-    const prevSel = horaOculto.value == h.hora ? 'checked' : '';
-    const cuposLabel = h.disponible
-      ? `<span class="hora-cupos">${h.cupos_min} cupo${h.cupos_min !== 1 ? 's' : ''}</span>`
-      : `<span class="hora-cupos">Sin cupo</span>`;
-    html += `
-      <input type="radio" name="_hora_display" id="${id}" value="${h.hora}"
-             class="hora-opt" ${disabled} ${prevSel} onchange="horaElegida(${h.hora})">
-      <label for="${id}" class="hora-label ${clsSinCupo}">${h.label}${cuposLabel}</label>`;
-  });
-  html += '</div>';
-  horasDiv.innerHTML = html;
+function limpiarHoras() {
+  document.getElementById('hora_dia1').value = '';
+  document.getElementById('hora_dia2').value = '';
+  document.getElementById('hora_dia3').value = '';
 }
 
-function horaElegida(hora) { horaOculto.value = hora; }
+function cargarHorasPorDia(frecuencia) {
+  horasDivWrap.innerHTML = '<div class="hora-loading">Cargando horarios…</div>';
+  horasDivWrap.classList.add('visible');
 
-// ── Restaurar si viene de POST con errores ──
+  fetch(`{% url 'horas_disponibles_ajax' %}?frecuencia=${frecuencia}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { horasDivWrap.innerHTML = `<p style="color:red">${data.error}</p>`; return; }
+      renderHorasPorDia(data.dias);
+    })
+    .catch(() => {
+      horasDivWrap.innerHTML = '<div class="hora-loading" style="color:#e74c3c">Error al cargar. Intenta de nuevo.</div>';
+    });
+}
+
+function renderHorasPorDia(dias) {
+  const camposHidden = ['hora_dia1', 'hora_dia2', 'hora_dia3'];
+  let html = '';
+  dias.forEach((d, idx) => {
+    const campo   = camposHidden[idx];
+    const selPrev = document.getElementById(campo).value;
+    html += `<div class="dia-grupo">`;
+    html += `<div class="dia-titulo">${d.nombre}</div>`;
+    html += `<div class="horas-grid">`;
+    d.horas.forEach(h => {
+      const id      = `hora_${d.dia}_${h.hora}`;
+      const checked = selPrev == h.hora ? 'checked' : '';
+      html += `
+        <input type="radio" name="_hora_dia${idx+1}_display"
+               id="${id}" value="${h.hora}" class="hora-opt" ${checked}
+               onchange="document.getElementById('${campo}').value=${h.hora}">
+        <label for="${id}" class="hora-label">${h.label}</label>`;
+    });
+    html += `</div></div>`;
+  });
+  horasDivWrap.innerHTML = html;
+}
+
+// ── Restaurar al volver de error ──
 window.addEventListener('DOMContentLoaded', () => {
-  const selFrq   = "{{ sel_frecuencia|default:'' }}";
-  const selFecha = "{{ sel_fecha|default:'' }}";
-  if (selFrq && selFecha) {
+  const selFrq = "{{ sel_frecuencia|default:'' }}";
+  if (selFrq) {
     frecuenciaActual = selFrq;
-    const cantidad = parseInt(cantidadVal.value);
-    fetch(`{% url 'horas_disponibles_ajax' %}?frecuencia=${selFrq}&fecha=${selFecha}&cantidad=${cantidad}`)
-      .then(r => r.json())
-      .then(data => { if (!data.error) renderHoras(data.horas); });
+    hintFecha.textContent = `Elige un ${NOMBRES_DIA_JS[selFrq]} como día de inicio.`;
+    cargarHorasPorDia(selFrq);
   }
 });
 </script>
