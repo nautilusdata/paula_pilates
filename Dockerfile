@@ -28,4 +28,5 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8080
 
 # Arrancar con gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "academia.wsgi:application"]
+#CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "academia.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--timeout", "120", "academia.wsgi:application"]
