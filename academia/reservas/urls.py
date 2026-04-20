@@ -31,4 +31,6 @@ urlpatterns = [
     path('pago/webpay/iniciar/<int:pack_id>/', views_webpay.webpay_iniciar, name='webpay_iniciar'),
     path('pago/webpay/retorno/', views_webpay.webpay_retorno, name='webpay_retorno'),
     path('pago/reintentar/<int:pack_id>/', views_webpay.reintentar_pago, name='reintentar_pago'),
+    # Cloud Scheduler — limpieza de packs expirados
+    path('internal/limpiar-packs/', views_panel_paula.limpiar_packs_view, name='limpiar_packs'),
 ]

@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 from django.contrib import messages
 from .models import (
     Sesion, ConfiguracionHorario, ConfiguracionGeneral,
@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 from django.db import transaction
+from .models import Pack
 
 # Solo Paula (staff) puede entrar al panel
 def es_staff(user):
@@ -318,3 +319,18 @@ def bulk_reschedule_preview(request):
         return redirect('panel_principal')
 
     return render(request, 'reservas/bulk_reschedule_preview.html', context)
+
+
+def limpiar_packs_view(request):
+    """Endpoint para Cloud Scheduler — elimina packs PENDIENTE_PAGO expirados."""
+    # Verificar token secreto para que nadie más pueda llamarlo
+    token = request.headers.get('X-Scheduler-Token')
+    if token != 'paula-pilates-scheduler-2026':
+        return JsonResponse({'error': 'No autorizado'}, status=401)
+    
+    umbral = timezone.now() - timedelta(hours=24)
+    packs = Pack.objects.filter(estado='PENDIENTE_PAGO', creado_en__lt=umbral)
+    total = packs.count()
+    packs.delete()
+    
+    return JsonResponse({'eliminados': total})
