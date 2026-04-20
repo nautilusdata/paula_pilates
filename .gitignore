@@ -33,3 +33,4 @@ staticfiles/
 Thumbs.db
 *.log
 
+envvars.yaml
