@@ -137,7 +137,7 @@ ACCOUNT_SIGNUP_FIELDS = [
     'password1*',
     'password2*',
 ]
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'               # sigue obligatorio verificar email
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # por mientras, lo habilitamos después
 
 LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_ON_GET = True
