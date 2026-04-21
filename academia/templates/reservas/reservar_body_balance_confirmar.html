@@ -191,7 +191,7 @@
     {% if es_full %}Tus clases del mes{% else %}Tu clase{% endif %}
   </div>
   <div class="timeline">
-    {% for num, fecha, label in fechas %}
+    {% for num, fecha, hora, label in fechas %}
     <div class="timeline-item {% if forloop.first %}primera{% elif forloop.last %}ultima{% endif %}">
       <div class="timeline-num">{{ num }}</div>
       <div class="timeline-fecha">
