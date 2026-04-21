@@ -126,6 +126,7 @@ def horas_disponibles_ajax(request):
 # ─── PACK 10 ──────────────────────────────────────────────────────────────────
 
 @login_required
+
 @require_http_methods(["GET", "POST"])
 def reservar_pack10(request):
     context = {
@@ -589,20 +590,25 @@ def reservar_clase_prueba(request):
     }
 
     if request.method == 'POST':
-        hora_str  = request.POST.get('hora')
         fecha_str = request.POST.get('fecha_inicio')
-
+        
+        # Hora fija — tomar de ConfiguracionHorario tipo TEST
+        horas_test = horas_disponibles_por_tipo('TEST')
+        hora = horas_test[0] if horas_test else None
+        
         errores = []
-        hora = int(hora_str) if hora_str and hora_str.isdigit() else None
-        if not hora or hora not in horas_disponibles_por_tipo('TEST'):
-            errores.append('Hora no válida.')
-
+        
+        if not hora:
+            errores.append('No hay horarios configurados para la clase de prueba.')
+        
         fecha_inicio = None
         if fecha_str:
             try:
                 fecha_inicio = date.fromisoformat(fecha_str)
                 if fecha_inicio < date.today():
                     errores.append('La fecha no puede ser en el pasado.')
+                elif fecha_inicio.weekday() != 5:  # 5 = sábado
+                    errores.append('La clase de prueba es solo los sábados.')
             except ValueError:
                 errores.append('Fecha no válida.')
         else:
@@ -614,7 +620,7 @@ def reservar_clase_prueba(request):
                 errores.append('No hay cupo disponible en ese horario.')
 
         if errores:
-            context.update({'errores': errores, 'sel_hora': hora_str, 'sel_fecha': fecha_str})
+            context.update({'errores': errores, 'sel_fecha': fecha_str})
             return render(request, 'reservas/reservar_clase_prueba.html', context)
 
         request.session['clase_prueba_borrador'] = {
