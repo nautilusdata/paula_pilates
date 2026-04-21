@@ -53,7 +53,7 @@ def verificar_transaccion(token: str) -> dict:
     return response
 
 
-def _activar_pack(pack: Pack):
+def _activar_pack(pack: Pack, request=None):
     """Crea las sesiones y activa el pack según su tipo. Idempotente: no hace nada si ya está ACTIVO."""
     if pack.estado == 'ACTIVO':
         return
@@ -69,9 +69,25 @@ def _activar_pack(pack: Pack):
 
     elif pack.tipo == 'BB_FULL':
         from .views_body_balance import generar_fechas_bb_full
-        fechas   = generar_fechas_bb_full(pack.fecha_inicio)
-        sesiones = [Sesion(pack=pack, fecha=f, hora=pack.hora, numero=i + 1)
-                    for i, f in enumerate(fechas)]
+
+        # Intentar recuperar pares de sesión (guardados en reservar_body_balance_confirmar)
+        # para evitar recalcular. Si no están, recalcular desde la fecha de inicio del pack.
+        pares = None
+        if request is not None:
+            raw = request.session.pop('bb_pares', None)
+            if raw:
+                from datetime import date as _date
+                pares = [(_date.fromisoformat(f), h) for f, h in raw]
+
+        if pares is None:
+            # Fallback: recalcular con la misma lógica que generar_fechas_bb_full
+            pares = generar_fechas_bb_full(pack.fecha_inicio)
+
+        # Cada par trae su propia hora → sábado = 11, mar/jue = 20
+        sesiones = [
+            Sesion(pack=pack, fecha=f, hora=h, numero=i + 1)
+            for i, (f, h) in enumerate(pares)
+        ]
         Sesion.objects.bulk_create(sesiones)
         pack.estado = 'ACTIVO'
         pack.save(update_fields=['estado'])
@@ -173,7 +189,8 @@ def webpay_retorno(request):
     # ── Pago aprobado ─────────────────────────────────────────────────────────
     if response_code == 0 and status == 'AUTHORIZED':
         try:
-            _activar_pack(pack)
+            # Pasamos request para que _activar_pack pueda recuperar bb_pares de sesión
+            _activar_pack(pack, request=request)
         except Exception as e:
             logger.error("Error activando pack=%s tras pago aprobado: %s", pack_id, e)
             messages.error(request, 'Pago recibido, pero hubo un error activando tu reserva. Avisa a Paula con urgencia.')
