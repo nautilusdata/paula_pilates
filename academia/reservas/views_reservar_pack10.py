@@ -31,7 +31,7 @@ MES_ES = {
     7: 'julio', 8: 'agosto', 9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'
 }
 
-NOMBRE_DIA_CORTO = {0: 'Lun', 1: 'Mar', 2: 'Mié', 3: 'Jue', 4: 'Vie'}
+NOMBRE_DIA_CORTO = {0: 'Lun', 1: 'Mar', 2: 'Mié', 3: 'Jue', 4: 'Vie', 5: 'Sáb'}
 
 NOMBRES_FRECUENCIA = {
     'LM':  'lunes o miércoles',
