@@ -11,6 +11,9 @@ HORARIOS_BB = {
     'SAB': {'dia': 5, 'hora': 11, 'label': 'Sábado 11:00'},
 }
 
+# Mapa rápido weekday → hora para BB_FULL (Mar=20, Jue=20, Sáb=11)
+DIA_HORA_BB = {h['dia']: h['hora'] for h in HORARIOS_BB.values()}
+
 NOMBRE_DIA = {0: 'Lun', 1: 'Mar', 2: 'Mié', 3: 'Jue', 4: 'Vie', 5: 'Sáb', 6: 'Dom'}
 MES_ES = {
     1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril', 5: 'mayo', 6: 'junio',
@@ -33,22 +36,24 @@ def cupos_bb(fecha: date, hora: int) -> int:
 
 def generar_fechas_bb_full(fecha_inicio: date) -> list:
     """
-    Genera las fechas del mes completo para Mensualidad Full
-    (Mar + Jue + Sáb) a partir de la fecha de inicio,
+    Genera los pares (fecha, hora) del mes completo para Mensualidad Full
+    (Mar 20:00 + Jue 20:00 + Sáb 11:00) a partir de la fecha de inicio,
     hasta completar 4 semanas, saltando feriados.
+
+    Retorna: list of (date, hora_int)
     """
     feriados = feriados_punta_arenas()
-    dias_bb = [1, 3, 5]  # Mar, Jue, Sáb
     fechas = []
     cursor = fecha_inicio
     fin = fecha_inicio + timedelta(weeks=4)
 
     while cursor < fin:
-        if cursor.weekday() in dias_bb and cursor not in feriados:
-            fechas.append(cursor)
+        if cursor.weekday() in DIA_HORA_BB and cursor not in feriados:
+            hora = DIA_HORA_BB[cursor.weekday()]   # ← hora correcta por día
+            fechas.append((cursor, hora))
         cursor += timedelta(days=1)
 
-    return fechas
+    return fechas  # [(date, hora), ...]
 
 
 @login_required
@@ -102,30 +107,36 @@ def reservar_body_balance(request):
 
         if errores:
             context.update({
-                'errores':   errores,
-                'sel_tipo':  tipo,
-                'sel_fecha': fecha_str,
+                'errores':    errores,
+                'sel_tipo':   tipo,
+                'sel_fecha':  fecha_str,
                 'sel_dia_bb': dia_bb,
             })
             return render(request, 'reservas/reservar_body_balance.html', context)
 
         if tipo == 'BB_FULL':
-            fechas = generar_fechas_bb_full(fecha_inicio)
-            hora   = HORARIOS_BB[{1: 'MAR', 3: 'JUE', 5: 'SAB'}[fecha_inicio.weekday()]]['hora']
+            # pares = [(date, hora), ...]  — cada día con su hora correcta
+            pares  = generar_fechas_bb_full(fecha_inicio)
             precio = ConfiguracionPrecio.get('BB_FULL', 60_000)
+            # Guardamos en sesión como lista de [fecha_iso, hora]
+            request.session['bb_borrador'] = {
+                'tipo':         tipo,
+                'fecha_inicio': fecha_inicio.isoformat(),
+                'dia_bb':       None,
+                'pares':        [[f.isoformat(), h] for f, h in pares],
+                'precio':       precio,
+            }
         else:
             hora   = HORARIOS_BB[dia_bb]['hora']
-            fechas = [fecha_inicio]
             precio = ConfiguracionPrecio.get('BB_SEMANAL', 15_000)
+            request.session['bb_borrador'] = {
+                'tipo':         tipo,
+                'fecha_inicio': fecha_inicio.isoformat(),
+                'dia_bb':       dia_bb,
+                'pares':        [[fecha_inicio.isoformat(), hora]],
+                'precio':       precio,
+            }
 
-        request.session['bb_borrador'] = {
-            'tipo':         tipo,
-            'fecha_inicio': fecha_inicio.isoformat(),
-            'dia_bb':       dia_bb,
-            'fechas':       [f.isoformat() for f in fechas],
-            'hora':         hora,
-            'precio':       precio,
-        }
         return redirect('reservar_body_balance_confirmar')
 
     return render(request, 'reservas/reservar_body_balance.html', context)
@@ -139,50 +150,56 @@ def reservar_body_balance_confirmar(request):
         messages.warning(request, 'Sesión expirada. Inicia la reserva de nuevo.')
         return redirect('reservar_body_balance')
 
-    fechas = [date.fromisoformat(f) for f in borrador['fechas']]
-    hora   = borrador['hora']
+    # Reconstruir pares (date, hora) — cada uno con su hora correcta
+    pares  = [(date.fromisoformat(f), h) for f, h in borrador['pares']]
     tipo   = borrador['tipo']
+    fechas = [f for f, h in pares]
 
     context = {
         'tipo':         tipo,
         'tipo_label':   'Mensualidad Full' if tipo == 'BB_FULL' else 'Clase Semanal',
         'fecha_inicio': fechas[0],
         'fecha_fin':    fechas[-1],
-        'fechas':       [(i + 1, f, fmt_fecha_bb(f)) for i, f in enumerate(fechas)],
-        'hora':         hora,
+        # Ahora incluimos la hora correcta de cada sesión en el template
+        'fechas':       [(i + 1, f, h, fmt_fecha_bb(f)) for i, (f, h) in enumerate(pares)],
         'precio':       borrador['precio'],
         'es_full':      tipo == 'BB_FULL',
     }
 
-
     if request.method == 'POST':
-            pack = Pack.objects.create(
-                alumna       = request.user,
-                tipo         = tipo,
-                hora         = hora,
-                fecha_inicio = fechas[0],
-                fecha_fin    = fechas[-1],
-                cantidad     = len(fechas),
-            )
-            del request.session['bb_borrador']
+        # Para BB_FULL el campo hora del Pack queda en None (irrelevante;
+        # las sesiones llevan su propia hora). Para BB_SEMANAL hay una sola hora.
+        hora_pack = None if tipo == 'BB_FULL' else pares[0][1]
 
-            from .views_webpay import crear_transaccion
-            return_url = request.build_absolute_uri('/pago/webpay/retorno/')
-            data = crear_transaccion(pack, return_url)
+        pack = Pack.objects.create(
+            alumna       = request.user,
+            tipo         = tipo,
+            hora         = hora_pack,
+            fecha_inicio = fechas[0],
+            fecha_fin    = fechas[-1],
+            cantidad     = len(pares),
+        )
+        del request.session['bb_borrador']
 
-            token = data.get('token')
-            url   = data.get('url')
+        from .views_webpay import crear_transaccion
+        return_url = request.build_absolute_uri('/pago/webpay/retorno/')
+        data = crear_transaccion(pack, return_url)
 
-            if not token or not url:
-                pack.delete()
-                messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
-                return redirect('reservar_body_balance')
+        token = data.get('token')
+        url   = data.get('url')
 
-            request.session['webpay_pack_id'] = pack.pk
+        if not token or not url:
+            pack.delete()
+            messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+            return redirect('reservar_body_balance')
 
-            return render(request, 'reservas/webpay_redirect.html', {
-                'url':   url,
-                'token': token,
-            })
+        # Guardamos los pares en sesión para que _activar_pack los use
+        request.session['bb_pares'] = borrador['pares']
+        request.session['webpay_pack_id'] = pack.pk
+
+        return render(request, 'reservas/webpay_redirect.html', {
+            'url':   url,
+            'token': token,
+        })
 
     return render(request, 'reservas/reservar_body_balance_confirmar.html', context)
