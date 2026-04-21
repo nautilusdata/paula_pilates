@@ -646,6 +646,7 @@ def reservar_clase_prueba_confirmar(request):
         'fecha':       fecha,
         'fecha_label': fmt_fecha(fecha),
         'precio':      ConfiguracionPrecio.get('CLASE_PRUEBA', 15_000),
+        'duracion':    '60 min', 
     }
 
     if request.method == 'POST':
