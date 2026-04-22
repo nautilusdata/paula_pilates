@@ -37,6 +37,9 @@
     <div class="auth-overlay">
         {% if user.is_authenticated %}
             <span class="user-greeting">{{ user.first_name|default:user.username }}</span>
+            {% if user.is_staff %}
+                <a href="/panel/" class="auth-btn panel-paula">Panel</a>
+            {% endif %}
             <a href="{% url 'account_logout' %}" class="auth-btn logout">Salir</a>
         {% else %}
             <a href="{% url 'account_login' %}" class="auth-btn login">Login</a>
