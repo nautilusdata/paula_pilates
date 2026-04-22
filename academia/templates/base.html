@@ -38,7 +38,7 @@
         {% if user.is_authenticated %}
             <span class="user-greeting">{{ user.first_name|default:user.username }}</span>
             {% if user.is_staff %}
-                    <a href="/panel/" class="auth-btn" style="background-color:#1a3d00; color:#fff;">Panel</a>
+                        <a href="/panel/" class="auth-btn" style="background-color:#1a3d00; color:#fff; border-radius:20px;">Panel</a>
             {% endif %}
             <a href="{% url 'account_logout' %}" class="auth-btn logout">Salir</a>
         {% else %}
