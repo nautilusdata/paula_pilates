@@ -10,20 +10,26 @@ from .models import (
 )
 from django.utils import timezone
 from django.http import JsonResponse
-from django.contrib.auth import authenticate
 from django.db import transaction
 
-# Solo Paula (staff) puede entrar al panel
 def es_staff(user):
     return user.is_staff
+
+# Color por tipo de producto — usado en ficha_alumna
+COLOR_TIPO = {
+    'PACK10':    'pl',
+    'REDUCIDO':  'pl',
+    'SUELTA':    'pl',
+    'PRIVADA':   'pv',
+    'BB_FULL':   'bb',
+    'BB_SEMANAL':'bb',
+    'PRUEBA':    'pr',
+}
 
 @login_required
 @user_passes_test(es_staff, login_url='/')
 def panel_principal(request):
-    """Vista principal del panel — día a día."""
     hoy = date.today()
-
-    # Día a mostrar
     dia_str = request.GET.get('dia')
     if dia_str:
         try:
@@ -36,19 +42,16 @@ def panel_principal(request):
     dia_anterior  = (dia_actual - timedelta(days=1)).isoformat()
     dia_siguiente = (dia_actual + timedelta(days=1)).isoformat()
 
-    # Sesiones del día
     sesiones_dia = Sesion.objects.filter(
         fecha=dia_actual,
         estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
     ).select_related('pack__alumna').order_by('hora')
 
-    # Agrupar por hora
     from collections import defaultdict
     por_hora = defaultdict(list)
     for sesion in sesiones_dia:
         por_hora[sesion.hora].append(sesion)
 
-    # Ordenar horas
     horas_del_dia = sorted(por_hora.keys())
 
     context = {
@@ -66,7 +69,6 @@ def panel_principal(request):
 @login_required
 @user_passes_test(es_staff, login_url='/')
 def ficha_alumna(request, alumna_id):
-    """Vista de Paula — ficha completa de una alumna con sus packs y opción de cancelar."""
     alumna = get_object_or_404(User, pk=alumna_id)
     hoy    = date.today()
 
@@ -78,22 +80,47 @@ def ficha_alumna(request, alumna_id):
         .order_by('-fecha_inicio')
     )
 
-    packs_data = []
+    packs_data    = []
+    sesiones_crono = []  # vista cronológica — todas las sesiones mezcladas
+
     for pack in packs:
-        sesiones       = pack.sesiones.order_by('fecha', 'hora')
-        completadas    = sesiones.filter(estado='COMPLETADA').count()
-        futuras        = sesiones.filter(fecha__gte=hoy, estado='PROGRAMADA').count()
+        sesiones    = pack.sesiones.order_by('fecha', 'hora')
+        completadas = sesiones.filter(estado='COMPLETADA').count()
+        total       = sesiones.count()
+        proxima     = sesiones.filter(fecha__gte=hoy, estado='PROGRAMADA').first()
+        color       = COLOR_TIPO.get(pack.tipo, 'pl')
+
+        sesiones_list = []
+        for s in sesiones:
+            es_proxima = bool(proxima and s.pk == proxima.pk)
+            pasada     = s.fecha < hoy or s.estado == 'COMPLETADA'
+            item = {
+                'sesion':    s,
+                'es_proxima': es_proxima,
+                'pasada':    pasada,
+                'pack':      pack,
+                'color':     color,
+            }
+            sesiones_list.append(item)
+            sesiones_crono.append(item)
+
         packs_data.append({
-            'pack':       pack,
-            'sesiones':   sesiones,
+            'pack':        pack,
+            'sesiones':    sesiones_list,
             'completadas': completadas,
-            'futuras':    futuras,
+            'total':       total,
+            'proxima':     proxima,
+            'color':       color,
         })
 
+    # Ordenar cronológicamente para la segunda vista
+    sesiones_crono.sort(key=lambda x: (x['sesion'].fecha, x['sesion'].hora))
+
     context = {
-        'alumna':     alumna,
-        'packs_data': packs_data,
-        'hoy':        hoy,
+        'alumna':         alumna,
+        'packs_data':     packs_data,
+        'sesiones_crono': sesiones_crono,
+        'hoy':            hoy,
     }
     return render(request, 'reservas/ficha_alumna.html', context)
 
@@ -102,20 +129,12 @@ def ficha_alumna(request, alumna_id):
 @user_passes_test(es_staff, login_url='/')
 @require_POST
 def cancelar_pack(request, pack_id):
-    """
-    Wipe limpio de un pack:
-    - Borra sesiones futuras (fecha >= hoy)
-    - Deja sesiones pasadas como registro histórico
-    - Cambia estado del pack a CANCELADO
-    Paula maneja el reembolso por fuera (transferencia, crédito, etc.)
-    """
-    hoy  = date.today()
-    pack = get_object_or_404(Pack, pk=pack_id)
+    hoy       = date.today()
+    pack      = get_object_or_404(Pack, pk=pack_id)
     alumna_id = pack.alumna.pk
     alumna_nombre = pack.alumna.get_full_name()
 
     with transaction.atomic():
-        # Borrar solo sesiones futuras — conservar historial de clases ya tomadas
         sesiones_borradas = pack.sesiones.filter(fecha__gte=hoy).delete()[0]
         pack.estado = 'CANCELADO'
         pack.save(update_fields=['estado'])
@@ -133,9 +152,7 @@ def cancelar_pack(request, pack_id):
 @user_passes_test(es_staff, login_url='/')
 @require_http_methods(["GET", "POST"])
 def panel_precios(request):
-    """Vista para editar precios."""
     precios = ConfiguracionPrecio.objects.all().order_by('clave')
-
     if request.method == 'POST':
         for precio in precios:
             nuevo = request.POST.get(f'precio_{precio.clave}')
@@ -145,15 +162,9 @@ def panel_precios(request):
         messages.success(request, 'Precios actualizados correctamente.')
         return redirect('panel_precios')
 
-    # Configuración general
     reformers = ConfiguracionGeneral.get('CAPACIDAD_REFORMERS', 7)
     cap_bb    = ConfiguracionGeneral.get('CAPACIDAD_BODY_BALANCE', 20)
-
-    context = {
-        'precios':    precios,
-        'reformers':  reformers,
-        'cap_bb':     cap_bb,
-    }
+    context   = {'precios': precios, 'reformers': reformers, 'cap_bb': cap_bb}
     return render(request, 'reservas/panel_precios.html', context)
 
 
@@ -186,14 +197,12 @@ def panel_horarios(request):
         messages.success(request, 'Horarios actualizados.')
         return redirect('panel_horarios')
 
-    horarios = ConfiguracionHorario.objects.all().order_by('hora', 'dia')
-    reformers = ConfiguracionGeneral.get('CAPACIDAD_REFORMERS', 7)
-    cap_bb    = ConfiguracionGeneral.get('CAPACIDAD_BODY_BALANCE', 20)
-
-    DIAS = [(0,'Lunes'),(1,'Martes'),(2,'Miércoles'),(3,'Jueves'),(4,'Viernes'),(5,'Sábado')]
+    horarios    = ConfiguracionHorario.objects.all().order_by('hora', 'dia')
+    reformers   = ConfiguracionGeneral.get('CAPACIDAD_REFORMERS', 7)
+    cap_bb      = ConfiguracionGeneral.get('CAPACIDAD_BODY_BALANCE', 20)
+    DIAS        = [(0,'Lunes'),(1,'Martes'),(2,'Miércoles'),(3,'Jueves'),(4,'Viernes'),(5,'Sábado')]
     todas_horas = sorted(set(horarios.values_list('hora', flat=True)))
 
-    # {hora: {dia: {tipo: ConfiguracionHorario}}}
     grilla = {}
     for hora in todas_horas:
         grilla[hora] = {}
@@ -203,7 +212,6 @@ def panel_horarios(request):
     for ch in horarios:
         grilla[ch.hora][ch.dia][ch.tipo] = ch
 
-    # Eliminar dias sin ningun tipo
     for hora in todas_horas:
         for dia_num, _ in DIAS:
             if not grilla[hora][dia_num]:
@@ -222,10 +230,8 @@ def panel_horarios(request):
 @login_required
 @user_passes_test(es_staff, login_url='/')
 def marcar_ausente(request, sesion_id):
-    """Paula marca una alumna como ausente desde su panel."""
     if request.method != 'POST':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
-    
     try:
         sesion = Sesion.objects.get(pk=sesion_id)
     except Sesion.DoesNotExist:
@@ -238,29 +244,21 @@ def marcar_ausente(request, sesion_id):
     sesion.marcada_ausente_en = timezone.now()
     sesion.save()
 
-    return JsonResponse({
-        'ok': True,
-        'alumna': sesion.pack.alumna.get_full_name(),
-        'sesion_id': sesion.pk,
-    })
+    return JsonResponse({'ok': True, 'alumna': sesion.pack.alumna.get_full_name(), 'sesion_id': sesion.pk})
 
 
 @login_required
 @user_passes_test(es_staff, login_url='/')
 @require_http_methods(["GET", "POST"])
 def bulk_reschedule(request):
-    """Paula reprograma todas las clases futuras por ausencia."""
     context = {'hoy': date.today()}
-
     if request.method == 'POST':
-        fecha_inicio_str = request.POST.get('fecha_inicio')
+        fecha_inicio_str  = request.POST.get('fecha_inicio')
         fecha_regreso_str = request.POST.get('fecha_regreso')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
+        errores   = []
 
-        errores = []
-
-        # Validar contraseñas
         if password1 != password2:
             errores.append('Las contraseñas no coinciden.')
         else:
@@ -270,9 +268,7 @@ def bulk_reschedule(request):
             if not user:
                 errores.append('Contraseña incorrecta.')
 
-        # Validar fechas
-        fecha_inicio = None
-        fecha_regreso = None
+        fecha_inicio = fecha_regreso = None
         try:
             fecha_inicio  = date.fromisoformat(fecha_inicio_str)
             fecha_regreso = date.fromisoformat(fecha_regreso_str)
@@ -287,7 +283,6 @@ def bulk_reschedule(request):
             context['errores'] = errores
             return render(request, 'reservas/bulk_reschedule.html', context)
 
-        # Guardar en sesión y redirigir a preview
         request.session['bulk_data'] = {
             'fecha_inicio':  fecha_inicio.isoformat(),
             'fecha_regreso': fecha_regreso.isoformat(),
@@ -301,23 +296,19 @@ def bulk_reschedule(request):
 @user_passes_test(es_staff, login_url='/')
 @require_http_methods(["GET", "POST"])
 def bulk_reschedule_preview(request):
-    """Muestra preview de los cambios antes de ejecutar."""
     bulk_data = request.session.get('bulk_data')
     if not bulk_data:
         return redirect('bulk_reschedule')
 
-    from .models import Pack, generar_fechas_pack, feriados_punta_arenas, DIAS_SEMANA_PILATES
+    from .models import Pack, feriados_punta_arenas, DIAS_SEMANA_PILATES
 
     fecha_inicio  = date.fromisoformat(bulk_data['fecha_inicio'])
     fecha_regreso = date.fromisoformat(bulk_data['fecha_regreso'])
 
-    # Sesiones afectadas — programadas desde fecha_inicio en adelante
     sesiones_afectadas = Sesion.objects.filter(
-        fecha__gte=fecha_inicio,
-        estado='PROGRAMADA',
+        fecha__gte=fecha_inicio, estado='PROGRAMADA',
     ).select_related('pack__alumna').order_by('pack', 'fecha')
 
-    # Calcular nuevas fechas para cada pack afectado
     feriados = feriados_punta_arenas()
     previews = []
     packs_procesados = set()
@@ -328,16 +319,13 @@ def bulk_reschedule_preview(request):
             continue
         packs_procesados.add(pack.pk)
 
-        # Sesiones del pack que se van a mover
         ses_pack = list(pack.sesiones.filter(
-            fecha__gte=fecha_inicio,
-            estado='PROGRAMADA'
+            fecha__gte=fecha_inicio, estado='PROGRAMADA'
         ).order_by('fecha'))
 
         if not ses_pack:
             continue
 
-        # Calcular nuevas fechas desde fecha_regreso
         if pack.frecuencia in DIAS_SEMANA_PILATES:
             dias = DIAS_SEMANA_PILATES[pack.frecuencia]
             nuevas_fechas = []
@@ -350,30 +338,27 @@ def bulk_reschedule_preview(request):
             nuevas_fechas = [fecha_regreso + timedelta(days=i) for i in range(len(ses_pack))]
 
         previews.append({
-            'alumna':       pack.alumna.get_full_name(),
-            'pack':         pack.get_tipo_display(),
-            'hora':         pack.hora,
-            'cambios':      list(zip(ses_pack, nuevas_fechas)),
+            'alumna':  pack.alumna.get_full_name(),
+            'pack':    pack.get_tipo_display(),
+            'hora':    pack.hora,
+            'cambios': list(zip(ses_pack, nuevas_fechas)),
         })
 
     context = {
-        'previews':      previews,
-        'fecha_inicio':  fecha_inicio,
-        'fecha_regreso': fecha_regreso,
+        'previews':       previews,
+        'fecha_inicio':   fecha_inicio,
+        'fecha_regreso':  fecha_regreso,
         'total_sesiones': sesiones_afectadas.count(),
     }
 
     if request.method == 'POST':
         count = 0
         with transaction.atomic():
-            # Paso 1: mover todo a fechas temporales para evitar conflictos
             for preview in previews:
                 for sesion, nueva_fecha in preview['cambios']:
                     sesion.fecha = sesion.fecha + timedelta(days=3650)
                     sesion.save(update_fields=['fecha'])
                     count += 1
-
-            # Paso 2: mover a las fechas definitivas
             for preview in previews:
                 for sesion, nueva_fecha in preview['cambios']:
                     sesion.fecha = nueva_fecha
@@ -387,14 +372,11 @@ def bulk_reschedule_preview(request):
 
 
 def limpiar_packs_view(request):
-    """Endpoint para Cloud Scheduler — elimina packs PENDIENTE_PAGO expirados."""
     token = request.headers.get('X-Scheduler-Token')
     if token != 'paula-pilates-scheduler-2026':
         return JsonResponse({'error': 'No autorizado'}, status=401)
-    
     umbral = timezone.now() - timedelta(hours=24)
-    packs = Pack.objects.filter(estado='PENDIENTE_PAGO', creado_en__lt=umbral)
-    total = packs.count()
+    packs  = Pack.objects.filter(estado='PENDIENTE_PAGO', creado_en__lt=umbral)
+    total  = packs.count()
     packs.delete()
-    
     return JsonResponse({'eliminados': total})
