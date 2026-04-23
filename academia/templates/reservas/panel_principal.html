@@ -206,7 +206,9 @@ body { font-family: var(--font); }
             {{ sesion.pack.alumna.first_name|first }}{{ sesion.pack.alumna.last_name|first }}
           </div>
           <div class="alumna-info">
-            <span class="alumna-nombre">{{ sesion.pack.alumna.get_full_name }}</span>
+            <a href="{% url 'ficha_alumna' sesion.pack.alumna.pk %}" class="alumna-nombre" style="text-decoration:none; color:inherit;">
+                {{ sesion.pack.alumna.get_full_name }}
+            </a>
             <span class="alumna-tipo">{{ sesion.pack.get_tipo_display }}</span>
           </div>
 

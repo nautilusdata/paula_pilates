@@ -1,17 +1,17 @@
 from datetime import date, timedelta
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_http_methods, require_POST
 from django.contrib import messages
+from django.contrib.auth.models import User
 from .models import (
     Sesion, ConfiguracionHorario, ConfiguracionGeneral,
-    ConfiguracionPrecio
+    ConfiguracionPrecio, Pack
 )
 from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 from django.db import transaction
-from .models import Pack
 
 # Solo Paula (staff) puede entrar al panel
 def es_staff(user):
@@ -61,6 +61,72 @@ def panel_principal(request):
         'es_hoy':        dia_actual == hoy,
     }
     return render(request, 'reservas/panel_principal.html', context)
+
+
+@login_required
+@user_passes_test(es_staff, login_url='/')
+def ficha_alumna(request, alumna_id):
+    """Vista de Paula — ficha completa de una alumna con sus packs y opción de cancelar."""
+    alumna = get_object_or_404(User, pk=alumna_id)
+    hoy    = date.today()
+
+    packs = (
+        Pack.objects
+        .filter(alumna=alumna)
+        .exclude(estado='CANCELADO')
+        .prefetch_related('sesiones')
+        .order_by('-fecha_inicio')
+    )
+
+    packs_data = []
+    for pack in packs:
+        sesiones       = pack.sesiones.order_by('fecha', 'hora')
+        completadas    = sesiones.filter(estado='COMPLETADA').count()
+        futuras        = sesiones.filter(fecha__gte=hoy, estado='PROGRAMADA').count()
+        packs_data.append({
+            'pack':       pack,
+            'sesiones':   sesiones,
+            'completadas': completadas,
+            'futuras':    futuras,
+        })
+
+    context = {
+        'alumna':     alumna,
+        'packs_data': packs_data,
+        'hoy':        hoy,
+    }
+    return render(request, 'reservas/ficha_alumna.html', context)
+
+
+@login_required
+@user_passes_test(es_staff, login_url='/')
+@require_POST
+def cancelar_pack(request, pack_id):
+    """
+    Wipe limpio de un pack:
+    - Borra sesiones futuras (fecha >= hoy)
+    - Deja sesiones pasadas como registro histórico
+    - Cambia estado del pack a CANCELADO
+    Paula maneja el reembolso por fuera (transferencia, crédito, etc.)
+    """
+    hoy  = date.today()
+    pack = get_object_or_404(Pack, pk=pack_id)
+    alumna_id = pack.alumna.pk
+    alumna_nombre = pack.alumna.get_full_name()
+
+    with transaction.atomic():
+        # Borrar solo sesiones futuras — conservar historial de clases ya tomadas
+        sesiones_borradas = pack.sesiones.filter(fecha__gte=hoy).delete()[0]
+        pack.estado = 'CANCELADO'
+        pack.save(update_fields=['estado'])
+
+    messages.success(
+        request,
+        f'Pack de {alumna_nombre} cancelado. '
+        f'{sesiones_borradas} sesión(es) futura(s) eliminada(s). '
+        f'El reembolso se gestiona directamente con la alumna.'
+    )
+    return redirect('ficha_alumna', alumna_id=alumna_id)
 
 
 @login_required
@@ -281,7 +347,6 @@ def bulk_reschedule_preview(request):
                     nuevas_fechas.append(cursor)
                 cursor += timedelta(days=1)
         else:
-            # Body Balance u otros sin frecuencia LMV
             nuevas_fechas = [fecha_regreso + timedelta(days=i) for i in range(len(ses_pack))]
 
         previews.append({
@@ -301,10 +366,10 @@ def bulk_reschedule_preview(request):
     if request.method == 'POST':
         count = 0
         with transaction.atomic():
-            # Paso 1: mover todo a fechas temporales (muy lejanas) para evitar conflictos
+            # Paso 1: mover todo a fechas temporales para evitar conflictos
             for preview in previews:
                 for sesion, nueva_fecha in preview['cambios']:
-                    sesion.fecha = sesion.fecha + timedelta(days=3650)  # +10 años
+                    sesion.fecha = sesion.fecha + timedelta(days=3650)
                     sesion.save(update_fields=['fecha'])
                     count += 1
 
@@ -323,7 +388,6 @@ def bulk_reschedule_preview(request):
 
 def limpiar_packs_view(request):
     """Endpoint para Cloud Scheduler — elimina packs PENDIENTE_PAGO expirados."""
-    # Verificar token secreto para que nadie más pueda llamarlo
     token = request.headers.get('X-Scheduler-Token')
     if token != 'paula-pilates-scheduler-2026':
         return JsonResponse({'error': 'No autorizado'}, status=401)

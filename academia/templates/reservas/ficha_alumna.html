@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Ficha – {{ alumna.get_full_name }} – Panel Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --gris:        #555;
+  --borde:       #e0e0e0;
+  --radio:       12px;
+  --font:        'Poppins', sans-serif;
+}
+body { font-family: var(--font); }
+
+.ficha-wrap {
+  width: 92%; max-width: 680px;
+  margin: 80px auto 80px;
+}
+
+.panel-nav {
+  display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.panel-nav a {
+  padding: 8px 16px; border-radius: 20px; text-decoration: none;
+  font-size: .82rem; font-weight: 600; background: #f0f0f0; color: var(--gris);
+  transition: all .15s;
+}
+.panel-nav a.activo { background: var(--verde); color: #fff; }
+.panel-nav a:hover  { background: var(--verde-light); color: var(--verde); }
+
+.ficha-header {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--verde);
+  color: #fff;
+  border-radius: var(--radio);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.ficha-avatar {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; font-weight: 700; flex-shrink: 0;
+}
+.ficha-nombre { font-size: 1.15rem; font-weight: 700; }
+.ficha-email  { font-size: .8rem; opacity: .75; margin-top: 2px; }
+
+/* Pack card */
+.pack-card {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.pack-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--verde-pale);
+  border-bottom: 1px solid var(--verde-light);
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pack-card-titulo {
+  font-weight: 700; color: var(--verde); font-size: .95rem;
+}
+.pack-card-meta {
+  font-size: .75rem; color: #888; margin-top: 2px;
+}
+.pack-estado {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; padding: 3px 10px; border-radius: 20px;
+}
+.estado-ACTIVO         { background: #e8f5e9; color: #388e3c; }
+.estado-PENDIENTE_PAGO { background: #ffebee; color: #c62828; }
+.estado-COMPLETADO     { background: #f5f5f5; color: #999; }
+.estado-CONGELADO      { background: #e3f2fd; color: #1565c0; }
+
+/* Sesiones mini */
+.sesiones-mini {
+  padding: 12px 18px;
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.sesion-chip {
+  font-size: .72rem; font-weight: 600;
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--verde-pale);
+  color: var(--verde);
+  border: 1px solid var(--verde-light);
+}
+.sesion-chip.pasada     { background: #f5f5f5; color: #bbb; border-color: #eee; }
+.sesion-chip.completada { background: #e8f5e9; color: #388e3c; border-color: #c8e6c9; }
+.sesion-chip.ausente    { background: #fff3e0; color: #e65100; border-color: #ffe0b2; }
+
+/* Botón cancelar */
+.pack-card-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--borde);
+  display: flex; justify-content: flex-end;
+}
+.btn-cancelar {
+  background: transparent;
+  color: #c62828;
+  border: 1.5px solid #e53935;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-family: var(--font);
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-cancelar:hover { background: #e53935; color: #fff; }
+
+/* Modal confirmación */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.45); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.visible { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 14px;
+  padding: 28px 24px; max-width: 360px; width: 90%;
+  box-shadow: 0 8px 32px rgba(0,0,0,.2);
+}
+.modal-titulo { font-size: 1rem; font-weight: 700; color: #c62828; margin-bottom: 10px; }
+.modal-texto  { font-size: .85rem; color: #555; margin-bottom: 20px; line-height: 1.5; }
+.modal-acciones { display: flex; gap: 10px; justify-content: flex-end; }
+.btn-modal-cancelar {
+  padding: 9px 18px; border-radius: 8px; border: 1px solid #ddd;
+  background: #f5f5f5; color: #555; font-family: var(--font);
+  font-size: .85rem; font-weight: 600; cursor: pointer;
+}
+.btn-modal-confirmar {
+  padding: 9px 18px; border-radius: 8px; border: none;
+  background: #e53935; color: #fff; font-family: var(--font);
+  font-size: .85rem; font-weight: 700; cursor: pointer;
+}
+
+.sin-packs {
+  text-align: center; padding: 50px 20px; color: #bbb;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ficha-wrap">
+
+  <div class="panel-nav">
+    <a href="{% url 'panel_principal' %}">📅 Agenda</a>
+    <a href="{% url 'panel_precios' %}">💰 Precios</a>
+    <a href="{% url 'panel_horarios' %}">⚙️ Horarios</a>
+    <a href="{% url 'bulk_reschedule' %}" style="background:#ffebee; color:#c62828;">⚠️ Reprogramar todo</a>
+  </div>
+
+  <!-- Header alumna -->
+  <div class="ficha-header">
+    <div class="ficha-avatar">
+      {{ alumna.first_name|first }}{{ alumna.last_name|first }}
+    </div>
+    <div>
+      <div class="ficha-nombre">{{ alumna.get_full_name }}</div>
+      <div class="ficha-email">{{ alumna.email }}</div>
+    </div>
+  </div>
+
+  {% if packs_data %}
+    {% for pd in packs_data %}
+    <div class="pack-card">
+
+      <div class="pack-card-header">
+        <div>
+          <div class="pack-card-titulo">{{ pd.pack.get_tipo_display }}</div>
+          <div class="pack-card-meta">
+            Inicio: {{ pd.pack.fecha_inicio|date:"d/m/Y" }}
+            · {{ pd.completadas }}/{{ pd.pack.cantidad }} clases completadas
+            · {{ pd.futuras }} futuras
+          </div>
+        </div>
+        <span class="pack-estado estado-{{ pd.pack.estado }}">
+          {{ pd.pack.get_estado_display }}
+        </span>
+      </div>
+
+      <!-- Chips de sesiones -->
+      <div class="sesiones-mini">
+        {% for sesion in pd.sesiones %}
+        <span class="sesion-chip
+          {% if sesion.estado == 'COMPLETADA' %}completada
+          {% elif sesion.fecha < hoy %}pasada
+          {% elif sesion.estado == 'RECUPERAR' %}ausente
+          {% endif %}
+        ">
+          {{ sesion.fecha|date:"d/m" }} {{ sesion.hora }}:00
+        </span>
+        {% endfor %}
+      </div>
+
+      <!-- Botón cancelar -->
+      <div class="pack-card-footer">
+        <button class="btn-cancelar"
+                onclick="confirmarCancelar({{ pd.pack.pk }}, '{{ pd.pack.get_tipo_display }}', {{ pd.futuras }})">
+          Cancelar pack
+        </button>
+      </div>
+
+    </div>
+    {% endfor %}
+
+  {% else %}
+    <div class="sin-packs">
+      <p>Esta alumna no tiene packs activos.</p>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- Modal confirmación cancelación -->
+<div class="modal-overlay" id="modal-cancelar">
+  <div class="modal-box">
+    <div class="modal-titulo">⚠️ Cancelar pack</div>
+    <div class="modal-texto" id="modal-texto"></div>
+    <div class="modal-acciones">
+      <button class="btn-modal-cancelar" onclick="cerrarModal()">Volver</button>
+      <form method="POST" id="form-cancelar" action="">
+        {% csrf_token %}
+        <button type="submit" class="btn-modal-confirmar">Sí, cancelar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmarCancelar(packId, tipo, futuras) {
+  document.getElementById('modal-texto').innerHTML =
+    `Vas a cancelar <strong>${tipo}</strong> de <strong>{{ alumna.get_full_name }}</strong>.<br><br>
+     Se eliminarán <strong>${futuras} sesión(es) futura(s)</strong>. Las clases ya realizadas quedan en el historial.<br><br>
+     El reembolso se gestiona directamente con la alumna.`;
+  document.getElementById('form-cancelar').action = `/panel/cancelar-pack/${packId}/`;
+  document.getElementById('modal-cancelar').classList.add('visible');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-cancelar').classList.remove('visible');
+}
+</script>
+{% endblock %}
