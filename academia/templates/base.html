@@ -15,6 +15,30 @@
     <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
+    <style>
+        .auth-overlay {
+        position: fixed;
+        top: 10px;
+        right: 16px;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        }
+        .auth-btn {
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-family: 'Poppins', sans-serif;
+        font-size: .82rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        }
+        .auth-btn.login  { background: #fff; color: #2f6300; border: 2px solid #2f6300; }
+        .auth-btn.logout { background: #2f6300; color: #fff; }
+        .auth-btn.signup { background: #408601; color: #fff; }
+        .user-greeting   { font-size: .82rem; font-weight: 600; color: #fff; }
+    </style>
     {% block extra_head %}{% endblock %}
     </head>
 
