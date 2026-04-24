@@ -2,6 +2,7 @@
 import random
 import string
 import logging
+import requests as http_requests
 
 from django.conf import settings
 from django.shortcuts import redirect, get_object_or_404, render
@@ -32,8 +33,47 @@ def _tx():
     return Transaction(options)
 
 
+# ── Notificación Telegram ─────────────────────────────────────────────────────
+
+def notificar_paula(pack: Pack):
+    """Envía mensaje a Paula vía Telegram cuando se confirma un pago."""
+    token   = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
+    chat_id = getattr(settings, 'TELEGRAM_CHAT_ID', None)
+
+    if not token or not chat_id:
+        logger.warning("Telegram no configurado — TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID falta.")
+        return
+
+    mensaje = (
+        f"💰 *Nuevo pago confirmado*\n"
+        f"👤 {pack.alumna.get_full_name()}\n"
+        f"📦 {pack.get_tipo_display()}\n"
+        f"💵 ${pack.precio_total:,}\n"
+        f"📅 Inicio: {pack.fecha_inicio.strftime('%d/%m/%Y')}"
+    )
+
+    try:
+        resp = http_requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={
+                "chat_id":    chat_id,
+                "text":       mensaje,
+                "parse_mode": "Markdown",
+            },
+            timeout=5,
+        )
+        if resp.ok:
+            logger.info("Telegram notificado OK pack=%s", pack.pk)
+        else:
+            logger.warning("Telegram error pack=%s: %s", pack.pk, resp.text)
+    except Exception as e:
+        # No interrumpir el flujo de pago si Telegram falla
+        logger.error("Telegram excepción pack=%s: %s", pack.pk, e)
+
+
+# ── Crear / verificar transacción ─────────────────────────────────────────────
+
 def crear_transaccion(pack: Pack, return_url: str) -> dict:
-    # Evitar compras en $0 si hay desconexión con la DB y el precio queda en fallback.
     if pack.precio_total == 0:
         raise ValueError('Precio inválido. Verifica la configuración de precios.')
 
@@ -44,7 +84,7 @@ def crear_transaccion(pack: Pack, return_url: str) -> dict:
         return_url = return_url,
     )
     logger.info("WEBPAY CREAR pack=%s response=%s", pack.pk, response)
-    return response  # dict con 'token' y 'url'
+    return response
 
 
 def verificar_transaccion(token: str) -> dict:
@@ -54,12 +94,12 @@ def verificar_transaccion(token: str) -> dict:
 
 
 def _activar_pack(pack: Pack, request=None):
-    """Crea las sesiones y activa el pack según su tipo. Idempotente: no hace nada si ya está ACTIVO."""
+    """Crea las sesiones y activa el pack según su tipo. Idempotente."""
     if pack.estado == 'ACTIVO':
         return
 
     if pack.tipo in ('PACK10', 'REDUCIDO', 'PRIVADA'):
-        crear_sesiones_pack(pack)  # pone estado ACTIVO internamente
+        crear_sesiones_pack(pack)
 
     elif pack.tipo in ('SUELTA', 'PRUEBA'):
         Sesion.objects.create(pack=pack, fecha=pack.fecha_inicio, hora=pack.hora, numero=1)
@@ -70,8 +110,6 @@ def _activar_pack(pack: Pack, request=None):
     elif pack.tipo == 'BB_FULL':
         from .views_body_balance import generar_fechas_bb_full
 
-        # Intentar recuperar pares de sesión (guardados en reservar_body_balance_confirmar)
-        # para evitar recalcular. Si no están, recalcular desde la fecha de inicio del pack.
         pares = None
         if request is not None:
             raw = request.session.pop('bb_pares', None)
@@ -80,10 +118,8 @@ def _activar_pack(pack: Pack, request=None):
                 pares = [(_date.fromisoformat(f), h) for f, h in raw]
 
         if pares is None:
-            # Fallback: recalcular con la misma lógica que generar_fechas_bb_full
             pares = generar_fechas_bb_full(pack.fecha_inicio)
 
-        # Cada par trae su propia hora → sábado = 11, mar/jue = 20
         sesiones = [
             Sesion(pack=pack, fecha=f, hora=h, numero=i + 1)
             for i, (f, h) in enumerate(pares)
@@ -129,35 +165,19 @@ def webpay_iniciar(request, pack_id):
 # ── Retorno de Webpay ─────────────────────────────────────────────────────────
 
 def webpay_retorno(request):
-    """
-    Webpay puede volver por tres caminos distintos:
-
-    1. Pago completado (aprobado o rechazado):
-       POST con token_ws
-
-    2. Alumna presionó "Volver al comercio" / abandonó:
-       GET con TBK_TOKEN  (sin token_ws)
-
-    3. Timeout de sesión Webpay (>10 min sin pagar):
-       POST con TBK_TOKEN y TBK_ORDER_ID (sin token_ws)
-    """
-
     tbk_token = request.POST.get('TBK_TOKEN') or request.GET.get('TBK_TOKEN')
     token_ws  = request.POST.get('token_ws')  or request.GET.get('token_ws')
 
-    # ── Caso 2 y 3: abandono o timeout ───────────────────────────────────────
     if tbk_token and not token_ws:
         logger.warning("WEBPAY abandono/timeout TBK_TOKEN=%s", tbk_token[:8])
         messages.warning(request, 'Cancelaste el pago o la sesión expiró. Puedes intentarlo cuando quieras.')
         return redirect('mis_clases')
 
-    # ── Sin token: situación inesperada ───────────────────────────────────────
     if not token_ws:
         logger.error("WEBPAY retorno sin token_ws ni TBK_TOKEN")
         messages.error(request, 'No se recibió confirmación de Webpay.')
         return redirect('mis_clases')
 
-    # ── Caso 1: confirmar con Transbank ──────────────────────────────────────
     try:
         data = verificar_transaccion(token_ws)
     except TransbankError as e:
@@ -171,7 +191,6 @@ def webpay_retorno(request):
 
     logger.info("WEBPAY retorno buy_order=%s status=%s response_code=%s", buy_order, status, response_code)
 
-    # Extraer pack_id del buy_order (formato "PACK-48")
     try:
         pack_id = int(buy_order.replace('PACK-', ''))
     except (ValueError, AttributeError):
@@ -181,7 +200,6 @@ def webpay_retorno(request):
 
     pack = get_object_or_404(Pack, pk=pack_id)
 
-    # Idempotencia: si ya estaba activado (doble POST), no hacer nada
     if pack.estado != 'PENDIENTE_PAGO':
         messages.info(request, 'Tu reserva ya estaba activada.')
         return redirect('mis_clases')
@@ -189,12 +207,14 @@ def webpay_retorno(request):
     # ── Pago aprobado ─────────────────────────────────────────────────────────
     if response_code == 0 and status == 'AUTHORIZED':
         try:
-            # Pasamos request para que _activar_pack pueda recuperar bb_pares de sesión
             _activar_pack(pack, request=request)
         except Exception as e:
             logger.error("Error activando pack=%s tras pago aprobado: %s", pack_id, e)
             messages.error(request, 'Pago recibido, pero hubo un error activando tu reserva. Avisa a Paula con urgencia.')
             return redirect('mis_clases')
+
+        # ── Notificar a Paula por Telegram ────────────────────────────────────
+        notificar_paula(pack)
 
         messages.success(request, f'¡Pago confirmado! Tu {pack.get_tipo_display()} está activo. 🎉')
         return redirect('mis_clases')
@@ -205,7 +225,7 @@ def webpay_retorno(request):
     return redirect('mis_clases')
 
 
-# ── Reintentar pago desde "Mis Clases" ───────────────────────────────────────
+# ── Reintentar pago ───────────────────────────────────────────────────────────
 
 @login_required
 def reintentar_pago(request, pack_id):
