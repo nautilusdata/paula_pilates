@@ -156,6 +156,5 @@ WEBPAY_API_KEY       = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42
 WEBPAY_URL_BASE = 'https://webpay3g.transbank.cl'
 
 # ─── Telegram ─────────────────────────────────────────────────────────────────
-
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID   = os.getenv('TELEGRAM_CHAT_ID')
