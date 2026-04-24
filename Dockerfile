@@ -22,6 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY academia/ .
 
 # Recolectar estáticos
+# Recolectar estáticos
+ENV SECRET_KEY=build-only-not-used-in-production
 RUN python manage.py collectstatic --noinput
 
 # Puerto
