@@ -113,7 +113,7 @@ USE_TZ = True  # Mantén esto en True para manejar cambios de horario de verano 
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    BASE_DIR / 'academia' / 'static',
 ]
 
 # Opcional pero útil: donde se copian con collectstatic
