@@ -22,7 +22,7 @@ secrets.json
 # --- ARCHIVOS ESTÁTICOS Y CARGAS ---
 # Evita subir los 1700+ archivos de FontAwesome y fotos de prueba
 assets/
-static/
+/static/
 media/
 staticfiles/
 
