@@ -15,30 +15,45 @@
     <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
-    <style>
+        <style>
+        /* Franja de auth — siempre fija debajo del header */
         .auth-overlay {
-        position: fixed;
-        top: 90px;
-        right: 16px;
-        z-index: 999;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+            position: fixed;
+            top: 90px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
         }
+
+        /* Nombre de la alumna — centrado absoluto */
+        .user-greeting {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: .82rem;
+            font-weight: 600;
+            color: #2f6300;
+        }
+
+        /* Botones — siempre a la derecha */
         .auth-btn {
-        padding: 8px 18px;
-        border-radius: 20px;
-        font-family: 'Poppins', sans-serif;
-        font-size: .82rem;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
+            margin-left: auto;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-family: 'Poppins', sans-serif;
+            font-size: .82rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
         }
+        .auth-btn + .auth-btn { margin-left: 8px; }
         .auth-btn.login  { background: #fff; color: #2f6300; border: 2px solid #2f6300; }
         .auth-btn.logout { background: #2f6300; color: #fff; }
         .auth-btn.signup { background: #408601; color: #fff; }
-        .user-greeting { font-size: .82rem; font-weight: 600; color: #2f6300; }
-    </style>
+        </style>
     {% block extra_head %}{% endblock %}
     </head>
 
@@ -58,7 +73,7 @@
     </header>
 
     <!-- Botones de auth superpuestos (móvil) o en header (desktop) -->
-    <div class="auth-overlay">
+    <div class="auth-overlay {% if user.is_authenticated %}logueada{% endif %}">
         {% if user.is_authenticated %}
             <span class="user-greeting">{{ user.first_name|default:user.username }}</span>
             {% if user.is_staff %}
