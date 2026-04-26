@@ -22,10 +22,10 @@ def generar_fechas_pack(fecha_inicio: date, dias: list,
                         horas: dict, cantidad: int = 10):
     """
     Genera lista de (fecha, hora) para el pack.
-    
+
     dias  = lista de weekdays elegidos, ej: [0, 2, 5] (Lun, Mié, Sáb)
     horas = dict {dia_semana: hora}, ej: {0: 9, 2: 10, 5: 11}
-    
+
     Salta feriados de Punta Arenas.
     El primer día DEBE coincidir con uno de los días elegidos.
     """
@@ -56,15 +56,24 @@ def generar_fechas_pack(fecha_inicio: date, dias: list,
 def horas_para_pack(pack) -> dict:
     """
     Construye el dict {dia_semana: hora} a partir de los campos hora_dia* del pack.
+    Usa pack.frecuencia como string de días separados por coma, ej: '0,2,5'
     """
-    dias = DIAS_SEMANA_PILATES[pack.frecuencia]
-    horas = {
-        dias[0]: pack.hora_dia1,
-        dias[1]: pack.hora_dia2,
-    }
-    if len(dias) == 3 and pack.hora_dia3 is not None:
-        horas[dias[2]] = pack.hora_dia3
+    if not pack.frecuencia:
+        return {}
+    dias = [int(d) for d in pack.frecuencia.split(',')]
+    horas = {}
+    campos = [pack.hora_dia1, pack.hora_dia2, pack.hora_dia3, pack.hora_dia4]
+    for i, dia in enumerate(dias):
+        if i < len(campos) and campos[i] is not None:
+            horas[dia] = campos[i]
     return horas
+
+
+def dias_para_pack(pack) -> list:
+    """Retorna lista de weekdays del pack, ej: [0, 2, 5]"""
+    if not pack.frecuencia:
+        return []
+    return [int(d) for d in pack.frecuencia.split(',')]
 
 
 # --------------------- Modelos ───────────────────────────────────────────────
@@ -111,33 +120,28 @@ class Pack(models.Model):
         ('CANCELADO',      'Cancelado'),
     ]
 
-    alumna       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='packs')
-    tipo         = models.CharField(max_length=20, choices=TIPO_CHOICES)
-    frecuencia   = models.CharField(
-    max_length=20,
-    blank=True,
-    null=True,
-    help_text='Días elegidos, ej: 0,2,5 (Lun,Mié,Sáb)'
-)
+    alumna     = models.ForeignKey(User, on_delete=models.CASCADE, related_name='packs')
+    tipo       = models.CharField(max_length=20, choices=TIPO_CHOICES)
 
-    # Hora por día de frecuencia (reemplaza el campo único 'hora')
-    # dia1 = primer día de la frecuencia (Lun o Mar)
-    # dia2 = segundo día (Mié o Jue)
-    # dia3 = tercer día (Vie) — solo para LMV
-    hora_dia1    = models.PositiveSmallIntegerField(
-                       null=True, blank=True,
-                       help_text='Hora día 1 (Lun o Mar)')
-    hora_dia2    = models.PositiveSmallIntegerField(
-                       null=True, blank=True,
-                       help_text='Hora día 2 (Mié o Jue)')
-    hora_dia3    = models.PositiveSmallIntegerField(
-                       null=True, blank=True,
-                       help_text='Hora día 3 (Vie) — solo LMV')
+    # Días elegidos como string separado por comas, ej: '0,2,5' (Lun,Mié,Sáb)
+    frecuencia = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text='Días elegidos, ej: 0,2,5 (Lun,Mié,Sáb)'
+    )
+
+    # Hora por día — dia1=primer día elegido, dia2=segundo, etc.
+    hora_dia1 = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Hora día 1')
+    hora_dia2 = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Hora día 2')
+    hora_dia3 = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Hora día 3')
+    hora_dia4 = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Hora día 4')
 
     # Para productos de una sola hora (SUELTA, PRUEBA, BB, PRIVADA)
-    hora         = models.PositiveSmallIntegerField(
-                       null=True, blank=True,
-                       help_text='Hora única (para productos no-pack)')
+    hora = models.PositiveSmallIntegerField(
+        null=True, blank=True,
+        help_text='Hora única (para productos no-pack)'
+    )
 
     fecha_inicio = models.DateField()
     fecha_fin    = models.DateField(blank=True, null=True)
@@ -166,17 +170,18 @@ class Pack(models.Model):
         return 0
 
     def clean(self):
-        horas_validas = horas_disponibles_por_tipo('PL')
-        if self.tipo in ('PACK10', 'REDUCIDO'):
-            for campo, label in [
-                (self.hora_dia1, 'hora día 1'),
-                (self.hora_dia2, 'hora día 2'),
-            ]:
-                if campo is not None and campo not in horas_validas:
-                    raise ValidationError(f'{label} {campo} no es válida para Pilates.')
-            if self.frecuencia == 'LMV' and self.hora_dia3 is not None:
-                if self.hora_dia3 not in horas_disponibles_por_tipo('PL', dia=4):
-                    raise ValidationError(f'hora día 3 (Vie) {self.hora_dia3} no es válida.')
+        # Validación simplificada — solo verifica horas contra slots activos PL
+        if self.tipo in ('PACK10', 'REDUCIDO') and self.frecuencia:
+            dias = dias_para_pack(self)
+            horas_validas = horas_disponibles_por_tipo('PL')
+            campos = [self.hora_dia1, self.hora_dia2, self.hora_dia3, self.hora_dia4]
+            for i, dia in enumerate(dias):
+                if i < len(campos) and campos[i] is not None:
+                    horas_dia = horas_disponibles_por_tipo('PL', dia=dia)
+                    if campos[i] not in horas_dia:
+                        raise ValidationError(
+                            f'Hora {campos[i]} no válida para Pilates el día {dia}.'
+                        )
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -210,7 +215,7 @@ class Sesion(models.Model):
     marcada_ausente_en = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        ordering       = ['fecha', 'hora']
+        ordering        = ['fecha', 'hora']
         unique_together = [('fecha', 'hora', 'pack')]
 
     @classmethod
@@ -231,29 +236,22 @@ class Sesion(models.Model):
 def crear_sesiones_pack(pack: Pack):
     if pack.tipo not in ('PACK10', 'REDUCIDO', 'PRIVADA'):
         raise ValueError('Solo packs tienen sesiones múltiples con esta función.')
-    
-    
 
     # PRIVADA usa una sola hora para todos los días
     if pack.tipo == 'PRIVADA':
-        horas = {d: pack.hora for d in DIAS_SEMANA_PILATES[pack.frecuencia]}
+        dias = dias_para_pack(pack)
+        horas = {d: pack.hora for d in dias}
     else:
         horas = horas_para_pack(pack)
+        dias  = dias_para_pack(pack)
 
-    pares = generar_fechas_pack(pack.fecha_inicio, pack.frecuencia, horas, pack.cantidad)
+    pares = generar_fechas_pack(pack.fecha_inicio, dias, horas, pack.cantidad)
 
     with transaction.atomic():
-
-        # Bloqueo — ninguna otra transacción puede leer estos slots hasta que terminemos
         Sesion.objects.select_for_update().filter(
             fecha__in=[f for f, h in pares],
             hora__in=list(set(h for f, h in pares)),
         )
-
-        sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
-        if sin_cupo:
-            fechas_str = ', '.join(str(f) for f, _ in sin_cupo)
-            raise ValidationError(f'Sin cupo disponible en: {fechas_str}')
 
         sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
         if sin_cupo:
@@ -271,13 +269,12 @@ def crear_sesiones_pack(pack: Pack):
         pack.save(update_fields=['fecha_fin', 'estado'])
 
         return sesiones
-    
+
 
 def detectar_overlap(alumna, pares: list) -> list:
     """
     Verifica si la alumna ya tiene sesiones activas que colisionen
     con alguna de las (fecha, hora) del nuevo pack.
-    Retorna lista de (fecha, hora) con colisión.
     """
     colisiones = []
     for f, h in pares:
@@ -350,6 +347,18 @@ def horas_disponibles_por_tipo(tipo: str, dia: int = None) -> list:
     if dia is not None:
         qs = qs.filter(dia=dia)
     return sorted(set(qs.values_list('hora', flat=True)))
+
+
+def slots_disponibles_pl() -> dict:
+    """
+    Retorna dict {dia: [hora, hora, ...]} con todos los slots PL activos.
+    Útil para el flujo de reserva libre.
+    """
+    qs = ConfiguracionHorario.objects.filter(tipo='PL', activo=True).order_by('dia', 'hora')
+    resultado = {}
+    for ch in qs:
+        resultado.setdefault(ch.dia, []).append(ch.hora)
+    return resultado
 
 
 class ConfiguracionPrecio(models.Model):
