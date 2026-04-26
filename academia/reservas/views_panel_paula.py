@@ -188,11 +188,21 @@ def panel_horarios(request):
             obj.valor = int(cap_bb)
             obj.save()
 
+        # Nuevo: un select por slot dia_hora
         for ch in ConfiguracionHorario.objects.all():
-            key = f'slot_{ch.dia}_{ch.hora}_{ch.tipo}'
+            key   = f'slot_{ch.dia}_{ch.hora}'
             valor = request.POST.get(key, '')
-            ch.activo = valor != ''
-            ch.save()
+            if valor == '':
+                ch.activo = False
+                ch.save()
+            elif valor != ch.tipo:
+                # Cambio de tipo — actualizar
+                ch.tipo   = valor
+                ch.activo = True
+                ch.save()
+            else:
+                ch.activo = True
+                ch.save()
 
         messages.success(request, 'Horarios actualizados.')
         return redirect('panel_horarios')
