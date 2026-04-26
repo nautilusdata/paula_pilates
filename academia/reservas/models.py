@@ -8,15 +8,6 @@ from datetime import date, timedelta
 import holidays
 
 
-# ─── Constantes de Negocio ────────────────────────────────────────────────────
-
-DIAS_SEMANA_PILATES = {
-    'LMV': [0, 2, 4],   # Lunes, Miércoles, Viernes
-    'LM':  [0, 2],       # Lunes, Miércoles
-    'MJ':  [1, 3],       # Martes, Jueves
-}
-
-
 # ─── Helpers de fecha ────────────────────────────────────────────────────────
 
 def feriados_punta_arenas(years=None):
@@ -27,36 +18,28 @@ def feriados_punta_arenas(years=None):
     return holidays.Chile(subdiv='MA', years=years)
 
 
-def generar_fechas_pack(fecha_inicio: date, frecuencia: str,
-                         horas: dict, cantidad: int = 10):
+def generar_fechas_pack(fecha_inicio: date, dias: list,
+                        horas: dict, cantidad: int = 10):
     """
     Genera lista de (fecha, hora) para el pack.
-
-    horas = dict {dia_semana: hora}
-    Ejemplos:
-      LMV → {0: 9, 2: 10, 4: 8}   Lunes 9am, Mié 10am, Vie 8am
-      LM  → {0: 9, 2: 10}
-      MJ  → {1: 9, 3: 10}
-
+    
+    dias  = lista de weekdays elegidos, ej: [0, 2, 5] (Lun, Mié, Sáb)
+    horas = dict {dia_semana: hora}, ej: {0: 9, 2: 10, 5: 11}
+    
     Salta feriados de Punta Arenas.
-    El primer día DEBE coincidir con uno de los días de la frecuencia.
+    El primer día DEBE coincidir con uno de los días elegidos.
     """
-    dias = DIAS_SEMANA_PILATES[frecuencia]
     feriados = feriados_punta_arenas()
-
 
     if fecha_inicio.weekday() not in dias:
         raise ValidationError(
             "La fecha de inicio no corresponde a un día válido para la frecuencia elegida."
         )
 
-    # No se puede iniciar un pack en feriado — la función lo saltaría silenciosamente generando una fecha de inicio distinta a la elegida,
-    # lo que confundiría a la alumna en el resumen de confirmación.
     if fecha_inicio in feriados:
         raise ValidationError(
             "La fecha de inicio es un feriado. Por favor elige otro día."
         )
-
 
     resultado = []
     cursor = fecha_inicio
@@ -120,12 +103,6 @@ class Pack(models.Model):
         ('BB_SEMANAL', 'Body Balance Clase Semanal'),
     ]
 
-    FRECUENCIA_CHOICES = [
-        ('LMV', 'Lunes – Miércoles – Viernes'),
-        ('LM',  'Lunes – Miércoles'),
-        ('MJ',  'Martes – Jueves'),
-    ]
-
     ESTADO_CHOICES = [
         ('PENDIENTE_PAGO', 'Pendiente de pago'),
         ('ACTIVO',         'Activo'),
@@ -136,7 +113,12 @@ class Pack(models.Model):
 
     alumna       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='packs')
     tipo         = models.CharField(max_length=20, choices=TIPO_CHOICES)
-    frecuencia   = models.CharField(max_length=3, choices=FRECUENCIA_CHOICES, blank=True)
+    frecuencia   = models.CharField(
+    max_length=20,
+    blank=True,
+    null=True,
+    help_text='Días elegidos, ej: 0,2,5 (Lun,Mié,Sáb)'
+)
 
     # Hora por día de frecuencia (reemplaza el campo único 'hora')
     # dia1 = primer día de la frecuencia (Lun o Mar)
