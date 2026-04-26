@@ -90,7 +90,7 @@ table.grilla {
   padding: 6px 4px;
 }
 
-/* ── Dropdown de slot ── */
+/* ── Dropdown ── */
 .slot-select {
   width: 100%;
   padding: 4px 2px;
@@ -107,8 +107,6 @@ table.grilla {
   appearance: none;
   -webkit-appearance: none;
 }
-
-/* Color por tipo seleccionado via JS */
 .slot-select.val-PL   { background: var(--verde-pale); color: var(--verde); border-color: var(--verde); }
 .slot-select.val-PV   { background: #e3f2fd; color: var(--azul); border-color: var(--azul); }
 .slot-select.val-BDB  { background: #fff3e0; color: var(--naranja); border-color: var(--naranja); }
@@ -166,7 +164,6 @@ table.grilla {
   <form method="POST">
     {% csrf_token %}
 
-    <!-- Leyenda -->
     <div class="leyenda">
       <div class="leyenda-item"><span class="leyenda-chip lc-PL">PL</span> Pilates Grupal</div>
       <div class="leyenda-item"><span class="leyenda-chip lc-PV">PV</span> Privada</div>
@@ -174,7 +171,6 @@ table.grilla {
       <div class="leyenda-item"><span class="leyenda-chip lc-TEST">TEST</span> Clase Prueba</div>
     </div>
 
-    <!-- Grilla semanal -->
     <div class="grilla-wrap">
       <table class="grilla">
         <thead>
@@ -188,20 +184,15 @@ table.grilla {
         <tbody>
           {% for hora in todas_horas %}
           <tr>
-            {# Label especial sábado slots 12 y 13 #}
-            <td class="td-hora">
-              {% for dia_num, dia_nombre in dias_enumerados %}{% endfor %}
-              {{ hora }}:00
-            </td>
+            <td class="td-hora">{{ hora }}:00</td>
             {% for dia_num, dia_nombre in dias_enumerados %}
             <td>
               {% with tipos_en_dia=grilla|get_item:hora|get_item:dia_num %}
               {% if tipos_en_dia %}
                 {% for tipo, ch in tipos_en_dia.items %}
-                {# Label visual: sábado (dia=5) slot 12 → 12:15, slot 13 → 13:30 #}
+                {# Label especial sábado: slot 12 → 12:15, slot 13 → 13:30 #}
                 {% if ch.dia == 5 and ch.hora == 12 %}
-                  {% with hora_label="12:15" %}
-                  <select name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                  <select name="slot_{{ ch.dia }}_{{ ch.hora }}"
                           class="slot-select {% if ch.activo %}val-{{ tipo }}{% else %}val-{% endif %}"
                           onchange="colorSelect(this)">
                     <option value="">—</option>
@@ -210,9 +201,8 @@ table.grilla {
                     <option value="BDB"  {% if ch.activo and tipo == 'BDB'  %}selected{% endif %}>BDB 12:15</option>
                     <option value="TEST" {% if ch.activo and tipo == 'TEST' %}selected{% endif %}>TEST 12:15</option>
                   </select>
-                  {% endwith %}
                 {% elif ch.dia == 5 and ch.hora == 13 %}
-                  <select name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                  <select name="slot_{{ ch.dia }}_{{ ch.hora }}"
                           class="slot-select {% if ch.activo %}val-{{ tipo }}{% else %}val-{% endif %}"
                           onchange="colorSelect(this)">
                     <option value="">—</option>
@@ -222,7 +212,7 @@ table.grilla {
                     <option value="TEST" {% if ch.activo and tipo == 'TEST' %}selected{% endif %}>TEST 13:30</option>
                   </select>
                 {% else %}
-                  <select name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                  <select name="slot_{{ ch.dia }}_{{ ch.hora }}"
                           class="slot-select {% if ch.activo %}val-{{ tipo }}{% else %}val-{% endif %}"
                           onchange="colorSelect(this)">
                     <option value="">—</option>
@@ -245,7 +235,6 @@ table.grilla {
       </table>
     </div>
 
-    <!-- Configuración general -->
     <div class="seccion-titulo">Configuración General</div>
     <div class="config-fila">
       <span class="desc">Reformers disponibles</span>
@@ -266,12 +255,9 @@ table.grilla {
 
 {% block extra_js %}
 <script>
-// Colorear dropdown según valor seleccionado
 function colorSelect(sel) {
   sel.className = 'slot-select val-' + sel.value;
 }
-
-// Aplicar colores al cargar
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.slot-select').forEach(colorSelect);
 });
