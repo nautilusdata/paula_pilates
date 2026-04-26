@@ -188,10 +188,10 @@ def panel_horarios(request):
             obj.valor = int(cap_bb)
             obj.save()
 
-        activos = set(k for k in request.POST if k.startswith('slot_'))
         for ch in ConfiguracionHorario.objects.all():
             key = f'slot_{ch.dia}_{ch.hora}_{ch.tipo}'
-            ch.activo = key in activos
+            valor = request.POST.get(key, '')
+            ch.activo = valor != ''
             ch.save()
 
         messages.success(request, 'Horarios actualizados.')
