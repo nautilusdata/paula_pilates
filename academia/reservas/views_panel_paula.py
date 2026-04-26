@@ -111,6 +111,7 @@ def ficha_alumna(request, alumna_id):
             'total':       total,
             'proxima':     proxima,
             'color':       color,
+            'futuras':     futuras,
         })
 
     # Ordenar cronológicamente para la segunda vista
