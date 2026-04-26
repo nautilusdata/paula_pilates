@@ -35,4 +35,5 @@ urlpatterns = [
     path('pago/reintentar/<int:pack_id>/', views_webpay.reintentar_pago, name='reintentar_pago'),
     # Cloud Scheduler — limpieza de packs expirados
     path('internal/limpiar-packs/', views_panel_paula.limpiar_packs_view, name='limpiar_packs'),
+    path('reservar/pack10/dias/', views_reservar_pack10.dias_disponibles_ajax, name='dias_disponibles_ajax'),
 ]
