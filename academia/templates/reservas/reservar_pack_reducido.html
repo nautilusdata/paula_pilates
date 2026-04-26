@@ -16,49 +16,27 @@
   --sombra:      0 2px 12px rgba(0,0,0,.07);
   --font:        'Poppins', sans-serif;
 }
+.pack-wrap { width: 92%; max-width: 580px; margin: 24px auto 100px; font-family: var(--font); }
 
-.pack-wrap {
-  width: 92%; max-width: 580px;
-  margin: 24px auto 100px;
-  font-family: var(--font);
-}
-
-.breadcrumb {
-  display: flex; align-items: center; gap: 6px;
-  font-size: .78rem; color: #999; margin-bottom: 20px;
-}
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: #999; margin-bottom: 20px; }
 .breadcrumb a { color: var(--verde); text-decoration: none; }
 .breadcrumb .sep { color: #ccc; }
 .breadcrumb .actual { color: var(--gris); font-weight: 600; }
 
-.pasos {
-  display: flex; gap: 0; margin-bottom: 28px;
-  border-radius: 30px; overflow: hidden; background: #f5f5f5;
-}
+.pasos { display: flex; gap: 0; margin-bottom: 28px; border-radius: 30px; overflow: hidden; background: #f5f5f5; }
 .paso { flex: 1; text-align: center; padding: 8px 4px; font-size: .75rem; color: #aaa; font-weight: 500; }
 .paso.activo { background: var(--verde); color: #fff; border-radius: 30px; }
 
 .pack-titulo    { font-size: 1.3rem; font-weight: 700; color: var(--verde); margin-bottom: 4px; }
 .pack-subtitulo { font-size: .85rem; color: var(--gris); margin-bottom: 24px; }
 
-.aviso {
-  background: #fff9e6; border-left: 4px solid var(--amarillo);
-  padding: 12px 14px; border-radius: 8px;
-  font-size: .82rem; color: #856404; margin-bottom: 22px;
-}
-.errores {
-  background: #fff0f0; border-left: 4px solid #e74c3c;
-  padding: 12px 14px; border-radius: 8px;
-  font-size: .82rem; color: #c0392b; margin-bottom: 20px;
-}
+.aviso { background: #fff9e6; border-left: 4px solid var(--amarillo); padding: 12px 14px; border-radius: 8px; font-size: .82rem; color: #856404; margin-bottom: 22px; }
+.errores { background: #fff0f0; border-left: 4px solid #e74c3c; padding: 12px 14px; border-radius: 8px; font-size: .82rem; color: #c0392b; margin-bottom: 20px; }
 .errores ul { margin: 6px 0 0; padding-left: 18px; }
 
-.seccion-label {
-  font-size: .7rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--verde); margin-bottom: 10px;
-}
+.seccion-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--verde); margin-bottom: 10px; }
 
-/* Cantidad */
+/* ── Cantidad ── */
 .cantidad-wrap { margin-bottom: 26px; }
 .cantidad-slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .cantidad-slider {
@@ -73,53 +51,35 @@
 .cantidad-num { font-size: 1.6rem; font-weight: 700; color: var(--verde); min-width: 32px; text-align: center; }
 .cantidad-hint { font-size: .75rem; color: #999; }
 
-/* Precio dinámico */
 .precio-dinamico {
   background: var(--verde-pale); border: 1px solid var(--verde-light);
   border-radius: var(--radio); padding: 16px 18px;
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 26px;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px;
 }
 .precio-dinamico .det { font-size: .82rem; color: var(--gris); }
 .precio-dinamico .det strong { display: block; color: var(--verde); font-size: 1.4rem; }
 
-/* Frecuencias */
-.frecuencias { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
-.frec-option { display: none; }
-.frec-label {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 18px; border: 2px solid var(--borde); border-radius: var(--radio);
-  cursor: pointer; background: #fff; box-shadow: var(--sombra); transition: all .15s;
+/* ── Selector de días ── */
+.dias-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 26px; }
+.dia-check { display: none; }
+.dia-chip {
+  display: block; text-align: center; padding: 12px 6px;
+  border: 2px solid var(--borde); border-radius: 10px;
+  cursor: pointer; font-size: .85rem; font-weight: 600;
+  color: #555; background: #fff; transition: all .15s; user-select: none;
 }
-.frec-label .frec-nombre { font-weight: 600; color: #333; font-size: .95rem; }
-.frec-label .frec-sub    { font-size: .78rem; color: #999; margin-top: 2px; }
-.frec-label .frec-pill   { background: #f0f0f0; color: #777; padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; }
-.frec-option:checked + .frec-label { border-color: var(--verde); background: var(--verde-pale); }
-.frec-option:checked + .frec-label .frec-pill { background: var(--verde); color: #fff; }
+.dia-check:checked + .dia-chip { border-color: var(--verde); background: var(--verde); color: #fff; }
 
-/* Fecha */
-.fecha-field {
-  width: 100%; padding: 14px 16px;
-  border: 2px solid var(--borde); border-radius: var(--radio);
-  font-family: var(--font); font-size: .95rem; color: #333;
-  background: #fff; box-sizing: border-box;
-  transition: border-color .15s; margin-bottom: 8px;
-}
-.fecha-field:focus { outline: none; border-color: var(--verde); }
-.fecha-hint { font-size: .75rem; color: #999; margin-bottom: 22px; display: block; }
-
-/* Selectores de hora por día */
-.horas-por-dia { display: none; margin-bottom: 26px; }
-.horas-por-dia.visible { display: block; }
-
-.dia-grupo { margin-bottom: 18px; }
+/* ── Horas por día ── */
+.horas-por-dia { margin-bottom: 26px; }
+.dia-grupo { margin-bottom: 18px; display: none; }
+.dia-grupo.visible { display: block; }
 .dia-titulo {
   font-size: .78rem; font-weight: 700; color: var(--verde);
   text-transform: uppercase; letter-spacing: .06em;
   margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
 }
 .dia-titulo::after { content: ''; flex: 1; height: 1px; background: var(--verde-light); }
-
 .horas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .hora-opt { display: none; }
 .hora-label {
@@ -129,9 +89,17 @@
   color: #555; background: #fff; transition: all .15s;
 }
 .hora-opt:checked + .hora-label { border-color: var(--verde); background: var(--verde); color: #fff; }
-.hora-loading { text-align: center; color: #aaa; font-size: .8rem; padding: 12px 0; }
 
-/* CTA */
+/* ── Fecha ── */
+.fecha-field {
+  width: 100%; padding: 14px 16px; border: 2px solid var(--borde);
+  border-radius: var(--radio); font-family: var(--font); font-size: .95rem;
+  color: #333; background: #fff; box-sizing: border-box;
+  margin-bottom: 8px; transition: border-color .15s;
+}
+.fecha-field:focus { outline: none; border-color: var(--verde); }
+.fecha-hint { font-size: .75rem; color: #999; margin-bottom: 22px; display: block; }
+
 .btn-continuar {
   display: block; width: 100%; padding: 16px;
   background: var(--verde); color: #fff; border: none;
@@ -163,12 +131,12 @@
   </div>
 
   <p class="pack-titulo">Pack Reducido</p>
-  <p class="pack-subtitulo">Pilates Reformer · $20.000 por clase · 2 a 9 clases</p>
+  <p class="pack-subtitulo">Pilates Reformer · ${{ precio_por_clase|floatformat:0 }} por clase · 2 a 9 clases</p>
 
   {% if not errores %}
   <div class="aviso">
-    <strong>Horario fijo:</strong> Elige una hora distinta para cada día de tu semana.
-    Ese esquema se repetirá en todas las sesiones del pack.
+    <strong>Horario fijo:</strong> Elige los días y hora para cada uno.
+    Ese esquema se repetirá cada semana hasta completar el pack.
   </div>
   {% endif %}
 
@@ -194,166 +162,119 @@
       <input type="hidden" name="cantidad" id="cantidad-valor" value="{{ sel_cantidad|default:5 }}">
     </div>
 
-    <!-- Precio dinámico -->
     <div class="precio-dinamico">
       <div class="det">
-        <strong id="precio-total">$100.000</strong>
-        <span id="precio-detalle">5 clases · $20.000 c/u</span>
+        <strong id="precio-total">${{ precio_por_clase|floatformat:0|default:20000 }}</strong>
+        <span id="precio-detalle">clases · ${{ precio_por_clase|floatformat:0 }} c/u</span>
       </div>
       <div style="font-size:.75rem; color:#999; text-align:right;">Pago único<br>por adelantado</div>
     </div>
 
-    <!-- ② Frecuencia -->
-    <div class="seccion-label">② ¿Con qué frecuencia?</div>
-    <div class="frecuencias">
-      {% for f in frecuencias %}
-      <input type="radio" name="frecuencia" id="frec_{{ f.codigo }}"
-             value="{{ f.codigo }}" class="frec-option"
-             {% if sel_frecuencia == f.codigo %}checked{% endif %} required>
-      <label for="frec_{{ f.codigo }}" class="frec-label">
-        <div class="frec-info">
-          <span class="frec-nombre">{{ f.label }}</span>
-          <span class="frec-sub">{{ f.dias }}</span>
-        </div>
-        <span class="frec-pill">{{ f.dias }}</span>
-      </label>
+    <!-- ② Días -->
+    <div class="seccion-label">② ¿Qué días quieres venir?</div>
+    <div class="dias-grid">
+      {% for d in dias_disponibles %}
+      <input type="checkbox" name="dia_{{ d.dia }}" id="dia_{{ d.dia }}"
+             class="dia-check" value="1"
+             {% if d.dia in sel_dias %}checked{% endif %}
+             onchange="toggleDia({{ d.dia }}, this.checked)">
+      <label for="dia_{{ d.dia }}" class="dia-chip">{{ d.nombre }}</label>
       {% endfor %}
     </div>
 
-    <!-- ③ Fecha -->
-    <div class="seccion-label">③ ¿Cuándo empieza tu primera clase?</div>
+    <!-- ③ Hora por día -->
+    <div class="seccion-label">③ ¿A qué hora cada día?</div>
+    <div class="horas-por-dia" id="horas-container">
+      {% for d in dias_disponibles %}
+      <div class="dia-grupo {% if d.dia in sel_dias %}visible{% endif %}" id="grupo_dia_{{ d.dia }}">
+        <div class="dia-titulo">{{ d.nombre }}</div>
+        <div class="horas-grid">
+          {% for h in d.horas %}
+          <input type="radio" name="hora_dia_{{ d.dia }}" id="h_{{ d.dia }}_{{ h.hora }}"
+                 value="{{ h.hora }}" class="hora-opt"
+                 {% if sel_horas and sel_horas|get_item:d.dia == h.hora %}checked{% endif %}>
+          <label for="h_{{ d.dia }}_{{ h.hora }}" class="hora-label">{{ h.label }}</label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ④ Fecha -->
+    <div class="seccion-label">④ ¿Cuándo empieza tu primera clase?</div>
     <input type="date" name="fecha_inicio" id="fecha_inicio"
            class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
            value="{{ sel_fecha|default:'' }}" required>
-    <span class="fecha-hint" id="fecha-hint">Selecciona la frecuencia primero.</span>
-
-    <!-- ④ Hora por día -->
-    <div class="seccion-label">④ ¿A qué hora cada día?</div>
-    <div id="horas-por-dia" class="horas-por-dia">
-      <div class="hora-loading">Selecciona la frecuencia para ver los horarios disponibles.</div>
-    </div>
-
-    <!-- Campos ocultos para las horas -->
-    <input type="hidden" name="hora_dia1" id="hora_dia1" value="{{ sel_hora_dia1|default:'' }}">
-    <input type="hidden" name="hora_dia2" id="hora_dia2" value="{{ sel_hora_dia2|default:'' }}">
-    <input type="hidden" name="hora_dia3" id="hora_dia3" value="{{ sel_hora_dia3|default:'' }}">
+    <span class="fecha-hint" id="fecha-hint">Selecciona los días primero.</span>
 
     <button type="submit" class="btn-continuar">Ver resumen →</button>
   </form>
-
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-const PRECIO_CLASE = 20000;
-const DIAS_FRECUENCIA_JS = { LMV: [1,3,5], LM: [1,3], MJ: [2,4] };
-const NOMBRES_DIA_JS = {
-  LMV: 'lunes, miércoles o viernes',
-  LM:  'lunes o miércoles',
-  MJ:  'martes o jueves',
-};
+const PRECIO_CLASE = {{ precio_por_clase|default:20000 }};
+const NOMBRE_DIA = {0:'Lunes',1:'Martes',2:'Miércoles',3:'Jueves',4:'Viernes',5:'Sábado'};
 
-let frecuenciaActual = null;
+let diasSeleccionados = new Set({{ sel_dias|default:"[]"|safe }});
 
-const slider        = document.getElementById('slider-cantidad');
-const numCantidad   = document.getElementById('num-cantidad');
-const cantidadVal   = document.getElementById('cantidad-valor');
-const precioTotal   = document.getElementById('precio-total');
+// ── Cantidad ──
+const slider      = document.getElementById('slider-cantidad');
+const numCantidad = document.getElementById('num-cantidad');
+const cantidadVal = document.getElementById('cantidad-valor');
+const precioTotal = document.getElementById('precio-total');
 const precioDetalle = document.getElementById('precio-detalle');
-const inputFecha    = document.getElementById('fecha_inicio');
-const hintFecha     = document.getElementById('fecha-hint');
-const horasDivWrap  = document.getElementById('horas-por-dia');
 
 function actualizarPrecio(cantidad) {
   numCantidad.textContent   = cantidad;
   cantidadVal.value         = cantidad;
   const total = cantidad * PRECIO_CLASE;
   precioTotal.textContent   = '$' + total.toLocaleString('es-CL');
-  precioDetalle.textContent = `${cantidad} clase${cantidad > 1 ? 's' : ''} · $20.000 c/u`;
+  precioDetalle.textContent = `${cantidad} clase${cantidad > 1 ? 's' : ''} · $${PRECIO_CLASE.toLocaleString('es-CL')} c/u`;
 }
 slider.addEventListener('input', () => actualizarPrecio(parseInt(slider.value)));
 actualizarPrecio(parseInt(slider.value));
 
-// ── Al elegir frecuencia → cargar horas por día ──
-document.querySelectorAll('.frec-option').forEach(radio => {
-  radio.addEventListener('change', () => {
-    frecuenciaActual = radio.value;
-    hintFecha.textContent = `Elige un ${NOMBRES_DIA_JS[frecuenciaActual]} como día de inicio.`;
-    inputFecha.value = '';
-    limpiarHoras();
-    cargarHorasPorDia(frecuenciaActual);
-  });
-});
+// ── Días ──
+function toggleDia(dia, checked) {
+  if (checked) {
+    diasSeleccionados.add(dia);
+  } else {
+    diasSeleccionados.delete(dia);
+  }
+  const grupo = document.getElementById(`grupo_dia_${dia}`);
+  if (grupo) grupo.classList.toggle('visible', checked);
+  actualizarHintFecha();
+}
 
-// ── Al elegir fecha → validar día correcto ──
-inputFecha.addEventListener('change', () => {
-  if (!frecuenciaActual) {
-    alert('Primero elige la frecuencia.');
-    inputFecha.value = '';
+function actualizarHintFecha() {
+  const hint = document.getElementById('fecha-hint');
+  if (diasSeleccionados.size === 0) {
+    hint.textContent = 'Selecciona los días primero.';
+  } else {
+    const nombres = Array.from(diasSeleccionados).sort().map(d => NOMBRE_DIA[d]).join(', ');
+    hint.textContent = `La primera clase debe ser uno de: ${nombres}.`;
+  }
+}
+
+document.getElementById('fecha_inicio').addEventListener('change', function() {
+  if (diasSeleccionados.size === 0) {
+    alert('Primero elige los días en que quieres venir.');
+    this.value = '';
     return;
   }
-  const fecha = inputFecha.value;
+  const fecha = this.value;
   if (!fecha) return;
-  const jsDate = new Date(fecha + 'T12:00:00');
-  if (!DIAS_FRECUENCIA_JS[frecuenciaActual].includes(jsDate.getDay())) {
-    alert(`Para ${frecuenciaActual}, la primera clase debe ser un ${NOMBRES_DIA_JS[frecuenciaActual]}.`);
-    inputFecha.value = '';
+  const jsDay = new Date(fecha + 'T12:00:00').getDay();
+  const pyDay = jsDay === 0 ? 6 : jsDay - 1;
+  if (!diasSeleccionados.has(pyDay)) {
+    const nombres = Array.from(diasSeleccionados).sort().map(d => NOMBRE_DIA[d]).join(', ');
+    alert(`La primera clase debe ser uno de los días elegidos: ${nombres}.`);
+    this.value = '';
   }
 });
 
-function limpiarHoras() {
-  document.getElementById('hora_dia1').value = '';
-  document.getElementById('hora_dia2').value = '';
-  document.getElementById('hora_dia3').value = '';
-}
-
-function cargarHorasPorDia(frecuencia) {
-  horasDivWrap.innerHTML = '<div class="hora-loading">Cargando horarios…</div>';
-  horasDivWrap.classList.add('visible');
-
-  fetch(`{% url 'horas_disponibles_ajax' %}?frecuencia=${frecuencia}`)
-    .then(r => r.json())
-    .then(data => {
-      if (data.error) { horasDivWrap.innerHTML = `<p style="color:red">${data.error}</p>`; return; }
-      renderHorasPorDia(data.dias);
-    })
-    .catch(() => {
-      horasDivWrap.innerHTML = '<div class="hora-loading" style="color:#e74c3c">Error al cargar. Intenta de nuevo.</div>';
-    });
-}
-
-function renderHorasPorDia(dias) {
-  const camposHidden = ['hora_dia1', 'hora_dia2', 'hora_dia3'];
-  let html = '';
-  dias.forEach((d, idx) => {
-    const campo   = camposHidden[idx];
-    const selPrev = document.getElementById(campo).value;
-    html += `<div class="dia-grupo">`;
-    html += `<div class="dia-titulo">${d.nombre}</div>`;
-    html += `<div class="horas-grid">`;
-    d.horas.forEach(h => {
-      const id      = `hora_${d.dia}_${h.hora}`;
-      const checked = selPrev == h.hora ? 'checked' : '';
-      html += `
-        <input type="radio" name="_hora_dia${idx+1}_display"
-               id="${id}" value="${h.hora}" class="hora-opt" ${checked}
-               onchange="document.getElementById('${campo}').value=${h.hora}">
-        <label for="${id}" class="hora-label">${h.label}</label>`;
-    });
-    html += `</div></div>`;
-  });
-  horasDivWrap.innerHTML = html;
-}
-
-// ── Restaurar al volver de error ──
-window.addEventListener('DOMContentLoaded', () => {
-  const selFrq = "{{ sel_frecuencia|default:'' }}";
-  if (selFrq) {
-    frecuenciaActual = selFrq;
-    hintFecha.textContent = `Elige un ${NOMBRES_DIA_JS[selFrq]} como día de inicio.`;
-    cargarHorasPorDia(selFrq);
-  }
-});
+actualizarHintFecha();
 </script>
 {% endblock %}
