@@ -88,6 +88,7 @@ def ficha_alumna(request, alumna_id):
         completadas = sesiones.filter(estado='COMPLETADA').count()
         total       = sesiones.count()
         proxima     = sesiones.filter(fecha__gte=hoy, estado='PROGRAMADA').first()
+        futuras     = sesiones.filter(fecha__gte=hoy, estado='PROGRAMADA').count()
         color       = COLOR_TIPO.get(pack.tipo, 'pl')
 
         sesiones_list = []
