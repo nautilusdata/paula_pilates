@@ -15,7 +15,6 @@ from django.db import transaction
 def es_staff(user):
     return user.is_staff
 
-# Color por tipo de producto — usado en ficha_alumna
 COLOR_TIPO = {
     'PACK10':    'pl',
     'REDUCIDO':  'pl',
@@ -26,42 +25,89 @@ COLOR_TIPO = {
     'PRUEBA':    'pr',
 }
 
+NOMBRE_DIA = {0:'Lunes',1:'Martes',2:'Miércoles',3:'Jueves',4:'Viernes',5:'Sábado'}
+MES_CORTO  = {1:'ene',2:'feb',3:'mar',4:'abr',5:'may',6:'jun',
+              7:'jul',8:'ago',9:'sep',10:'oct',11:'nov',12:'dic'}
+
+
+def _lunes_de(d: date) -> date:
+    """Retorna el lunes de la semana que contiene d."""
+    return d - timedelta(days=d.weekday())
+
+
 @login_required
 @user_passes_test(es_staff, login_url='/')
 def panel_principal(request):
     hoy = date.today()
-    dia_str = request.GET.get('dia')
-    if dia_str:
+
+    # Semana a mostrar — basada en ?semana=YYYY-MM-DD (lunes)
+    semana_str = request.GET.get('semana')
+    if semana_str:
         try:
-            dia_actual = date.fromisoformat(dia_str)
+            lunes = date.fromisoformat(semana_str)
+            # Asegurar que sea lunes
+            lunes = _lunes_de(lunes)
         except ValueError:
-            dia_actual = hoy
+            lunes = _lunes_de(hoy)
     else:
-        dia_actual = hoy
+        lunes = _lunes_de(hoy)
 
-    dia_anterior  = (dia_actual - timedelta(days=1)).isoformat()
-    dia_siguiente = (dia_actual + timedelta(days=1)).isoformat()
+    sabado         = lunes + timedelta(days=5)
+    semana_anterior = (lunes - timedelta(weeks=1)).isoformat()
+    semana_siguiente = (lunes + timedelta(weeks=1)).isoformat()
+    es_semana_actual = lunes == _lunes_de(hoy)
 
-    sesiones_dia = Sesion.objects.filter(
-        fecha=dia_actual,
-        estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
-    ).select_related('pack__alumna').order_by('hora')
+    # Días de la semana: Lun → Sáb
+    dias_semana = [lunes + timedelta(days=i) for i in range(6)]
 
+    # Sesiones de toda la semana
     from collections import defaultdict
-    por_hora = defaultdict(list)
-    for sesion in sesiones_dia:
-        por_hora[sesion.hora].append(sesion)
+    sesiones_semana = Sesion.objects.filter(
+        fecha__gte=lunes,
+        fecha__lte=sabado,
+        estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
+    ).select_related('pack__alumna').order_by('fecha', 'hora')
 
-    horas_del_dia = sorted(por_hora.keys())
+    # Agrupar por fecha → hora → sesiones
+    por_dia = {}
+    for dia in dias_semana:
+        por_dia[dia] = defaultdict(list)
+
+    for sesion in sesiones_semana:
+        if sesion.fecha in por_dia:
+            por_dia[sesion.fecha][sesion.hora].append(sesion)
+
+    # Construir lista de días con sus horas
+    dias_data = []
+    for dia in dias_semana:
+        por_hora = dict(por_dia[dia])
+        horas_del_dia = sorted(por_hora.keys())
+        dias_data.append({
+            'fecha':       dia,
+            'nombre':      NOMBRE_DIA[dia.weekday()],
+            'es_hoy':      dia == hoy,
+            'es_pasado':   dia < hoy,
+            'por_hora':    por_hora,
+            'horas':       horas_del_dia,
+            'tiene_clases': bool(horas_del_dia),
+        })
+
+    # Label de semana: "28 abr – 3 may"
+    label_semana = (
+        f"{lunes.day} {MES_CORTO[lunes.month]}"
+        f" – "
+        f"{sabado.day} {MES_CORTO[sabado.month]}"
+    )
 
     context = {
-        'dia_actual':    dia_actual,
-        'dia_anterior':  dia_anterior,
-        'dia_siguiente': dia_siguiente,
-        'por_hora':      dict(por_hora),
-        'horas_del_dia': horas_del_dia,
-        'hoy':           hoy,
-        'es_hoy':        dia_actual == hoy,
+        'dias_data':        dias_data,
+        'lunes':            lunes,
+        'sabado':           sabado,
+        'semana_anterior':  semana_anterior,
+        'semana_siguiente': semana_siguiente,
+        'es_semana_actual': es_semana_actual,
+        'label_semana':     label_semana,
+        'hoy':              hoy,
     }
     return render(request, 'reservas/panel_principal.html', context)
 
@@ -81,7 +127,7 @@ def ficha_alumna(request, alumna_id):
     )
 
     packs_data    = []
-    sesiones_crono = []  # vista cronológica — todas las sesiones mezcladas
+    sesiones_crono = []
 
     for pack in packs:
         sesiones    = pack.sesiones.order_by('fecha', 'hora')
@@ -96,11 +142,11 @@ def ficha_alumna(request, alumna_id):
             es_proxima = bool(proxima and s.pk == proxima.pk)
             pasada     = s.fecha < hoy or s.estado == 'COMPLETADA'
             item = {
-                'sesion':    s,
+                'sesion':     s,
                 'es_proxima': es_proxima,
-                'pasada':    pasada,
-                'pack':      pack,
-                'color':     color,
+                'pasada':     pasada,
+                'pack':       pack,
+                'color':      color,
             }
             sesiones_list.append(item)
             sesiones_crono.append(item)
@@ -115,7 +161,6 @@ def ficha_alumna(request, alumna_id):
             'futuras':     futuras,
         })
 
-    # Ordenar cronológicamente para la segunda vista
     sesiones_crono.sort(key=lambda x: (x['sesion'].fecha, x['sesion'].hora))
 
     context = {
@@ -190,7 +235,6 @@ def panel_horarios(request):
             obj.valor = int(cap_bb)
             obj.save()
 
-        # Nuevo: un select por slot dia_hora
         for ch in ConfiguracionHorario.objects.all():
             key   = f'slot_{ch.dia}_{ch.hora}'
             valor = request.POST.get(key, '')
@@ -198,7 +242,6 @@ def panel_horarios(request):
                 ch.activo = False
                 ch.save()
             elif valor != ch.tipo:
-                # Cambio de tipo — actualizar
                 ch.tipo   = valor
                 ch.activo = True
                 ch.save()
@@ -312,7 +355,7 @@ def bulk_reschedule_preview(request):
     if not bulk_data:
         return redirect('bulk_reschedule')
 
-    from .models import Pack, feriados_punta_arenas, DIAS_SEMANA_PILATES
+    from .models import Pack, feriados_punta_arenas, dias_para_pack
 
     fecha_inicio  = date.fromisoformat(bulk_data['fecha_inicio'])
     fecha_regreso = date.fromisoformat(bulk_data['fecha_regreso'])
@@ -338,8 +381,8 @@ def bulk_reschedule_preview(request):
         if not ses_pack:
             continue
 
-        if pack.frecuencia in DIAS_SEMANA_PILATES:
-            dias = DIAS_SEMANA_PILATES[pack.frecuencia]
+        dias = dias_para_pack(pack)
+        if dias:
             nuevas_fechas = []
             cursor = fecha_regreso
             while len(nuevas_fechas) < len(ses_pack):

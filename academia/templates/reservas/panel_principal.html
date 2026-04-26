@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load panel_tags %}
-{% block title %}Panel Paula – {{ dia_actual|date:"d/m/Y" }}{% endblock %}
+{% block title %}Panel Paula – Semana {{ label_semana }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -22,14 +22,9 @@
 }
 body { font-family: var(--font); }
 
-.panel-wrap {
-  width: 92%; max-width: 680px;
-  margin: 80px auto 80px;
-}
+.panel-wrap { width: 92%; max-width: 680px; margin: 80px auto 80px; }
 
-.panel-nav {
-  display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
-}
+.panel-nav { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
 .panel-nav a {
   padding: 8px 16px; border-radius: 20px; text-decoration: none;
   font-size: .82rem; font-weight: 600; background: #f0f0f0; color: var(--gris);
@@ -38,106 +33,80 @@ body { font-family: var(--font); }
 .panel-nav a.activo { background: var(--verde); color: #fff; }
 .panel-nav a:hover  { background: var(--verde-light); color: var(--verde); }
 
-.dia-nav {
-  display: flex; align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px; gap: 10px;
+/* ── Navegación semanal ── */
+.semana-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px; gap: 10px;
 }
-.dia-nav a {
-  padding: 10px 18px;
-  background: var(--verde-pale);
-  color: var(--verde);
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 1.1rem;
+.semana-nav a {
+  padding: 10px 18px; background: var(--verde-pale); color: var(--verde);
+  border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1.1rem;
 }
-.dia-nav a:hover { background: var(--verde-light); }
+.semana-nav a:hover { background: var(--verde-light); }
+.semana-titulo { text-align: center; flex: 1; }
+.semana-titulo .semana-label {
+  font-size: 1rem; font-weight: 700; color: var(--verde); display: block;
+}
+.semana-titulo .semana-sub { font-size: .78rem; color: #999; }
 
-.dia-titulo { text-align: center; flex: 1; }
-.dia-titulo .dia-nombre {
-  font-size: 1.1rem; font-weight: 700; color: var(--verde); display: block;
-}
-.dia-titulo .dia-fecha { font-size: .85rem; color: #999; }
-.badge-hoy {
-  display: inline-block; background: var(--verde); color: #fff;
-  font-size: .65rem; font-weight: 700; padding: 2px 8px;
-  border-radius: 10px; margin-left: 6px; vertical-align: middle;
-}
-
-.btn-hoy {
+.btn-semana-actual {
   display: block; text-align: center; padding: 8px;
   background: transparent; color: var(--verde);
   border: 1px solid var(--verde-light); border-radius: 8px;
   text-decoration: none; font-size: .78rem; font-weight: 600;
   margin-bottom: 20px;
 }
-.btn-hoy:hover { background: var(--verde-pale); }
+.btn-semana-actual:hover { background: var(--verde-pale); }
 
-.btn-ausente {
-  font-size: .65rem; font-weight: 700;
-  padding: 4px 10px; border-radius: 10px;
-  border: 1.5px solid #e74c3c;
-  background: transparent; color: #e74c3c;
-  cursor: pointer; transition: all .15s;
+/* ── Separador de día ── */
+.dia-separador {
+  display: flex; align-items: center; gap: 10px;
+  margin: 24px 0 12px;
+}
+.dia-separador .dia-label {
+  font-size: .85rem; font-weight: 700; color: var(--verde);
   white-space: nowrap;
+}
+.dia-separador.hoy .dia-label { color: #fff; background: var(--verde); padding: 3px 10px; border-radius: 20px; }
+.dia-separador.pasado .dia-label { color: #bbb; }
+.dia-separador::after { content: ''; flex: 1; height: 1px; background: var(--borde); }
+
+.badge-hoy {
+  display: inline-block; background: var(--verde); color: #fff;
+  font-size: .65rem; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; margin-left: 6px; vertical-align: middle;
+}
+
+/* ── Bloques de hora ── */
+.btn-ausente {
+  font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px;
+  border: 1.5px solid #e74c3c; background: transparent; color: #e74c3c;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
 }
 .btn-ausente:hover { background: #e74c3c; color: #fff; }
-.badge-ausente {
-  font-size: .65rem; font-weight: 700;
-  padding: 4px 10px; border-radius: 10px;
-  background: #fff3e0; color: #e65100;
-  white-space: nowrap;
-}
-.badge-recuperada {
-  font-size: .65rem; font-weight: 700;
-  padding: 4px 10px; border-radius: 10px;
-  background: #e8f5e9; color: #388e3c;
-  white-space: nowrap;
-}
+.badge-ausente { font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: #fff3e0; color: #e65100; white-space: nowrap; }
+.badge-recuperada { font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: #e8f5e9; color: #388e3c; white-space: nowrap; }
 
-.hora-bloque {
-  margin-bottom: 16px;
-  border-radius: var(--radio);
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-}
+.hora-bloque { margin-bottom: 12px; border-radius: var(--radio); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.hora-header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; color: #fff; font-weight: 700; }
+.hora-header .hora-num { font-size: 1rem; min-width: 48px; }
+.hora-header .hora-tipo { font-size: .72rem; font-weight: 600; opacity: .85; text-transform: uppercase; letter-spacing: .05em; }
+.hora-header .hora-count { margin-left: auto; font-size: .72rem; opacity: .7; }
 
-.hora-header {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 16px; color: #fff; font-weight: 700;
-}
-.hora-header .hora-num { font-size: 1.1rem; min-width: 52px; }
-.hora-header .hora-tipo {
-  font-size: .75rem; font-weight: 600; opacity: .85;
-  text-transform: uppercase; letter-spacing: .05em;
-}
-.hora-header .hora-count { margin-left: auto; font-size: .75rem; opacity: .7; }
-
-.tipo-PACK10, .tipo-REDUCIDO, .tipo-SUELTA, .tipo-PL { background: var(--verde); }
+.tipo-PACK10, .tipo-REDUCIDO, .tipo-SUELTA { background: var(--verde); }
 .tipo-PRIVADA { background: var(--azul); }
 .tipo-BB_FULL, .tipo-BB_SEMANAL { background: var(--naranja); }
 .tipo-PRUEBA { background: var(--morado); }
 
-.pale-PACK10, .pale-REDUCIDO, .pale-SUELTA, .pale-PL { background: var(--verde-pale); }
+.pale-PACK10, .pale-REDUCIDO, .pale-SUELTA { background: var(--verde-pale); }
 .pale-PRIVADA { background: var(--azul-pale); }
 .pale-BB_FULL, .pale-BB_SEMANAL { background: var(--naranja-pale); }
 .pale-PRUEBA { background: var(--morado-pale); }
 
-.hora-body { padding: 10px 16px; }
-
-.alumna-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,.06);
-  font-size: .88rem;
-}
+.hora-body { padding: 8px 16px; }
+.alumna-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,.06); font-size: .88rem; }
 .alumna-row:last-child { border-bottom: none; }
-
-.alumna-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .75rem; font-weight: 700; color: #fff; flex-shrink: 0;
-}
+.alumna-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; color: #fff; flex-shrink: 0; }
 .avatar-PACK10, .avatar-REDUCIDO, .avatar-SUELTA { background: var(--verde); }
 .avatar-PRIVADA { background: var(--azul); }
 .avatar-BB_FULL, .avatar-BB_SEMANAL { background: var(--naranja); }
@@ -148,9 +117,10 @@ body { font-family: var(--font); }
 .alumna-tipo { font-size: .72rem; color: #999; }
 .alumna-sesion { font-size: .72rem; color: #bbb; white-space: nowrap; }
 
-.sin-clases { text-align: center; padding: 50px 20px; color: #bbb; }
-.sin-clases .icono { font-size: 2.5rem; margin-bottom: 10px; }
-.sin-clases p { font-size: .9rem; }
+.sin-clases-dia { text-align: center; padding: 12px 20px; color: #ddd; font-size: .8rem; }
+
+.sin-semana { text-align: center; padding: 50px 20px; color: #bbb; }
+.sin-semana .icono { font-size: 2.5rem; margin-bottom: 10px; }
 </style>
 {% endblock %}
 
@@ -164,25 +134,33 @@ body { font-family: var(--font); }
     <a href="{% url 'bulk_reschedule' %}" style="background:#ffebee; color:#c62828;">⚠️ Reprogramar todo</a>
   </div>
 
-  <div class="dia-nav">
-    <a href="?dia={{ dia_anterior }}">←</a>
-    <div class="dia-titulo">
-      <span class="dia-nombre">
-        {{ dia_actual|date:"l" }}
-        {% if es_hoy %}<span class="badge-hoy">Hoy</span>{% endif %}
-      </span>
-      <span class="dia-fecha">{{ dia_actual|date:"j \d\e F \d\e Y" }}</span>
+  <!-- Navegación semanal -->
+  <div class="semana-nav">
+    <a href="?semana={{ semana_anterior }}">←</a>
+    <div class="semana-titulo">
+      <span class="semana-label">{{ label_semana }}</span>
+      <span class="semana-sub">Semana completa · Lun a Sáb</span>
     </div>
-    <a href="?dia={{ dia_siguiente }}">→</a>
+    <a href="?semana={{ semana_siguiente }}">→</a>
   </div>
 
-  {% if not es_hoy %}
-  <a href="{% url 'panel_principal' %}" class="btn-hoy">Ir a hoy</a>
+  {% if not es_semana_actual %}
+  <a href="{% url 'panel_principal' %}" class="btn-semana-actual">Ir a la semana actual</a>
   {% endif %}
 
-  {% if horas_del_dia %}
-    {% for hora in horas_del_dia %}
-    {% with sesiones=por_hora|get_item:hora %}
+  <!-- Días de la semana -->
+  {% for dia in dias_data %}
+
+  <div class="dia-separador {% if dia.es_hoy %}hoy{% elif dia.es_pasado %}pasado{% endif %}">
+    <span class="dia-label">
+      {{ dia.nombre }} {{ dia.fecha|date:"d/m" }}
+      {% if dia.es_hoy %}<span class="badge-hoy">Hoy</span>{% endif %}
+    </span>
+  </div>
+
+  {% if dia.tiene_clases %}
+    {% for hora in dia.horas %}
+    {% with sesiones=dia.por_hora|get_item:hora %}
     {% with tipo_principal=sesiones.0.pack.tipo %}
     <div class="hora-bloque">
       <div class="hora-header tipo-{{ tipo_principal }}">
@@ -207,30 +185,21 @@ body { font-family: var(--font); }
           </div>
           <div class="alumna-info">
             <a href="{% url 'ficha_alumna' sesion.pack.alumna.pk %}" class="alumna-nombre" style="text-decoration:none; color:inherit;">
-                {{ sesion.pack.alumna.get_full_name }}
+              {{ sesion.pack.alumna.get_full_name }}
             </a>
             <span class="alumna-tipo">{{ sesion.pack.get_tipo_display }}</span>
           </div>
-
-
-        <span class="alumna-sesion">
-            {% if sesion.pack.cantidad > 1 %}
-              Clase {{ sesion.numero }}/{{ sesion.pack.cantidad }}
-            {% else %}
-              Única
-            {% endif %}
-        </span>
-        {% if sesion.estado == 'PROGRAMADA' %}
-        <button class="btn-ausente" onclick="marcarAusente({{ sesion.pk }}, this)">
-            Ausente
-        </button>
-        {% elif sesion.estado == 'RECUPERAR' %}
-        <span class="badge-ausente">Ausente</span>
-        {% elif sesion.estado == 'RECUPERADA' %}
-        <span class="badge-recuperada">✓ Recuperó</span>
-        {% endif %}
-
-
+          <span class="alumna-sesion">
+            {% if sesion.pack.cantidad > 1 %}Clase {{ sesion.numero }}/{{ sesion.pack.cantidad }}
+            {% else %}Única{% endif %}
+          </span>
+          {% if sesion.estado == 'PROGRAMADA' %}
+            <button class="btn-ausente" onclick="marcarAusente({{ sesion.pk }}, this)">Ausente</button>
+          {% elif sesion.estado == 'RECUPERAR' %}
+            <span class="badge-ausente">Ausente</span>
+          {% elif sesion.estado == 'RECUPERADA' %}
+            <span class="badge-recuperada">✓ Recuperó</span>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -240,11 +209,10 @@ body { font-family: var(--font); }
     {% endfor %}
 
   {% else %}
-    <div class="sin-clases">
-      <div class="icono">🌿</div>
-      <p>Sin clases programadas para este día.</p>
-    </div>
+    <div class="sin-clases-dia">Sin clases</div>
   {% endif %}
+
+  {% endfor %}
 
 </div>
 {% endblock %}
@@ -253,13 +221,9 @@ body { font-family: var(--font); }
 <script>
 function marcarAusente(sesionId, btn) {
   if (!confirm('¿Marcar como ausente?')) return;
-  
   fetch(`/panel/ausente/${sesionId}/`, {
     method: 'POST',
-    headers: {
-      'X-CSRFToken': '{{ csrf_token }}',
-      'Content-Type': 'application/json',
-    },
+    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
   })
   .then(r => r.json())
   .then(data => {
