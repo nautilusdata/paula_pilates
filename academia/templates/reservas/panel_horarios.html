@@ -66,62 +66,54 @@ table.grilla {
   table-layout: fixed;
 }
 
-.grilla th:not(.th-hora) {
-  width: 15%;
+.grilla th {
+  padding: 4px 2px; text-align: center;
+  font-size: .65rem; font-weight: 700;
+  color: #fff; background: var(--verde);
+  white-space: nowrap;
 }
 
-.grilla th {
-  padding: 4px 1px; text-align: center;
-  font-size: .6rem; font-weight: 700;
-  color: #fff; background: var(--verde);
-  white-width: 32px; min-width: 32px; max-width: 32px;
-  white-space: nowrap;
-}white-space: nowrap;
-
-
 .grilla th.th-hora {
-  background: #333; width: 42px; min-width: 42px; max-width: 42px;
+  background: #333; width: 52px;
 }
 
 .grilla td {
   border: 1px solid var(--borde);
-  padding: 2px; text-align: center;
+  padding: 4px; text-align: center;
   background: #fafafa;
 }
 
 .grilla td.td-hora {
   background: var(--verde-pale);
   color: var(--verde); font-weight: 700;
-  font-size: .68rem; white-space: nowrap;
-  padding: 4px 2px;
-  width: 42px; min-width: 42px; max-width: 42px;
+  font-size: .72rem; white-space: nowrap;
+  padding: 6px 4px;
 }
 
-/* ── Celda toggle ── */
-.celda-toggle { display: flex; flex-direction: column; gap: 3px; align-items: center; padding: 3px 2px; }
-
-.slot-check { display: none; }
-
-.slot-label {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 100%; min-width: 20px;
-  padding: 2px 0px;
-  border-radius: 3px;
-  font-size: .5rem; font-weight: 700;
+/* ── Dropdown de slot ── */
+.slot-select {
+  width: 100%;
+  padding: 4px 2px;
+  border-radius: 6px;
+  border: 1.5px solid #e0e0e0;
+  background: #f5f5f5;
+  color: #aaa;
+  font-family: var(--font);
+  font-size: .65rem;
+  font-weight: 700;
+  text-align: center;
   cursor: pointer;
   transition: all .15s;
-  border: 1.5px solid #e0e0e0;
-  background: #f5f5f5; color: #ccc;
-  user-select: none;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-/* Activos por tipo */
-.slot-check.tipo-PL:checked   + .slot-label { background: var(--verde-pale); color: var(--verde); border-color: var(--verde); }
-.slot-check.tipo-PV:checked   + .slot-label { background: #e3f2fd; color: var(--azul); border-color: var(--azul); }
-.slot-check.tipo-BDB:checked  + .slot-label { background: #fff3e0; color: var(--naranja); border-color: var(--naranja); }
-.slot-check.tipo-TEST:checked + .slot-label { background: #f3e5f5; color: var(--morado); border-color: var(--morado); }
-
-.sin-slot { color: #eee; font-size: .65rem; }
+/* Color por tipo seleccionado via JS */
+.slot-select.val-PL   { background: var(--verde-pale); color: var(--verde); border-color: var(--verde); }
+.slot-select.val-PV   { background: #e3f2fd; color: var(--azul); border-color: var(--azul); }
+.slot-select.val-BDB  { background: #fff3e0; color: var(--naranja); border-color: var(--naranja); }
+.slot-select.val-TEST { background: #f3e5f5; color: var(--morado); border-color: var(--morado); }
+.slot-select.val-     { background: #f5f5f5; color: #ccc; border-color: #e0e0e0; }
 
 /* ── Config general ── */
 .config-fila {
@@ -196,24 +188,53 @@ table.grilla {
         <tbody>
           {% for hora in todas_horas %}
           <tr>
-            <td class="td-hora">{{ hora }}:00</td>
+            {# Label especial sábado slots 12 y 13 #}
+            <td class="td-hora">
+              {% for dia_num, dia_nombre in dias_enumerados %}{% endfor %}
+              {{ hora }}:00
+            </td>
             {% for dia_num, dia_nombre in dias_enumerados %}
             <td>
               {% with tipos_en_dia=grilla|get_item:hora|get_item:dia_num %}
               {% if tipos_en_dia %}
-              <div class="celda-toggle">
                 {% for tipo, ch in tipos_en_dia.items %}
-                <input type="checkbox"
-                       class="slot-check tipo-{{ tipo }}"
-                       name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
-                       id="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
-                       {% if ch.activo %}checked{% endif %}>
-                <label for="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
-                       class="slot-label">{{ tipo }}</label>
+                {# Label visual: sábado (dia=5) slot 12 → 12:15, slot 13 → 13:30 #}
+                {% if ch.dia == 5 and ch.hora == 12 %}
+                  {% with hora_label="12:15" %}
+                  <select name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                          class="slot-select {% if ch.activo %}val-{{ tipo }}{% else %}val-{% endif %}"
+                          onchange="colorSelect(this)">
+                    <option value="">—</option>
+                    <option value="PL"   {% if ch.activo and tipo == 'PL'   %}selected{% endif %}>PL 12:15</option>
+                    <option value="PV"   {% if ch.activo and tipo == 'PV'   %}selected{% endif %}>PV 12:15</option>
+                    <option value="BDB"  {% if ch.activo and tipo == 'BDB'  %}selected{% endif %}>BDB 12:15</option>
+                    <option value="TEST" {% if ch.activo and tipo == 'TEST' %}selected{% endif %}>TEST 12:15</option>
+                  </select>
+                  {% endwith %}
+                {% elif ch.dia == 5 and ch.hora == 13 %}
+                  <select name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                          class="slot-select {% if ch.activo %}val-{{ tipo }}{% else %}val-{% endif %}"
+                          onchange="colorSelect(this)">
+                    <option value="">—</option>
+                    <option value="PL"   {% if ch.activo and tipo == 'PL'   %}selected{% endif %}>PL 13:30</option>
+                    <option value="PV"   {% if ch.activo and tipo == 'PV'   %}selected{% endif %}>PV 13:30</option>
+                    <option value="BDB"  {% if ch.activo and tipo == 'BDB'  %}selected{% endif %}>BDB 13:30</option>
+                    <option value="TEST" {% if ch.activo and tipo == 'TEST' %}selected{% endif %}>TEST 13:30</option>
+                  </select>
+                {% else %}
+                  <select name="slot_{{ ch.dia }}_{{ ch.hora }}_{{ tipo }}"
+                          class="slot-select {% if ch.activo %}val-{{ tipo }}{% else %}val-{% endif %}"
+                          onchange="colorSelect(this)">
+                    <option value="">—</option>
+                    <option value="PL"   {% if ch.activo and tipo == 'PL'   %}selected{% endif %}>PL</option>
+                    <option value="PV"   {% if ch.activo and tipo == 'PV'   %}selected{% endif %}>PV</option>
+                    <option value="BDB"  {% if ch.activo and tipo == 'BDB'  %}selected{% endif %}>BDB</option>
+                    <option value="TEST" {% if ch.activo and tipo == 'TEST' %}selected{% endif %}>TEST</option>
+                  </select>
+                {% endif %}
                 {% endfor %}
-              </div>
               {% else %}
-              <span class="sin-slot">·</span>
+              <span style="color:#eee; font-size:.65rem;">·</span>
               {% endif %}
               {% endwith %}
             </td>
@@ -241,4 +262,18 @@ table.grilla {
   </form>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Colorear dropdown según valor seleccionado
+function colorSelect(sel) {
+  sel.className = 'slot-select val-' + sel.value;
+}
+
+// Aplicar colores al cargar
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.slot-select').forEach(colorSelect);
+});
+</script>
 {% endblock %}
