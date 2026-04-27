@@ -496,9 +496,9 @@ def reprogramar_horas_ajax(request, sesion_id):
 @require_POST
 def reprogramar_sesion_confirmar(request, sesion_id):
     """Ejecuta el movimiento de la sesión al nuevo slot."""
-    sesion     = get_object_or_404(Sesion, pk=sesion_id)
-    fecha_str  = request.POST.get('nueva_fecha')
-    hora_str   = request.POST.get('nueva_hora')
+    sesion    = get_object_or_404(Sesion, pk=sesion_id)
+    fecha_str = request.POST.get('nueva_fecha')
+    hora_str  = request.POST.get('nueva_hora')
 
     try:
         nueva_fecha = date.fromisoformat(fecha_str)
@@ -507,9 +507,22 @@ def reprogramar_sesion_confirmar(request, sesion_id):
         messages.error(request, 'Datos inválidos.')
         return redirect('reprogramar_sesion', sesion_id=sesion_id)
 
-    # Verificar cupo
+    # Verificar cupo general
     if Sesion.cupos_disponibles(nueva_fecha, nueva_hora) < 1:
         messages.error(request, 'Ese slot ya no tiene cupo. Elige otro.')
+        return redirect('reprogramar_sesion', sesion_id=sesion_id)
+
+    # Verificar que la alumna no tenga otra clase en ese slot
+    ya_tiene = Sesion.objects.filter(
+        pack__alumna=sesion.pack.alumna,
+        pack__estado__in=['ACTIVO', 'PENDIENTE_PAGO'],
+        fecha=nueva_fecha,
+        hora=nueva_hora,
+        estado__in=['PROGRAMADA', 'RECUPERAR'],
+    ).exclude(pk=sesion.pk).exists()
+
+    if ya_tiene:
+        messages.error(request, f'{sesion.pack.alumna.first_name} ya tiene una clase en ese horario. Elige otro.')
         return redirect('reprogramar_sesion', sesion_id=sesion_id)
 
     # Mover la sesión
