@@ -1,191 +1,142 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Reprogramar clase – {{ sesion.pack.alumna.get_full_name }}{% endblock %}
+{% block title %}Reprogramar – {{ sesion.pack.alumna.get_full_name }}{% endblock %}
 
 {% block extra_head %}
 <style>
 :root {
-  --verde:       #2f6300;
-  --verde-light: #d4eac8;
-  --verde-pale:  #f0f7ea;
-  --gris:        #555;
-  --borde:       #e0e0e0;
-  --radio:       12px;
-  --font:        'Poppins', sans-serif;
+  --verde: #2f6300; --verde-light: #d4eac8; --verde-pale: #f0f7ea;
+  --gris: #555; --borde: #e0e0e0; --radio: 12px; --font: 'Poppins', sans-serif;
 }
 body { font-family: var(--font); }
-
-.reprog-wrap { width: 92%; max-width: 580px; margin: 80px auto 80px; }
-
-.panel-nav { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-.panel-nav a {
-  padding: 8px 16px; border-radius: 20px; text-decoration: none;
-  font-size: .82rem; font-weight: 600; background: #f0f0f0; color: var(--gris);
-  transition: all .15s;
+.wrap { width: 92%; max-width: 480px; margin: 80px auto 80px; }
+.back { display: inline-block; margin-bottom: 20px; color: var(--verde); text-decoration: none; font-size: .85rem; font-weight: 600; }
+.info-card { background: #fff3e0; border-left: 4px solid #e65100; border-radius: var(--radio); padding: 14px 16px; margin-bottom: 24px; }
+.info-card .titulo { font-weight: 700; color: #333; margin-bottom: 4px; }
+.info-card .detalle { font-size: .82rem; color: #888; }
+label { display: block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--verde); margin-bottom: 8px; }
+input[type=date] {
+  width: 100%; padding: 14px 16px; border: 2px solid var(--borde);
+  border-radius: var(--radio); font-family: var(--font); font-size: .95rem;
+  color: #333; background: #fff; box-sizing: border-box; margin-bottom: 20px;
 }
-.panel-nav a:hover { background: var(--verde-light); color: var(--verde); }
-
-/* ── Info sesión original ── */
-.sesion-original {
-  background: #fff3e0; border-left: 4px solid #e65100;
-  border-radius: var(--radio); padding: 16px 18px; margin-bottom: 24px;
-}
-.sesion-original .eyebrow { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #e65100; margin-bottom: 6px; }
-.sesion-original .alumna  { font-size: 1rem; font-weight: 700; color: #333; margin-bottom: 2px; }
-.sesion-original .detalle { font-size: .82rem; color: #888; }
-
-/* ── Semanas ── */
-.semana-titulo {
-  font-size: .72rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--verde);
-  border-bottom: 2px solid var(--verde-light);
-  padding-bottom: 6px; margin: 20px 0 12px;
-}
-
-/* ── Día ── */
-.dia-bloque { margin-bottom: 16px; }
-.dia-label {
-  font-size: .82rem; font-weight: 700; color: #555;
-  margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
-}
-.dia-label::after { content: ''; flex: 1; height: 1px; background: var(--borde); }
-.dia-label.hoy-label { color: var(--verde); }
-
-/* ── Slots ── */
+input[type=date]:focus { outline: none; border-color: var(--verde); }
+.slots-wrap { margin-bottom: 24px; }
+.slots-titulo { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--verde); margin-bottom: 10px; }
 .slots-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-
 .slot-btn {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 10px 14px; border-radius: 10px; border: none;
-  cursor: pointer; font-family: var(--font); transition: all .15s;
-  min-width: 72px;
+  padding: 12px 16px; border-radius: 10px; border: 2px solid var(--borde);
+  background: #fff; cursor: pointer; font-family: var(--font);
+  font-size: .85rem; font-weight: 700; color: #555; transition: all .15s;
+  display: flex; flex-direction: column; align-items: center; min-width: 70px;
 }
-.slot-hora  { font-size: .9rem; font-weight: 700; }
-.slot-cupos { font-size: .65rem; font-weight: 600; margin-top: 2px; }
-
-/* Verde — disponible */
-.slot-ok    { background: var(--verde-pale); color: var(--verde); border: 1.5px solid var(--verde-light); }
+.slot-btn .cupos { font-size: .65rem; font-weight: 600; margin-top: 2px; }
+.slot-ok   { border-color: var(--verde-light); color: var(--verde); background: var(--verde-pale); }
 .slot-ok:hover { background: var(--verde); color: #fff; }
-
-/* Amarillo — casi lleno (1-2) */
-.slot-poco  { background: #fff9e6; color: #856404; border: 1.5px solid #f1c40f; }
+.slot-poco { border-color: #f1c40f; color: #856404; background: #fff9e6; }
 .slot-poco:hover { background: #f1c40f; color: #333; }
+.slot-lleno { border-color: #eee; color: #ccc; cursor: not-allowed; }
+.loading { color: #aaa; font-size: .85rem; padding: 12px 0; }
 
-/* Rojo — lleno */
-.slot-lleno { background: #fff0f0; color: #c62828; border: 1.5px solid #e53935; cursor: not-allowed; opacity: .6; }
-
-.sin-slots { font-size: .8rem; color: #ccc; padding: 8px 0; }
-
-/* ── Confirmación ── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.45); z-index: 1000;
-  align-items: center; justify-content: center;
-}
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; }
 .modal-overlay.visible { display: flex; }
-.modal-box {
-  background: #fff; border-radius: 14px;
-  padding: 28px 24px; max-width: 360px; width: 90%;
-  box-shadow: 0 8px 32px rgba(0,0,0,.2);
-}
+.modal-box { background: #fff; border-radius: 14px; padding: 24px; max-width: 340px; width: 90%; }
 .modal-titulo { font-size: 1rem; font-weight: 700; color: var(--verde); margin-bottom: 10px; }
-.modal-texto  { font-size: .88rem; color: #555; margin-bottom: 20px; line-height: 1.5; }
+.modal-texto  { font-size: .85rem; color: #555; margin-bottom: 20px; line-height: 1.5; }
 .modal-acciones { display: flex; gap: 10px; justify-content: flex-end; }
-.btn-modal-volver    { padding: 9px 18px; border-radius: 8px; border: 1px solid #ddd; background: #f5f5f5; color: #555; font-family: var(--font); font-size: .85rem; font-weight: 600; cursor: pointer; }
-.btn-modal-confirmar { padding: 9px 18px; border-radius: 8px; border: none; background: var(--verde); color: #fff; font-family: var(--font); font-size: .85rem; font-weight: 700; cursor: pointer; }
+.btn-volver    { padding: 9px 16px; border-radius: 8px; border: 1px solid #ddd; background: #f5f5f5; color: #555; font-family: var(--font); font-size: .85rem; font-weight: 600; cursor: pointer; }
+.btn-confirmar { padding: 9px 16px; border-radius: 8px; border: none; background: var(--verde); color: #fff; font-family: var(--font); font-size: .85rem; font-weight: 700; cursor: pointer; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="reprog-wrap">
+<div class="wrap">
+  <a href="{% url 'panel_principal' %}" class="back">← Volver a Agenda</a>
 
-  <div class="panel-nav">
-    <a href="{% url 'panel_principal' %}">← Agenda</a>
-  </div>
-
-  <!-- Info sesión original -->
-  <div class="sesion-original">
-    <div class="eyebrow">Reprogramar clase</div>
-    <div class="alumna">{{ sesion.pack.alumna.get_full_name }}</div>
+  <div class="info-card">
+    <div class="titulo">{{ sesion.pack.alumna.get_full_name }}</div>
     <div class="detalle">
       {{ sesion.pack.get_tipo_display }} · Clase {{ sesion.numero }}/{{ sesion.pack.cantidad }}<br>
-      Fecha original: {{ sesion.fecha|date:"l j \d\e F" }} {{ sesion.hora }}:00 hrs
+      Fecha actual: {{ sesion.fecha|date:"l j \d\e F" }} {{ sesion.hora }}:00 hrs
     </div>
   </div>
 
-  <!-- Semanas con slots disponibles -->
-  {% for semana in semanas %}
-  <div class="semana-titulo">{{ semana.label }}</div>
+  <label for="nueva-fecha">① Elige la nueva fecha</label>
+  <input type="date" id="nueva-fecha" min="{{ hoy|date:'Y-m-d' }}">
 
-  {% for dia in semana.dias %}
-  <div class="dia-bloque">
-    <div class="dia-label {% if dia.es_hoy %}hoy-label{% endif %}">
-      {{ dia.nombre }} {{ dia.fecha|date:"d/m" }}
-      {% if dia.es_hoy %}· Hoy{% endif %}
-    </div>
-
-    {% if dia.slots %}
-    <div class="slots-grid">
-      {% for slot in dia.slots %}
-      {% if slot.cupos > 0 %}
-      <button type="button"
-              class="slot-btn {% if slot.cupos <= 2 %}slot-poco{% else %}slot-ok{% endif %}"
-              onclick="elegirSlot('{{ dia.fecha|date:'Y-m-d' }}', {{ slot.hora }}, '{{ dia.nombre }} {{ dia.fecha|date:'d/m' }} {{ slot.hora }}:00')">
-        <span class="slot-hora">{{ slot.label }}</span>
-        <span class="slot-cupos">{{ slot.cupos }} libre{% if slot.cupos != 1 %}s{% endif %}</span>
-      </button>
-      {% else %}
-      <button type="button" class="slot-btn slot-lleno" disabled>
-        <span class="slot-hora">{{ slot.label }}</span>
-        <span class="slot-cupos">Lleno</span>
-      </button>
-      {% endif %}
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="sin-slots">Sin clases este día</div>
-    {% endif %}
+  <div class="slots-wrap" id="slots-wrap" style="display:none;">
+    <div class="slots-titulo">② Elige la hora</div>
+    <div class="slots-grid" id="slots-grid"></div>
   </div>
-  {% endfor %}
-
-  {% endfor %}
-
 </div>
 
-<!-- Modal confirmación -->
-<div class="modal-overlay" id="modal-confirmar">
+<div class="modal-overlay" id="modal">
   <div class="modal-box">
-    <div class="modal-titulo">Confirmar reprogramación</div>
+    <div class="modal-titulo">Confirmar cambio</div>
     <div class="modal-texto" id="modal-texto"></div>
     <div class="modal-acciones">
-      <button class="btn-modal-volver" onclick="cerrarModal()">Cancelar</button>
-      <form method="POST" id="form-reprog" action="">
+      <button class="btn-volver" onclick="cerrarModal()">Cancelar</button>
+      <form method="POST" id="form-reprog" action="{% url 'reprogramar_sesion_confirmar' sesion.pk %}">
         {% csrf_token %}
         <input type="hidden" name="nueva_fecha" id="input-fecha">
         <input type="hidden" name="nueva_hora"  id="input-hora">
-        <button type="submit" class="btn-modal-confirmar">Confirmar →</button>
+        <button type="submit" class="btn-confirmar">Confirmar →</button>
       </form>
     </div>
   </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-function elegirSlot(fecha, hora, label) {
+const alumna = '{{ sesion.pack.alumna.get_full_name }}';
+const fechaOrig = '{{ sesion.fecha|date:"d/m" }}';
+const horaOrig  = '{{ sesion.hora }}';
+
+document.getElementById('nueva-fecha').addEventListener('change', function() {
+  const fecha = this.value;
+  if (!fecha) return;
+
+  const wrap = document.getElementById('slots-wrap');
+  const grid = document.getElementById('slots-grid');
+  wrap.style.display = 'block';
+  grid.innerHTML = '<div class="loading">Cargando horarios…</div>';
+
+  fetch(`/panel/reprogramar/{{ sesion.pk }}/horas/?fecha=${fecha}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { grid.innerHTML = `<p style="color:red">${data.error}</p>`; return; }
+      if (!data.slots.length) { grid.innerHTML = '<div class="loading">Sin horarios disponibles.</div>'; return; }
+
+      grid.innerHTML = data.slots.map(s => {
+        if (s.cupos <= 0) {
+          return `<button class="slot-btn slot-lleno" disabled>
+            <span>${s.label}</span><span class="cupos">Lleno</span>
+          </button>`;
+        }
+        const cls = s.cupos <= 2 ? 'slot-poco' : 'slot-ok';
+        return `<button class="slot-btn ${cls}" onclick="elegir('${fecha}', ${s.hora}, '${s.label}', ${s.cupos})">
+          <span>${s.label}</span><span class="cupos">${s.cupos} libre${s.cupos !== 1 ? 's' : ''}</span>
+        </button>`;
+      }).join('');
+    })
+    .catch(() => { grid.innerHTML = '<div class="loading" style="color:red">Error al cargar. Intenta de nuevo.</div>'; });
+});
+
+function elegir(fecha, hora, label, cupos) {
   document.getElementById('input-fecha').value = fecha;
   document.getElementById('input-hora').value  = hora;
-  document.getElementById('form-reprog').action = '/panel/reprogramar/{{ sesion.pk }}/confirmar/';
+  const partes = fecha.split('-');
+  const fechaLabel = `${partes[2]}/${partes[1]}/${partes[0]}`;
   document.getElementById('modal-texto').innerHTML =
-    `Mover clase de <strong>{{ sesion.pack.alumna.get_full_name }}</strong><br>
-     al <strong>${label} hrs</strong>.<br><br>
-     La fecha original ({{ sesion.fecha|date:"d/m" }} {{ sesion.hora }}:00) quedará libre.`;
-  document.getElementById('modal-confirmar').classList.add('visible');
+    `Mover clase de <strong>${alumna}</strong><br>
+     al <strong>${fechaLabel} ${label} hrs</strong>.<br><br>
+     Fecha original: ${fechaOrig} ${horaOrig}:00 quedará libre.`;
+  document.getElementById('modal').classList.add('visible');
 }
 
 function cerrarModal() {
-  document.getElementById('modal-confirmar').classList.remove('visible');
+  document.getElementById('modal').classList.remove('visible');
 }
 </script>
 {% endblock %}

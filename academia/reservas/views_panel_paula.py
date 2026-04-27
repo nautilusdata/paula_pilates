@@ -439,83 +439,43 @@ def limpiar_packs_view(request):
 
 # ── Reprogramar sesión ────────────────────────────────────────────────────────
 
-HORA_LABEL_ESPECIAL = {
-    (5, 12): '12:15',
-    (5, 13): '13:30',
-}
-
-def _hora_label(dia_weekday: int, hora: int) -> str:
-    return HORA_LABEL_ESPECIAL.get((dia_weekday, hora), f'{hora:02d}:00')
-
-MES_CORTO_R = {1:'ene',2:'feb',3:'mar',4:'abr',5:'may',6:'jun',
-               7:'jul',8:'ago',9:'sep',10:'oct',11:'nov',12:'dic'}
-NOMBRE_DIA_R = {0:'Lunes',1:'Martes',2:'Miércoles',3:'Jueves',4:'Viernes',5:'Sábado'}
+@login_required
+@user_passes_test(es_staff, login_url='/')
+def reprogramar_sesion(request, sesion_id):
+    """Página liviana — solo datepicker. Las horas se cargan vía AJAX."""
+    from .models import horas_disponibles_por_tipo
+    sesion = get_object_or_404(Sesion, pk=sesion_id)
+    context = {
+        'sesion': sesion,
+        'hoy':    date.today(),
+    }
+    return render(request, 'reservas/reprogramar_sesion.html', context)
 
 
 @login_required
 @user_passes_test(es_staff, login_url='/')
-def reprogramar_sesion(request, sesion_id):
-    """Paula elige nuevo slot para mover la sesión."""
+def reprogramar_horas_ajax(request, sesion_id):
+    """AJAX — retorna horas disponibles para la fecha elegida."""
     from .models import horas_disponibles_por_tipo
-    from collections import defaultdict
-    sesion = get_object_or_404(Sesion, pk=sesion_id)
-    hoy    = date.today()
+    sesion    = get_object_or_404(Sesion, pk=sesion_id)
+    fecha_str = request.GET.get('fecha')
+    if not fecha_str:
+        return JsonResponse({'error': 'Fecha requerida'}, status=400)
+    try:
+        fecha = date.fromisoformat(fecha_str)
+    except ValueError:
+        return JsonResponse({'error': 'Fecha inválida'}, status=400)
 
-    inicio   = hoy + timedelta(days=1)
-    fin      = inicio + timedelta(weeks=4)
-    horas_pl = horas_disponibles_por_tipo('PL')
-    capacidad = ConfiguracionGeneral.get('CAPACIDAD_REFORMERS', 6)
-
-    # Una sola query para todas las sesiones ocupadas en el rango
-    ocupados_qs = Sesion.objects.filter(
-        fecha__gte=inicio,
-        fecha__lt=fin,
-        estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
-    ).values('fecha', 'hora')
-
-    # Contar ocupados por (fecha, hora) en memoria
-    ocupados = defaultdict(int)
-    for row in ocupados_qs:
-        ocupados[(row['fecha'], row['hora'])] += 1
-
-    semanas = []
-    cursor  = inicio
-    while cursor < fin:
-        lunes  = cursor - timedelta(days=cursor.weekday())
-        sabado = lunes + timedelta(days=5)
-
-        dias_semana = []
-        for i in range(6):
-            dia = lunes + timedelta(days=i)
-            if dia < inicio:
-                continue
-            slots = []
-            for h in horas_pl:
-                cupos = capacidad - ocupados.get((dia, h), 0)
-                slots.append({
-                    'hora':  h,
-                    'label': _hora_label(dia.weekday(), h),
-                    'cupos': max(cupos, 0),
-                })
-            dias_semana.append({
-                'fecha':  dia,
-                'nombre': NOMBRE_DIA_R[dia.weekday()],
-                'es_hoy': dia == hoy,
-                'slots':  slots,
-            })
-
-        if dias_semana:
-            label = (f"{lunes.day} {MES_CORTO_R[lunes.month]}"
-                     f" – {sabado.day} {MES_CORTO_R[sabado.month]}")
-            semanas.append({'label': label, 'dias': dias_semana})
-
-        cursor = sabado + timedelta(days=1)
-
-    context = {
-        'sesion':  sesion,
-        'semanas': semanas,
-    }
-    return render(request, 'reservas/reprogramar_sesion.html', context)
+    horas_pl  = horas_disponibles_por_tipo('PL')
+    slots = []
+    for h in horas_pl:
+        cupos = Sesion.cupos_disponibles(fecha, h)
+        slots.append({
+            'hora':  h,
+            'label': f'{h:02d}:00',
+            'cupos': cupos,
+        })
+    return JsonResponse({'slots': slots})
 
 
 @login_required
