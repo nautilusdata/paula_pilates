@@ -457,33 +457,45 @@ NOMBRE_DIA_R = {0:'Lunes',1:'Martes',2:'Miércoles',3:'Jueves',4:'Viernes',5:'S�
 def reprogramar_sesion(request, sesion_id):
     """Paula elige nuevo slot para mover la sesión."""
     from .models import horas_disponibles_por_tipo
+    from collections import defaultdict
     sesion = get_object_or_404(Sesion, pk=sesion_id)
     hoy    = date.today()
 
-    # Generar 4 semanas desde mañana
-    inicio  = hoy + timedelta(days=1)
-    fin     = inicio + timedelta(weeks=4)
+    inicio   = hoy + timedelta(days=1)
+    fin      = inicio + timedelta(weeks=4)
     horas_pl = horas_disponibles_por_tipo('PL')
+    capacidad = ConfiguracionGeneral.get('CAPACIDAD_REFORMERS', 6)
+
+    # Una sola query para todas las sesiones ocupadas en el rango
+    ocupados_qs = Sesion.objects.filter(
+        fecha__gte=inicio,
+        fecha__lt=fin,
+        estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
+    ).values('fecha', 'hora')
+
+    # Contar ocupados por (fecha, hora) en memoria
+    ocupados = defaultdict(int)
+    for row in ocupados_qs:
+        ocupados[(row['fecha'], row['hora'])] += 1
 
     semanas = []
     cursor  = inicio
     while cursor < fin:
-        # Lunes de esa semana
         lunes  = cursor - timedelta(days=cursor.weekday())
         sabado = lunes + timedelta(days=5)
 
         dias_semana = []
-        for i in range(6):  # Lun→Sáb
+        for i in range(6):
             dia = lunes + timedelta(days=i)
             if dia < inicio:
                 continue
             slots = []
             for h in horas_pl:
-                cupos = Sesion.cupos_disponibles(dia, h)
+                cupos = capacidad - ocupados.get((dia, h), 0)
                 slots.append({
                     'hora':  h,
                     'label': _hora_label(dia.weekday(), h),
-                    'cupos': cupos,
+                    'cupos': max(cupos, 0),
                 })
             dias_semana.append({
                 'fecha':  dia,
@@ -497,7 +509,7 @@ def reprogramar_sesion(request, sesion_id):
                      f" – {sabado.day} {MES_CORTO_R[sabado.month]}")
             semanas.append({'label': label, 'dias': dias_semana})
 
-        cursor = sabado + timedelta(days=1)  # siguiente lunes
+        cursor = sabado + timedelta(days=1)
 
     context = {
         'sesion':  sesion,
