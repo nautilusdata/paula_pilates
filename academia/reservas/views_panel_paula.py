@@ -478,7 +478,8 @@ def reprogramar_horas_ajax(request, sesion_id):
         return JsonResponse({'error': 'Fecha inválida'}, status=400)
 
     tipo_slot = TIPO_PACK_A_SLOT.get(sesion.pack.tipo, 'PL')
-    horas     = horas_disponibles_por_tipo(tipo_slot)
+    dia_semana = fecha.weekday()  # 0=Lun...5=Sáb
+    horas = horas_disponibles_por_tipo(tipo_slot, dia=dia_semana)  # ← agregar dia
     slots = []
     for h in horas:
         cupos = Sesion.cupos_disponibles(fecha, h)
