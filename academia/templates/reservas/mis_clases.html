@@ -354,11 +354,7 @@
             {% elif s.sesion.estado == 'CONGELADA' %}
               <span class="sesion-badge badge-congelada">Congelada</span>
             {% elif s.sesion.estado == 'RECUPERAR' %}
-              {% if s.puede_recuperar %}
-                <a href="{% url 'recuperar_clase' s.sesion.pk %}" class="sesion-badge badge-recuperar">Recuperar →</a>
-              {% else %}
-                <span class="sesion-badge badge-ausente">Ausente</span>
-              {% endif %}
+              <span class="sesion-badge badge-ausente">Ausente</span>
             {% elif s.sesion.estado == 'RECUPERADA' %}
               <span class="sesion-badge badge-completada">✓ Recuperada</span>
             {% else %}
