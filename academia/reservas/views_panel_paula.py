@@ -435,3 +435,106 @@ def limpiar_packs_view(request):
     total  = packs.count()
     packs.delete()
     return JsonResponse({'eliminados': total})
+
+
+# ── Reprogramar sesión ────────────────────────────────────────────────────────
+
+HORA_LABEL_ESPECIAL = {
+    (5, 12): '12:15',
+    (5, 13): '13:30',
+}
+
+def _hora_label(dia_weekday: int, hora: int) -> str:
+    return HORA_LABEL_ESPECIAL.get((dia_weekday, hora), f'{hora:02d}:00')
+
+MES_CORTO_R = {1:'ene',2:'feb',3:'mar',4:'abr',5:'may',6:'jun',
+               7:'jul',8:'ago',9:'sep',10:'oct',11:'nov',12:'dic'}
+NOMBRE_DIA_R = {0:'Lunes',1:'Martes',2:'Miércoles',3:'Jueves',4:'Viernes',5:'Sábado'}
+
+
+@login_required
+@user_passes_test(es_staff, login_url='/')
+def reprogramar_sesion(request, sesion_id):
+    """Paula elige nuevo slot para mover la sesión."""
+    from .models import horas_disponibles_por_tipo
+    sesion = get_object_or_404(Sesion, pk=sesion_id)
+    hoy    = date.today()
+
+    # Generar 4 semanas desde mañana
+    inicio  = hoy + timedelta(days=1)
+    fin     = inicio + timedelta(weeks=4)
+    horas_pl = horas_disponibles_por_tipo('PL')
+
+    semanas = []
+    cursor  = inicio
+    while cursor < fin:
+        # Lunes de esa semana
+        lunes  = cursor - timedelta(days=cursor.weekday())
+        sabado = lunes + timedelta(days=5)
+
+        dias_semana = []
+        for i in range(6):  # Lun→Sáb
+            dia = lunes + timedelta(days=i)
+            if dia < inicio:
+                continue
+            slots = []
+            for h in horas_pl:
+                cupos = Sesion.cupos_disponibles(dia, h)
+                slots.append({
+                    'hora':  h,
+                    'label': _hora_label(dia.weekday(), h),
+                    'cupos': cupos,
+                })
+            dias_semana.append({
+                'fecha':  dia,
+                'nombre': NOMBRE_DIA_R[dia.weekday()],
+                'es_hoy': dia == hoy,
+                'slots':  slots,
+            })
+
+        if dias_semana:
+            label = (f"{lunes.day} {MES_CORTO_R[lunes.month]}"
+                     f" – {sabado.day} {MES_CORTO_R[sabado.month]}")
+            semanas.append({'label': label, 'dias': dias_semana})
+
+        cursor = sabado + timedelta(days=1)  # siguiente lunes
+
+    context = {
+        'sesion':  sesion,
+        'semanas': semanas,
+    }
+    return render(request, 'reservas/reprogramar_sesion.html', context)
+
+
+@login_required
+@user_passes_test(es_staff, login_url='/')
+@require_POST
+def reprogramar_sesion_confirmar(request, sesion_id):
+    """Ejecuta el movimiento de la sesión al nuevo slot."""
+    sesion     = get_object_or_404(Sesion, pk=sesion_id)
+    fecha_str  = request.POST.get('nueva_fecha')
+    hora_str   = request.POST.get('nueva_hora')
+
+    try:
+        nueva_fecha = date.fromisoformat(fecha_str)
+        nueva_hora  = int(hora_str)
+    except (ValueError, TypeError):
+        messages.error(request, 'Datos inválidos.')
+        return redirect('reprogramar_sesion', sesion_id=sesion_id)
+
+    # Verificar cupo
+    if Sesion.cupos_disponibles(nueva_fecha, nueva_hora) < 1:
+        messages.error(request, 'Ese slot ya no tiene cupo. Elige otro.')
+        return redirect('reprogramar_sesion', sesion_id=sesion_id)
+
+    # Mover la sesión
+    sesion.fecha = nueva_fecha
+    sesion.hora  = nueva_hora
+    sesion.save(update_fields=['fecha', 'hora'])
+
+    messages.success(
+        request,
+        f'Clase de {sesion.pack.alumna.get_full_name()} '
+        f'movida al {nueva_fecha.strftime("%d/%m/%Y")} {nueva_hora:02d}:00.'
+    )
+    return redirect('panel_principal')

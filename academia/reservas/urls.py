@@ -9,6 +9,7 @@ urlpatterns = [
     path('reservar/pack10/', views_reservar_pack10.reservar_pack10, name='reservar_pack10'),
     path('reservar/pack10/confirmar/', views_reservar_pack10.reservar_pack10_confirmar, name='reservar_pack10_confirmar'),
     path('reservar/pack10/horas/', views_reservar_pack10.horas_disponibles_ajax, name='horas_disponibles_ajax'),
+    path('reservar/pack10/dias/', views_reservar_pack10.dias_disponibles_ajax, name='dias_disponibles_ajax'),
     path('mis-clases/', views_mis_clases.mis_clases, name='mis_clases'),
     path('reservar/pack-reducido/', views_reservar_pack10.reservar_pack_reducido, name='reservar_pack_reducido'),
     path('reservar_pack_reducido/confirmar/', views_reservar_pack10.reservar_pack_reducido_confirmar, name='reservar_pack_reducido_confirmar'),
@@ -24,16 +25,15 @@ urlpatterns = [
     path('panel/precios/', views_panel_paula.panel_precios, name='panel_precios'),
     path('panel/horarios/', views_panel_paula.panel_horarios, name='panel_horarios'),
     path('panel/ausente/<int:sesion_id>/', views_panel_paula.marcar_ausente, name='marcar_ausente'),
-    path('panel/alumna/<int:alumna_id>/', views_panel_paula.ficha_alumna, name='ficha_alumna'),       # ← nuevo
-    path('panel/cancelar-pack/<int:pack_id>/', views_panel_paula.cancelar_pack, name='cancelar_pack'), # ← nuevo
+    path('panel/alumna/<int:alumna_id>/', views_panel_paula.ficha_alumna, name='ficha_alumna'),
+    path('panel/cancelar-pack/<int:pack_id>/', views_panel_paula.cancelar_pack, name='cancelar_pack'),
+    path('panel/reprogramar/<int:sesion_id>/', views_panel_paula.reprogramar_sesion, name='reprogramar_sesion'),
+    path('panel/reprogramar/<int:sesion_id>/confirmar/', views_panel_paula.reprogramar_sesion_confirmar, name='reprogramar_sesion_confirmar'),
     path('recuperar/<int:sesion_id>/', views_mis_clases.recuperar_clase, name='recuperar_clase'),
     path('panel/bulk-reschedule/', views_panel_paula.bulk_reschedule, name='bulk_reschedule'),
     path('panel/bulk-reschedule/preview/', views_panel_paula.bulk_reschedule_preview, name='bulk_reschedule_preview'),
-    # Pago Webpay
     path('pago/webpay/iniciar/<int:pack_id>/', views_webpay.webpay_iniciar, name='webpay_iniciar'),
     path('pago/webpay/retorno/', views_webpay.webpay_retorno, name='webpay_retorno'),
     path('pago/reintentar/<int:pack_id>/', views_webpay.reintentar_pago, name='reintentar_pago'),
-    # Cloud Scheduler — limpieza de packs expirados
     path('internal/limpiar-packs/', views_panel_paula.limpiar_packs_view, name='limpiar_packs'),
-    path('reservar/pack10/dias/', views_reservar_pack10.dias_disponibles_ajax, name='dias_disponibles_ajax'),
 ]

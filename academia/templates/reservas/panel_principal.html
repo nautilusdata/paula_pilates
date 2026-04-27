@@ -117,6 +117,12 @@ body { font-family: var(--font); }
 .alumna-tipo { font-size: .72rem; color: #999; }
 .alumna-sesion { font-size: .72rem; color: #bbb; white-space: nowrap; }
 
+.btn-cambiar {
+  font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px;
+  border: 1.5px solid var(--verde); background: transparent; color: var(--verde);
+  cursor: pointer; transition: all .15s; white-space: nowrap; text-decoration: none;
+}
+.btn-cambiar:hover { background: var(--verde); color: #fff; }
 .sin-clases-dia { text-align: center; padding: 12px 20px; color: #ddd; font-size: .8rem; }
 
 .sin-semana { text-align: center; padding: 50px 20px; color: #bbb; }
@@ -194,7 +200,7 @@ body { font-family: var(--font); }
             {% else %}Única{% endif %}
           </span>
           {% if sesion.estado == 'PROGRAMADA' %}
-            <button class="btn-ausente" onclick="marcarAusente({{ sesion.pk }}, this)">Ausente</button>
+            <a href="{% url 'reprogramar_sesion' sesion.pk %}" class="btn-cambiar">Cambiar</a>
           {% elif sesion.estado == 'RECUPERAR' %}
             <span class="badge-ausente">Ausente</span>
           {% elif sesion.estado == 'RECUPERADA' %}
