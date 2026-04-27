@@ -452,23 +452,21 @@ def reprogramar_sesion(request, sesion_id):
     return render(request, 'reservas/reprogramar_sesion.html', context)
 
 
+TIPO_PACK_A_SLOT = {
+    'PACK10':     'PL',
+    'REDUCIDO':   'PL',
+    'SUELTA':     'PL',
+    'PRIVADA':    'PV',
+    'BB_FULL':    'BDB',
+    'BB_SEMANAL': 'BDB',
+    'PRUEBA':     'TEST',
+}
+
+
 @login_required
 @user_passes_test(es_staff, login_url='/')
 def reprogramar_horas_ajax(request, sesion_id):
-    TIPO_PACK_A_SLOT = {
-        'PACK10':     'PL',
-        'REDUCIDO':   'PL',
-        'SUELTA':     'PL',
-        'PRIVADA':    'PV',
-        'BB_FULL':    'BDB',
-        'BB_SEMANAL': 'BDB',
-        'PRUEBA':     'TEST',
-    }
-
-    tipo_slot = TIPO_PACK_A_SLOT.get(sesion.pack.tipo, 'PL')
-    horas_pl  = horas_disponibles_por_tipo(tipo_slot)
-
-    """AJAX — retorna horas disponibles para la fecha elegida."""
+    """AJAX — retorna horas disponibles para la fecha elegida, filtradas por tipo de producto."""
     from .models import horas_disponibles_por_tipo
     sesion    = get_object_or_404(Sesion, pk=sesion_id)
     fecha_str = request.GET.get('fecha')
@@ -479,9 +477,10 @@ def reprogramar_horas_ajax(request, sesion_id):
     except ValueError:
         return JsonResponse({'error': 'Fecha inválida'}, status=400)
 
-    horas_pl  = horas_disponibles_por_tipo('PL')
+    tipo_slot = TIPO_PACK_A_SLOT.get(sesion.pack.tipo, 'PL')
+    horas     = horas_disponibles_por_tipo(tipo_slot)
     slots = []
-    for h in horas_pl:
+    for h in horas:
         cupos = Sesion.cupos_disponibles(fecha, h)
         slots.append({
             'hora':  h,
