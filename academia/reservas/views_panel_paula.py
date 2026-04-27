@@ -455,6 +455,19 @@ def reprogramar_sesion(request, sesion_id):
 @login_required
 @user_passes_test(es_staff, login_url='/')
 def reprogramar_horas_ajax(request, sesion_id):
+    TIPO_PACK_A_SLOT = {
+        'PACK10':     'PL',
+        'REDUCIDO':   'PL',
+        'SUELTA':     'PL',
+        'PRIVADA':    'PV',
+        'BB_FULL':    'BDB',
+        'BB_SEMANAL': 'BDB',
+        'PRUEBA':     'TEST',
+    }
+
+    tipo_slot = TIPO_PACK_A_SLOT.get(sesion.pack.tipo, 'PL')
+    horas_pl  = horas_disponibles_por_tipo(tipo_slot)
+
     """AJAX — retorna horas disponibles para la fecha elegida."""
     from .models import horas_disponibles_por_tipo
     sesion    = get_object_or_404(Sesion, pk=sesion_id)
