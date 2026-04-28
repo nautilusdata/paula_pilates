@@ -477,18 +477,44 @@ def reprogramar_horas_ajax(request, sesion_id):
     except ValueError:
         return JsonResponse({'error': 'Fecha inválida'}, status=400)
 
-    tipo_slot = TIPO_PACK_A_SLOT.get(sesion.pack.tipo, 'PL')
-    dia_semana = fecha.weekday()  # 0=Lun...5=Sáb
-    horas = horas_disponibles_por_tipo(tipo_slot, dia=dia_semana)  # ← agregar dia
+    tipo_slot  = TIPO_PACK_A_SLOT.get(sesion.pack.tipo, 'PL')
+    dia_semana = fecha.weekday()
+    horas      = horas_disponibles_por_tipo(tipo_slot, dia=dia_semana)
+    alumna     = sesion.pack.alumna
+    es_bb      = sesion.pack.tipo in ('BB_FULL', 'BB_SEMANAL')
+
     slots = []
     for h in horas:
-        cupos = Sesion.cupos_disponibles(fecha, h)
+        # Cupo según tipo: BB usa su propia capacidad
+        if es_bb:
+            ocupados = Sesion.objects.filter(
+                fecha=fecha,
+                hora=h,
+                estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
+                pack__tipo__in=['BB_FULL', 'BB_SEMANAL'],
+            ).count()
+            cap   = ConfiguracionGeneral.get('CAPACIDAD_BODY_BALANCE', 20)
+            cupos = max(cap - ocupados, 0)
+        else:
+            cupos = Sesion.cupos_disponibles(fecha, h)
+
+        # ¿La alumna ya tiene una clase (de cualquier tipo) en este slot?
+        alumna_ocupada = Sesion.objects.filter(
+            pack__alumna=alumna,
+            pack__estado__in=['ACTIVO', 'PENDIENTE_PAGO'],
+            fecha=fecha,
+            hora=h,
+            estado__in=['PROGRAMADA', 'RECUPERAR'],
+        ).exclude(pk=sesion.pk).exists()
+
         slots.append({
-            'hora':  h,
-            'label': f'{h:02d}:00',
-            'cupos': cupos,
+            'hora':          h,
+            'label':         f'{h:02d}:00',
+            'cupos':         cupos,
+            'alumna_ocupada': alumna_ocupada,
         })
-    return JsonResponse({'slots': slots})
+
+    return JsonResponse({'slots': slots, 'nombre_alumna': alumna.first_name})
 
 
 @login_required

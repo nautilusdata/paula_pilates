@@ -46,12 +46,34 @@ input[type=date]:focus { outline: none; border-color: var(--verde); }
 .modal-acciones { display: flex; gap: 10px; justify-content: flex-end; }
 .btn-volver    { padding: 9px 16px; border-radius: 8px; border: 1px solid #ddd; background: #f5f5f5; color: #555; font-family: var(--font); font-size: .85rem; font-weight: 600; cursor: pointer; }
 .btn-confirmar { padding: 9px 16px; border-radius: 8px; border: none; background: var(--verde); color: #fff; font-family: var(--font); font-size: .85rem; font-weight: 700; cursor: pointer; }
+.alerta-msg {
+  padding: 12px 16px; border-radius: var(--radio); font-size: .84rem;
+  font-weight: 600; line-height: 1.5;
+}
+.alerta-error   { background: #ffebee; border-left: 4px solid #e53935; color: #c62828; }
+.alerta-warning { background: #fff8e1; border-left: 4px solid #f9a825; color: #7b5800; }
+.alerta-success { background: #e8f5e9; border-left: 4px solid #388e3c; color: #1b5e20; }
+.slot-alumna-ocupada {
+  border-color: #e53935 !important; color: #e53935 !important;
+  background: #fff5f5 !important; cursor: not-allowed !important; opacity: .7;
+}
+.slot-alumna-ocupada .cupos { color: #e53935 !important; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="wrap">
   <a href="{% url 'panel_principal' %}" class="back">← Volver a Agenda</a>
+
+  {% if messages %}
+    {% for message in messages %}
+    <div class="alerta-msg alerta-{{ message.tags }}" style="margin-bottom:16px;">
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <div id="alerta-conflicto" class="alerta-msg alerta-warning" style="display:none; margin-bottom:16px;"></div>
 
   <div class="info-card">
     <div class="titulo">{{ sesion.pack.alumna.get_full_name }}</div>
@@ -97,23 +119,42 @@ document.getElementById('nueva-fecha').addEventListener('change', function() {
   const fecha = this.value;
   if (!fecha) return;
 
-  const wrap = document.getElementById('slots-wrap');
-  const grid = document.getElementById('slots-grid');
+  const wrap     = document.getElementById('slots-wrap');
+  const grid     = document.getElementById('slots-grid');
+  const alertaEl = document.getElementById('alerta-conflicto');
   wrap.style.display = 'block';
   grid.innerHTML = '<div class="loading">Cargando horarios…</div>';
+  alertaEl.style.display = 'none';
 
   fetch(`/panel/reprogramar/{{ sesion.pk }}/horas/?fecha=${fecha}`)
     .then(r => r.json())
     .then(data => {
       if (data.error) { grid.innerHTML = `<p style="color:red">${data.error}</p>`; return; }
-      if (!data.slots.length) { grid.innerHTML = '<div class="loading">Sin horarios disponibles.</div>'; return; }
+      if (!data.slots.length) { grid.innerHTML = '<div class="loading">Sin horarios disponibles para este día.</div>'; return; }
+
+      const nombre = data.nombre_alumna || alumna;
+      const hayConflicto = data.slots.some(s => s.alumna_ocupada);
+
+      if (hayConflicto) {
+        alertaEl.textContent = `⚠️ ${nombre} ya tiene una clase en algunos de estos horarios (marcados en rojo). Elige otro horario o cambia la fecha.`;
+        alertaEl.style.display = 'block';
+      }
 
       grid.innerHTML = data.slots.map(s => {
-        if (s.cupos <= 0) {
-          return `<button class="slot-btn slot-lleno" disabled>
-            <span>${s.label}</span><span class="cupos">Lleno</span>
+        // Alumna ya tiene clase aquí — bloqueado con explicación
+        if (s.alumna_ocupada) {
+          return `<button class="slot-btn slot-alumna-ocupada" disabled title="${nombre} ya tiene clase en este horario">
+            <span>${s.label}</span>
+            <span class="cupos">Alumna ocupada</span>
           </button>`;
         }
+        // Sin cupo general
+        if (s.cupos <= 0) {
+          return `<button class="slot-btn slot-lleno" disabled>
+            <span>${s.label}</span><span class="cupos">Sin cupo</span>
+          </button>`;
+        }
+        // Disponible
         const cls = s.cupos <= 2 ? 'slot-poco' : 'slot-ok';
         return `<button class="slot-btn ${cls}" onclick="elegir('${fecha}', ${s.hora}, '${s.label}', ${s.cupos})">
           <span>${s.label}</span><span class="cupos">${s.cupos} libre${s.cupos !== 1 ? 's' : ''}</span>
