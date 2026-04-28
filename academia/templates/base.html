@@ -16,31 +16,37 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
         <style>
-        /* Franja de auth — siempre fija debajo del header */
+        /* Franja de auth — transparente por defecto (no logueado, sobre foto carrusel) */
         .auth-overlay {
             position: fixed;
-            top: 90px;
+            top: 80px;
             left: 0;
             right: 0;
             z-index: 999;
             display: flex;
             align-items: center;
-            padding: 0 16px;
+            padding: 8px 16px;
+            min-height: 44px;
+            background: transparent;
         }
 
-        /* Nombre de la alumna — centrado absoluto */
+        /* Logueada — franja blanca funcional */
+        .auth-overlay.logueada {
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        /* Nombre de la alumna — centrado */
         .user-greeting {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            flex: 1;
+            text-align: center;
             font-size: .82rem;
             font-weight: 600;
             color: #2f6300;
         }
 
-        /* Botones — siempre a la derecha */
+        /* Botones — a la derecha */
         .auth-btn {
-            margin-left: auto;
             padding: 8px 18px;
             border-radius: 20px;
             font-family: 'Poppins', sans-serif;

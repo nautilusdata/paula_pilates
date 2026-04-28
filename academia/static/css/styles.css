@@ -19,14 +19,21 @@ a{
 
 /* Estilos generales para el encabezado */
 .header {
-  display: flex; /* Flexbox para distribuir los elementos */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+  display: flex;
   min-height: 40px;
   max-height: 80px;
-  background-color: #408601; /* Color de fondo de la barra superior */
-  justify-content: space-between; /* Espacio entre los elementos */
-  align-items: center; /* Centrar verticalmente los elementos */
-  padding: 10px 20px; /* Espacio interno */
-  color: white; /* Color del texto */
+  background-color: #408601;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  color: white;
+  box-sizing: border-box;
 }
 
 
