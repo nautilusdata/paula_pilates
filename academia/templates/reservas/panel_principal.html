@@ -87,7 +87,7 @@ body { font-family: var(--font); }
 .badge-ausente { font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: #fff3e0; color: #e65100; white-space: nowrap; }
 .badge-recuperada { font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: #e8f5e9; color: #388e3c; white-space: nowrap; }
 
-.hora-bloque { margin-bottom: 12px; border-radius: var(--radio); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.hora-bloque { margin-bottom: 12px; border-radius: var(--radio); overflow: visible; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
 .hora-header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; color: #fff; font-weight: 700; }
 .hora-header .hora-num { font-size: 1rem; min-width: 48px; }
 .hora-header .hora-tipo { font-size: .72rem; font-weight: 600; opacity: .85; text-transform: uppercase; letter-spacing: .05em; }
@@ -123,6 +123,39 @@ body { font-family: var(--font); }
   cursor: pointer; transition: all .15s; white-space: nowrap; text-decoration: none;
 }
 .btn-cambiar:hover { background: var(--verde); color: #fff; }
+
+/* Fila pasada — atenuada */
+.alumna-row.pasada {
+  opacity: .55;
+  background: #f9f9f9;
+}
+
+/* Dropdown de acciones para clases pasadas */
+.acciones-dropdown {
+  position: relative; display: inline-block;
+}
+.acciones-btn {
+  font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px;
+  border: 1.5px solid #bbb; background: transparent; color: #888;
+  cursor: pointer; white-space: nowrap;
+}
+.acciones-menu {
+  display: none; position: absolute; right: 0; top: 110%;
+  background: #fff; border: 1px solid var(--borde);
+  border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  z-index: 500; min-width: 140px; overflow: hidden;
+}
+.acciones-menu.visible { display: block; }
+.acciones-menu button {
+  display: block; width: 100%; padding: 10px 14px;
+  font-family: var(--font); font-size: .8rem; font-weight: 600;
+  border: none; background: transparent; cursor: pointer;
+  text-align: left; transition: background .1s;
+}
+.acciones-menu button:hover { background: #f5f5f5; }
+.acciones-menu .accion-completada { color: #388e3c; }
+.acciones-menu .accion-ausente    { color: #e65100; }
+.badge-completada { font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: #e8f5e9; color: #388e3c; white-space: nowrap; }
 .sin-clases-dia { text-align: center; padding: 12px 20px; color: #ddd; font-size: .8rem; }
 
 .sin-semana { text-align: center; padding: 50px 20px; color: #bbb; }
@@ -185,7 +218,7 @@ body { font-family: var(--font); }
       </div>
       <div class="hora-body pale-{{ tipo_principal }}">
         {% for sesion in sesiones %}
-        <div class="alumna-row">
+        <div class="alumna-row{% if sesion.fecha < hoy or sesion.fecha == hoy and sesion.hora <= hora_actual %} pasada{% endif %}">
           <div class="alumna-avatar avatar-{{ sesion.pack.tipo }}">
             {{ sesion.pack.alumna.first_name|first }}{{ sesion.pack.alumna.last_name|first }}
           </div>
@@ -199,13 +232,28 @@ body { font-family: var(--font); }
             {% if sesion.pack.cantidad > 1 %}Clase {{ sesion.numero }}/{{ sesion.pack.cantidad }}
             {% else %}Única{% endif %}
           </span>
-          {% if sesion.estado == 'PROGRAMADA' %}
-            <a href="{% url 'reprogramar_sesion' sesion.pk %}" class="btn-cambiar">Cambiar</a>
-          {% elif sesion.estado == 'RECUPERAR' %}
-            <span class="badge-ausente">Ausente</span>
+
+          {% if sesion.estado == 'COMPLETADA' %}
+            <span class="badge-completada">✓ Hecha</span>
           {% elif sesion.estado == 'RECUPERADA' %}
             <span class="badge-recuperada">✓ Recuperó</span>
+          {% elif sesion.estado == 'RECUPERAR' %}
+            <span class="badge-ausente">Ausente</span>
+            <a href="{% url 'reprogramar_sesion' sesion.pk %}" class="btn-cambiar">Cambiar</a>
+          {% elif sesion.estado == 'PROGRAMADA' %}
+            {% if sesion.fecha < hoy or sesion.fecha == hoy and sesion.hora <= hora_actual %}
+              <div class="acciones-dropdown">
+                <button class="acciones-btn" onclick="toggleMenu(this)">Acción ▾</button>
+                <div class="acciones-menu">
+                  <button class="accion-completada" onclick="marcarCompletada({{ sesion.pk }}, this)">✓ Completada</button>
+                  <button class="accion-ausente" onclick="marcarAusente({{ sesion.pk }}, this)">✗ Ausente</button>
+                </div>
+              </div>
+            {% else %}
+              <a href="{% url 'reprogramar_sesion' sesion.pk %}" class="btn-cambiar">Cambiar</a>
+            {% endif %}
           {% endif %}
+
         </div>
         {% endfor %}
       </div>
@@ -225,8 +273,39 @@ body { font-family: var(--font); }
 
 {% block extra_js %}
 <script>
+// Cerrar dropdowns al hacer click fuera
+document.addEventListener('click', e => {
+  if (!e.target.closest('.acciones-dropdown')) {
+    document.querySelectorAll('.acciones-menu.visible').forEach(m => m.classList.remove('visible'));
+  }
+});
+
+function toggleMenu(btn) {
+  const menu = btn.nextElementSibling;
+  document.querySelectorAll('.acciones-menu.visible').forEach(m => {
+    if (m !== menu) m.classList.remove('visible');
+  });
+  menu.classList.toggle('visible');
+}
+
+function marcarCompletada(sesionId, btn) {
+  const row = btn.closest('.alumna-row');
+  fetch(`/panel/completada/${sesionId}/`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      btn.closest('.acciones-dropdown').outerHTML = '<span class="badge-completada">✓ Hecha</span>';
+    } else {
+      alert('Error: ' + data.error);
+    }
+  })
+  .catch(() => alert('Error de conexión.'));
+}
+
 function marcarAusente(sesionId, btn) {
-  if (!confirm('¿Marcar como ausente?')) return;
   fetch(`/panel/ausente/${sesionId}/`, {
     method: 'POST',
     headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
@@ -234,7 +313,7 @@ function marcarAusente(sesionId, btn) {
   .then(r => r.json())
   .then(data => {
     if (data.ok) {
-      btn.outerHTML = '<span class="badge-ausente">Ausente</span>';
+      btn.closest('.acciones-dropdown').outerHTML = '<span class="badge-ausente">Ausente</span>';
     } else {
       alert('Error: ' + data.error);
     }

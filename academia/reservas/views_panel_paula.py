@@ -108,6 +108,7 @@ def panel_principal(request):
         'es_semana_actual': es_semana_actual,
         'label_semana':     label_semana,
         'hoy':              hoy,
+        'hora_actual':      timezone.localtime(timezone.now()).hour,
     }
     return render(request, 'reservas/panel_principal.html', context)
 
@@ -298,6 +299,25 @@ def marcar_ausente(request, sesion_id):
     sesion.estado = 'RECUPERAR'
     sesion.marcada_ausente_en = timezone.now()
     sesion.save()
+
+    return JsonResponse({'ok': True, 'alumna': sesion.pack.alumna.get_full_name(), 'sesion_id': sesion.pk})
+
+
+@login_required
+@user_passes_test(es_staff, login_url='/')
+def marcar_completada(request, sesion_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    try:
+        sesion = Sesion.objects.get(pk=sesion_id)
+    except Sesion.DoesNotExist:
+        return JsonResponse({'error': 'Sesión no encontrada'}, status=404)
+
+    if sesion.estado != 'PROGRAMADA':
+        return JsonResponse({'error': 'Solo se pueden completar sesiones programadas'}, status=400)
+
+    sesion.estado = 'COMPLETADA'
+    sesion.save(update_fields=['estado'])
 
     return JsonResponse({'ok': True, 'alumna': sesion.pack.alumna.get_full_name(), 'sesion_id': sesion.pk})
 

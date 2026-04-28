@@ -30,6 +30,7 @@ urlpatterns = [
     path('panel/reprogramar/<int:sesion_id>/', views_panel_paula.reprogramar_sesion, name='reprogramar_sesion'),
     path('panel/reprogramar/<int:sesion_id>/confirmar/', views_panel_paula.reprogramar_sesion_confirmar, name='reprogramar_sesion_confirmar'),
     path('panel/reprogramar/<int:sesion_id>/horas/', views_panel_paula.reprogramar_horas_ajax, name='reprogramar_horas_ajax'),
+    path('panel/completada/<int:sesion_id>/', views_panel_paula.marcar_completada, name='marcar_completada'),
     #path('recuperar/<int:sesion_id>/', views_mis_clases.recuperar_clase, name='recuperar_clase'),
     path('panel/bulk-reschedule/', views_panel_paula.bulk_reschedule, name='bulk_reschedule'),
     path('panel/bulk-reschedule/preview/', views_panel_paula.bulk_reschedule_preview, name='bulk_reschedule_preview'),
