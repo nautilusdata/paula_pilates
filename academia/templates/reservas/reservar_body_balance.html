@@ -142,10 +142,13 @@
   </div>
 
   <p class="pack-titulo">Body Balance</p>
-  <p class="pack-subtitulo">Martes · Jueves · Sábado</p>
+  <p class="pack-subtitulo">{{ dias_nombres }}</p>
 
   <div class="aviso">
-    <strong>Clases grupales</strong> — Martes y Jueves a las 20:00, Sábado a las 11:00.
+    <strong>Clases grupales</strong> —
+    {% for slot in slots_bb %}
+      {{ slot.dia_nombre }} a las {{ slot.hora }}:00{% if not forloop.last %}, {% endif %}
+    {% endfor %}.
   </div>
 
   {% if errores %}
@@ -166,7 +169,7 @@
       <label for="tipo_full" class="tipo-label">
         <div class="tipo-info">
           <span class="tipo-nombre">Mensualidad Full</span>
-          <span class="tipo-sub">3 veces por semana · Mar + Jue + Sáb</span>
+          <span class="tipo-sub">{{ full_sub }}</span>
         </div>
         <span class="tipo-precio">$60.000</span>
       </label>
@@ -186,9 +189,12 @@
     <div class="seccion-full {% if sel_tipo == 'BB_FULL' %}visible{% endif %}" id="seccion-full">
       <div class="seccion-label">② Horarios fijos</div>
       <div class="horarios-full">
-        <div class="horario-full-fila"><span class="dia">Martes</span><span class="hora">20:00 hrs</span></div>
-        <div class="horario-full-fila"><span class="dia">Jueves</span><span class="hora">20:00 hrs</span></div>
-        <div class="horario-full-fila"><span class="dia">Sábado</span><span class="hora">11:00 hrs</span></div>
+        {% for slot in slots_bb %}
+        <div class="horario-full-fila">
+          <span class="dia">{{ slot.dia_nombre }}</span>
+          <span class="hora">{{ slot.hora }}:00 hrs</span>
+        </div>
+        {% endfor %}
       </div>
       <div class="seccion-label">③ ¿Cuándo empiezas?</div>
       <input type="date" name="fecha_full" id="fecha_full"
@@ -201,26 +207,14 @@
     <div class="seccion-semanal {% if sel_tipo == 'BB_SEMANAL' %}visible{% endif %}" id="seccion-semanal">
       <div class="seccion-label">② ¿Qué día de la semana?</div>
       <div class="horarios-bb">
-        <input type="radio" name="dia_bb" id="dia_mar" value="MAR"
-               class="dia-opt" {% if sel_dia_bb == 'MAR' %}checked{% endif %}>
-        <label for="dia_mar" class="dia-label">
-          <span class="dia-nombre">Martes</span>
-          <span class="dia-hora">20:00 hrs</span>
+        {% for slot in slots_bb %}
+        <input type="radio" name="dia_bb" id="dia_{{ slot.key }}" value="{{ slot.key }}"
+               class="dia-opt" {% if sel_dia_bb == slot.key %}checked{% endif %}>
+        <label for="dia_{{ slot.key }}" class="dia-label">
+          <span class="dia-nombre">{{ slot.dia_nombre }}</span>
+          <span class="dia-hora">{{ slot.hora }}:00 hrs</span>
         </label>
-
-        <input type="radio" name="dia_bb" id="dia_jue" value="JUE"
-               class="dia-opt" {% if sel_dia_bb == 'JUE' %}checked{% endif %}>
-        <label for="dia_jue" class="dia-label">
-          <span class="dia-nombre">Jueves</span>
-          <span class="dia-hora">20:00 hrs</span>
-        </label>
-
-        <input type="radio" name="dia_bb" id="dia_sab" value="SAB"
-               class="dia-opt" {% if sel_dia_bb == 'SAB' %}checked{% endif %}>
-        <label for="dia_sab" class="dia-label">
-          <span class="dia-nombre">Sábado</span>
-          <span class="dia-hora">11:00 hrs</span>
-        </label>
+        {% endfor %}
       </div>
 
       <div class="seccion-label">③ ¿Cuándo es tu primera clase?</div>
@@ -238,8 +232,9 @@
 
 {% block extra_js %}
 <script>
-const DIAS_BB = { MAR: 2, JUE: 4, SAB: 6 };  // JS: 0=Dom
-const DIAS_FULL = [2, 4, 6];  // Mar, Jue, Sáb en JS
+// Días activos leídos desde ConfiguracionHorario (sin hardcodeo)
+const DIAS_JS_FULL = {{ dias_js_full|safe }};          // ej: [2, 4, 6]
+const DIAS_JS_MAP  = {{ dias_js_map|safe }};           // ej: {"1": 2, "3": 4, "5": 6}
 
 const seccionFull    = document.getElementById('seccion-full');
 const seccionSemanal = document.getElementById('seccion-semanal');
@@ -263,13 +258,13 @@ document.querySelectorAll('input[name="tipo"]').forEach(radio => {
   });
 });
 
-// ── Validar fecha Full (Mar, Jue o Sáb) ──
+// ── Validar fecha Full (solo días activos BDB) ──
 fechaFull.addEventListener('change', () => {
   const fecha = fechaFull.value;
   if (!fecha) return;
   const dia = new Date(fecha + 'T12:00:00').getDay();
-  if (!DIAS_FULL.includes(dia)) {
-    alert('Para Mensualidad Full elige un martes, jueves o sábado como fecha de inicio.');
+  if (!DIAS_JS_FULL.includes(dia)) {
+    alert('Para Mensualidad Full elige un día en que haya clases de Body Balance.');
     fechaFull.value = '';
   }
 });
@@ -280,11 +275,10 @@ fechaSemanal.addEventListener('change', () => {
   const diaOpt = document.querySelector('input[name="dia_bb"]:checked');
   if (!fecha) return;
   if (!diaOpt) { alert('Primero elige el día de la semana.'); fechaSemanal.value = ''; return; }
-  const diaEsperado = DIAS_BB[diaOpt.value];
+  const diaEsperado = DIAS_JS_MAP[diaOpt.value];
   const diaFecha    = new Date(fecha + 'T12:00:00').getDay();
   if (diaFecha !== diaEsperado) {
-    const nombres = { MAR: 'martes', JUE: 'jueves', SAB: 'sábado' };
-    alert(`La fecha debe ser un ${nombres[diaOpt.value]}.`);
+    alert('La fecha debe coincidir con el día elegido.');
     fechaSemanal.value = '';
   }
 });
