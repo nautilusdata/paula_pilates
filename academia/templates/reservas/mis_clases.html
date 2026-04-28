@@ -281,7 +281,7 @@
     <div class="proxima-card">
       <div class="eyebrow">Tu próxima clase</div>
       <div class="fecha-grande">{{ proxima_global.fecha|date:"l j \d\e F" }}</div>
-      <div class="hora-grande">{{ proxima_global.hora }}:00 hrs · Pilates Reformer</div>
+      <div class="hora-grande">{{ proxima_global.hora }}:00 hrs · {{ proxima_global.pack.get_tipo_display }}</div>
       <div class="clase-num">Clase {{ proxima_global.numero }} de {{ proxima_global.pack.cantidad }}</div>
     </div>
     {% endif %}

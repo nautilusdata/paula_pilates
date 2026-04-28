@@ -345,10 +345,10 @@ body { font-family: var(--font); }
           {% endfor %}
         </div>
 
-        <!-- Cancelar pack -->
+        <!-- Cancelar -->
         <button class="btn-cancelar-pack"
                 onclick="confirmarCancelar({{ pd.pack.pk }}, '{{ pd.pack.get_tipo_display }}', {{ pd.futuras }})">
-          Cancelar pack
+          Cancelar
         </button>
 
       </div>
@@ -404,10 +404,10 @@ body { font-family: var(--font); }
 
 </div>
 
-<!-- Modal cancelar pack -->
+<!-- Modal cancelar -->
 <div class="modal-overlay" id="modal-cancelar">
   <div class="modal-box">
-    <div class="modal-titulo">⚠️ Cancelar pack</div>
+    <div class="modal-titulo">⚠️ Cancelar reserva</div>
     <div class="modal-texto" id="modal-texto"></div>
     <div class="modal-acciones">
       <button class="btn-modal-volver" onclick="cerrarModal()">Volver</button>
