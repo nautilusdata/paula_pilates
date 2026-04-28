@@ -1,18 +1,12 @@
 {% load static %}
 <style>
-  .alumno-titulo {
-    background-color: #f0f7ea;
-    text-align: center;
-    padding: 14px 20px 10px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #2f6300;
-    letter-spacing: .04em;
-    border-bottom: 1px solid #d4eac8;
-  }
-
+  /* Nav fijo debajo del header (80px) + auth-overlay (48px) = 128px */
   .nav-alumno {
+    position: fixed;
+    top: 128px;
+    left: 0;
+    right: 0;
+    z-index: 998;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     background-color: #2f6300;
@@ -46,10 +40,9 @@
     font-weight: 700;
   }
 
-  .nav-alumno {
-  margin-top: 45px;
-}
-
+  .nav-alumno-spacer {
+    height: 160px;
+  }
 </style>
 
 <nav class="nav-alumno">
@@ -58,3 +51,5 @@
   <a href="{% url 'perfil' %}"     {% if activo == 'perfil'     %}class="nav-activo"{% endif %}>Mi Perfil</a>
   <a href="{% url 'reglamento' %}" {% if activo == 'reglamento' %}class="nav-activo"{% endif %}>Reglamento</a>
 </nav>
+
+<div class="nav-alumno-spacer"></div>
