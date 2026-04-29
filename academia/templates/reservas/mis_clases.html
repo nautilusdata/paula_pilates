@@ -234,6 +234,7 @@
 .badge-completada { background: #eee; color: #aaa; }
 .badge-congelada  { background: #e3f2fd; color: #1565c0; }
 .badge-ausente    { background: #fff3e0; color: #e65100; }
+.badge-reprog     { background: #e3f2fd; color: #1565c0; }
 .badge-recuperar  {
   background: #e65100; color: #fff;
   font-size: .65rem; font-weight: 700;
@@ -311,8 +312,7 @@
         <div class="pack-header">
           <div class="pack-titulo">
             {{ pd.pack.get_tipo_display }}
-            · {{ pd.pack.get_frecuencia_display }}
-            · {{ pd.pack.hora }}:00
+            {% if pd.pack.fecha_inicio %} · desde {{ pd.pack.fecha_inicio|date:"d/m/Y" }}{% endif %}
           </div>
           <span class="pack-estado estado-{{ pd.pack.estado }}">
             {{ pd.pack.get_estado_display }}
@@ -354,7 +354,11 @@
             {% elif s.sesion.estado == 'CONGELADA' %}
               <span class="sesion-badge badge-congelada">Congelada</span>
             {% elif s.sesion.estado == 'RECUPERAR' %}
-              <span class="sesion-badge badge-ausente">Ausente</span>
+              {% if s.pasada %}
+                <span class="sesion-badge badge-ausente">Ausente</span>
+              {% else %}
+                <span class="sesion-badge badge-reprog">Reprog.</span>
+              {% endif %}
             {% elif s.sesion.estado == 'RECUPERADA' %}
               <span class="sesion-badge badge-completada">✓ Recuperada</span>
             {% else %}
