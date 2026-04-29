@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Alumnas – Panel Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --gris:        #555;
+  --borde:       #e0e0e0;
+  --radio:       12px;
+  --font:        'Poppins', sans-serif;
+}
+body { font-family: var(--font); }
+
+.panel-wrap { width: 92%; max-width: 680px; margin: 140px auto 80px; }
+
+.panel-nav { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.panel-nav a {
+  padding: 8px 16px; border-radius: 20px; text-decoration: none;
+  font-size: .82rem; font-weight: 600; background: #f0f0f0; color: var(--gris);
+  transition: all .15s;
+}
+.panel-nav a.activo { background: var(--verde); color: #fff; }
+.panel-nav a:hover  { background: var(--verde-light); color: var(--verde); }
+
+.seccion-titulo {
+  font-size: 1rem; font-weight: 700; color: var(--verde);
+  margin-bottom: 16px;
+}
+
+/* ── Lista alumnas ── */
+.alumnas-lista {
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.alumna-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: #fff; border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  text-decoration: none; color: inherit;
+  transition: box-shadow .15s;
+}
+.alumna-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+
+.alumna-card.pendiente {
+  border-left: 4px solid #e53935;
+  background: #fff5f5;
+}
+.alumna-card.sin-pack {
+  opacity: .6;
+}
+
+.alumna-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--verde); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .82rem; font-weight: 700; flex-shrink: 0;
+}
+.alumna-avatar.pendiente { background: #e53935; }
+.alumna-avatar.sin-pack  { background: #bbb; }
+
+.alumna-body { flex: 1; }
+.alumna-nombre { font-weight: 700; color: #333; font-size: .92rem; }
+.alumna-detalle { font-size: .75rem; color: #999; margin-top: 2px; }
+
+.alumna-badge {
+  font-size: .65rem; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px; white-space: nowrap;
+}
+.badge-activo    { background: #e8f5e9; color: #388e3c; }
+.badge-pendiente { background: #ffebee; color: #c62828; }
+.badge-sin-pack  { background: #f5f5f5; color: #999; }
+
+.alumna-proxima {
+  font-size: .72rem; color: var(--verde);
+  font-weight: 600; white-space: nowrap;
+}
+
+.sin-alumnas {
+  text-align: center; padding: 60px 20px; color: #bbb;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="panel-wrap">
+
+  <div class="panel-nav">
+    <a href="{% url 'panel_principal' %}">📅 Agenda</a>
+    <a href="{% url 'panel_precios' %}">💰 Precios</a>
+    <a href="{% url 'panel_horarios' %}">⚙️ Horarios</a>
+    <a href="{% url 'panel_alumnas' %}" class="activo">👥 Alumnas</a>
+    <a href="{% url 'bulk_reschedule' %}" style="background:#ffebee; color:#c62828;">⚠️ Reprogramar todo</a>
+  </div>
+
+  <div class="seccion-titulo">{{ alumnas_data|length }} alumna{% if alumnas_data|length != 1 %}s{% endif %} registradas</div>
+
+  {% if alumnas_data %}
+  <div class="alumnas-lista">
+    {% for ad in alumnas_data %}
+    <a href="{% url 'ficha_alumna' ad.alumna.pk %}"
+       class="alumna-card {% if ad.pack_pendiente %}pendiente{% elif not ad.pack_activo %}sin-pack{% endif %}">
+
+      <div class="alumna-avatar {% if ad.pack_pendiente %}pendiente{% elif not ad.pack_activo %}sin-pack{% endif %}">
+        {{ ad.alumna.first_name|first }}{{ ad.alumna.last_name|first }}
+      </div>
+
+      <div class="alumna-body">
+        <div class="alumna-nombre">{{ ad.alumna.get_full_name }}</div>
+        <div class="alumna-detalle">
+          {{ ad.alumna.email }}
+          {% if ad.total_packs %} · {{ ad.total_packs }} reserva{% if ad.total_packs != 1 %}s{% endif %}{% endif %}
+        </div>
+      </div>
+
+      {% if ad.proxima %}
+        <div class="alumna-proxima">{{ ad.proxima.fecha|date:"d/m" }} {{ ad.proxima.hora }}:00</div>
+      {% endif %}
+
+      {% if ad.pack_pendiente %}
+        <span class="alumna-badge badge-pendiente">⚠️ Pago pendiente</span>
+      {% elif ad.pack_activo %}
+        <span class="alumna-badge badge-activo">Activa</span>
+      {% else %}
+        <span class="alumna-badge badge-sin-pack">Sin reservas</span>
+      {% endif %}
+
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="sin-alumnas">No hay alumnas registradas aún.</div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -582,3 +582,39 @@ def reprogramar_sesion_confirmar(request, sesion_id):
         f'movida al {nueva_fecha.strftime("%d/%m/%Y")} {nueva_hora:02d}:00.'
     )
     return redirect('panel_principal')
+
+
+@login_required
+@user_passes_test(es_staff, login_url='/')
+def panel_alumnas(request):
+    """Lista todas las alumnas con resumen de su estado actual."""
+    hoy = date.today()
+
+    alumnas = User.objects.filter(is_staff=False, is_superuser=False).order_by('first_name', 'last_name')
+
+    alumnas_data = []
+    for alumna in alumnas:
+        packs = Pack.objects.filter(alumna=alumna).exclude(estado='CANCELADO').order_by('-fecha_inicio')
+        pack_activo     = packs.filter(estado='ACTIVO').first()
+        pack_pendiente  = packs.filter(estado='PENDIENTE_PAGO').first()
+
+        proxima = None
+        if pack_activo:
+            proxima = Sesion.objects.filter(
+                pack=pack_activo,
+                fecha__gte=hoy,
+                estado='PROGRAMADA',
+            ).order_by('fecha', 'hora').first()
+
+        alumnas_data.append({
+            'alumna':          alumna,
+            'pack_activo':     pack_activo,
+            'pack_pendiente':  pack_pendiente,
+            'proxima':         proxima,
+            'total_packs':     packs.count(),
+        })
+
+    return render(request, 'reservas/panel_alumnas.html', {
+        'alumnas_data': alumnas_data,
+        'hoy':          hoy,
+    })

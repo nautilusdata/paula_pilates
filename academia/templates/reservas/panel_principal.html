@@ -175,6 +175,7 @@ body { font-family: var(--font); }
     <a href="{% url 'panel_principal' %}" class="activo">📅 Agenda</a>
     <a href="{% url 'panel_precios' %}">💰 Precios</a>
     <a href="{% url 'panel_horarios' %}">⚙️ Horarios</a>
+    <a href="{% url 'panel_alumnas' %}">👥 Alumnas</a>
     <a href="{% url 'bulk_reschedule' %}" style="background:#ffebee; color:#c62828;">⚠️ Reprogramar todo</a>
   </div>
 
@@ -231,11 +232,7 @@ body { font-family: var(--font); }
             <a href="{% url 'ficha_alumna' sesion.pack.alumna.pk %}" class="alumna-nombre" style="text-decoration:none; color:inherit;">
               {{ sesion.pack.alumna.get_full_name }}
             </a>
-            <span class="alumna-tipo">
-              {% if sesion.pack.tipo == 'BB_FULL' %}BB Mensual
-              {% elif sesion.pack.tipo == 'BB_SEMANAL' %}BB Semanal
-              {% else %}{{ sesion.pack.get_tipo_display }}{% endif %}
-            </span>
+            <span class="alumna-tipo">{{ sesion.pack.get_tipo_display }}</span>
           </div>
           <span class="alumna-sesion">
             {% if sesion.pack.cantidad > 1 %}Clase {{ sesion.numero }}/{{ sesion.pack.cantidad }}
