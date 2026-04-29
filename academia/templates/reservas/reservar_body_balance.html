@@ -151,6 +151,12 @@
     {% endfor %}.
   </div>
 
+  {% if messages %}
+  {% for message in messages %}
+  <div class="errores">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
+
   {% if errores %}
   <div class="errores">
     <strong>Por favor corrige lo siguiente:</strong>
