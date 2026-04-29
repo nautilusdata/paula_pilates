@@ -590,28 +590,36 @@ def panel_alumnas(request):
     """Lista todas las alumnas con resumen de su estado actual."""
     hoy = date.today()
 
-    alumnas = User.objects.filter(is_staff=False, is_superuser=False).order_by('first_name', 'last_name')
+    # EFECTO PLR Musk — una sola query con prefetch, sin N+1
+    alumnas = (User.objects
+               .filter(is_staff=False, is_superuser=False)
+               .prefetch_related('packs', 'packs__sesiones')
+               .order_by('first_name', 'last_name'))
 
     alumnas_data = []
     for alumna in alumnas:
-        packs = Pack.objects.filter(alumna=alumna).exclude(estado='CANCELADO').order_by('-fecha_inicio')
-        pack_activo     = packs.filter(estado='ACTIVO').first()
-        pack_pendiente  = packs.filter(estado='PENDIENTE_PAGO').first()
+        # Resuelve en memoria Python — cero queries adicionales
+        packs = [p for p in alumna.packs.all() if p.estado != 'CANCELADO']
+        packs.sort(key=lambda p: p.fecha_inicio, reverse=True)
+
+        pack_activo    = next((p for p in packs if p.estado == 'ACTIVO'), None)
+        pack_pendiente = next((p for p in packs if p.estado == 'PENDIENTE_PAGO'), None)
 
         proxima = None
         if pack_activo:
-            proxima = Sesion.objects.filter(
-                pack=pack_activo,
-                fecha__gte=hoy,
-                estado='PROGRAMADA',
-            ).order_by('fecha', 'hora').first()
+            sesiones_futuras = [
+                s for s in pack_activo.sesiones.all()
+                if s.fecha >= hoy and s.estado == 'PROGRAMADA'
+            ]
+            sesiones_futuras.sort(key=lambda s: (s.fecha, s.hora))
+            proxima = sesiones_futuras[0] if sesiones_futuras else None
 
         alumnas_data.append({
-            'alumna':          alumna,
-            'pack_activo':     pack_activo,
-            'pack_pendiente':  pack_pendiente,
-            'proxima':         proxima,
-            'total_packs':     packs.count(),
+            'alumna':         alumna,
+            'pack_activo':    pack_activo,
+            'pack_pendiente': pack_pendiente,
+            'proxima':        proxima,
+            'total_packs':    len(packs),
         })
 
     return render(request, 'reservas/panel_alumnas.html', {
