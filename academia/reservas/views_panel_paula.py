@@ -65,7 +65,7 @@ def panel_principal(request):
     sesiones_semana = Sesion.objects.filter(
         fecha__gte=lunes,
         fecha__lte=sabado,
-        estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
+        estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA', 'COMPLETADA'],
     ).select_related('pack__alumna').order_by('fecha', 'hora')
 
     # Agrupar por fecha → hora → sesiones
