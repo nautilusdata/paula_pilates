@@ -590,11 +590,9 @@ def panel_alumnas(request):
     """Lista todas las alumnas con resumen de su estado actual."""
     hoy = date.today()
 
-    # EFECTO PLR Musk — una sola query con prefetch, sin N+1
-    alumnas = (User.objects
-               .filter(is_staff=False, is_superuser=False)
-               .prefetch_related('packs', 'packs__sesiones')
-               .order_by('first_name', 'last_name'))
+    # EFECTO PLR Musk
+    #alumnas = User.objects.filter(is_staff=False, is_superuser=False).order_by('first_name', 'last_name')
+    alumnas = User.objects.filter(is_staff=False, is_superuser=False).prefetch_related('packs','packs__sesiones').order_by('first_name', 'last_name')
 
     alumnas_data = []
     for alumna in alumnas:
