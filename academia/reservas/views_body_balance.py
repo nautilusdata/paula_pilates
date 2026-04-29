@@ -222,6 +222,13 @@ def reservar_body_balance_confirmar(request):
     if request.method == 'POST':
         hora_pack = None if tipo == 'BB_FULL' else pares[0][1]
 
+        # ── Chequeo de cupo antes de crear el pack ────────────────────────
+        sin_cupo = [(f, h) for f, h in pares if cupos_bb(f, h) < 1]
+        if sin_cupo:
+            fechas_str = ', '.join(fmt_fecha_bb(f) for f, _ in sin_cupo)
+            messages.error(request, f'Sin cupo disponible en: {fechas_str}. Elige otra fecha.')
+            return redirect('reservar_body_balance')
+
         pack = Pack.objects.create(
             alumna       = request.user,
             tipo         = tipo,
