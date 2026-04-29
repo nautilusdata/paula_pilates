@@ -160,6 +160,7 @@ body { font-family: var(--font); }
 .acciones-menu .accion-completada { color: #388e3c; }
 .acciones-menu .accion-ausente    { color: #e65100; }
 .badge-completada { font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: #e8f5e9; color: #388e3c; white-space: nowrap; }
+.badge-reprog { font-size: .65rem; font-weight: 700; padding: 4px 10px; border-radius: 10px; background: #e3f2fd; color: #1565c0; white-space: nowrap; }
 .sin-clases-dia { text-align: center; padding: 12px 20px; color: #ddd; font-size: .8rem; }
 
 .sin-semana { text-align: center; padding: 50px 20px; color: #bbb; }
@@ -230,7 +231,11 @@ body { font-family: var(--font); }
             <a href="{% url 'ficha_alumna' sesion.pack.alumna.pk %}" class="alumna-nombre" style="text-decoration:none; color:inherit;">
               {{ sesion.pack.alumna.get_full_name }}
             </a>
-            <span class="alumna-tipo">{{ sesion.pack.get_tipo_display }}</span>
+            <span class="alumna-tipo">
+              {% if sesion.pack.tipo == 'BB_FULL' %}BB Mensual
+              {% elif sesion.pack.tipo == 'BB_SEMANAL' %}BB Semanal
+              {% else %}{{ sesion.pack.get_tipo_display }}{% endif %}
+            </span>
           </div>
           <span class="alumna-sesion">
             {% if sesion.pack.cantidad > 1 %}Clase {{ sesion.numero }}/{{ sesion.pack.cantidad }}
@@ -242,8 +247,13 @@ body { font-family: var(--font); }
           {% elif sesion.estado == 'RECUPERADA' %}
             <span class="badge-recuperada">✓ Recuperó</span>
           {% elif sesion.estado == 'RECUPERAR' %}
-            <span class="badge-ausente">Ausente</span>
-            <a href="{% url 'reprogramar_sesion' sesion.pk %}" class="btn-cambiar">Cambiar</a>
+            {% if sesion.fecha < hoy or sesion.fecha == hoy and sesion.hora <= hora_actual %}
+              <span class="badge-ausente">Ausente</span>
+              <a href="{% url 'reprogramar_sesion' sesion.pk %}" class="btn-cambiar">Cambiar</a>
+            {% else %}
+              <span class="badge-reprog">Reprog.</span>
+              <a href="{% url 'reprogramar_sesion' sesion.pk %}" class="btn-cambiar">Cambiar</a>
+            {% endif %}
           {% elif sesion.estado == 'PROGRAMADA' %}
             {% if sesion.fecha < hoy or sesion.fecha == hoy and sesion.hora <= hora_actual %}
               <div class="acciones-dropdown">
