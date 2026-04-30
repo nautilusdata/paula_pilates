@@ -683,43 +683,57 @@ def reservar_clase_prueba_confirmar(request):
 
 # ─── CLASE PRIVADA ────────────────────────────────────────────────────────────
 
-HORAS_PRIVADAS = [11, 16]
-
-
 def slot_privado_disponible(fecha: date, hora: int) -> bool:
     return not Sesion.objects.filter(
         fecha=fecha,
         hora=hora,
         estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
+        pack__tipo='PRIVADA',
     ).exists()
+
+
+def slots_disponibles_pv() -> dict:
+    """Retorna dict {dia: [hora, hora, ...]} con todos los slots PV activos."""
+    from .models import ConfiguracionHorario
+    qs = ConfiguracionHorario.objects.filter(tipo='PV', activo=True).order_by('dia', 'hora')
+    resultado = {}
+    for ch in qs:
+        resultado.setdefault(ch.dia, []).append(ch.hora)
+    return resultado
 
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def reservar_clase_privada(request):
-    slots = slots_disponibles_pl()
+    slots = slots_disponibles_pv()
     dias_disponibles = [
         {
             'dia':    dia,
             'nombre': NOMBRE_DIA[dia],
+            'horas':  [{'hora': h, 'label': f'{h:02d}:00'} for h in horas],
         }
-        for dia in sorted(slots.keys())
+        for dia, horas in sorted(slots.items())
     ]
 
     context = {
-        'hoy':             date.today(),
-        'horas':           [{'valor': h, 'label': f'{h:02d}:00'} for h in HORAS_PRIVADAS],
+        'hoy':              date.today(),
         'dias_disponibles': dias_disponibles,
-        'precio_pack10':   ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000),
-        'precio_reducido': ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000),
+        'precio_pack10':    ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000),
+        'precio_reducido':  ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000),
     }
 
     if request.method == 'POST':
         tipo         = request.POST.get('tipo')
         dias         = _parse_dias_post(request)
-        hora_str     = request.POST.get('hora')
         fecha_str    = request.POST.get('fecha_inicio')
         cantidad_str = request.POST.get('cantidad', '10')
+
+        # Hora por día — igual que Pack 10
+        horas_dict = {}
+        for dia in dias:
+            h_str = request.POST.get(f'hora_dia_{dia}')
+            if h_str and h_str.isdigit():
+                horas_dict[dia] = int(h_str)
 
         errores = []
 
@@ -728,10 +742,8 @@ def reservar_clase_privada(request):
 
         if not dias:
             errores.append('Selecciona al menos un día.')
-
-        hora = int(hora_str) if hora_str and hora_str.isdigit() else None
-        if not hora or hora not in HORAS_PRIVADAS:
-            errores.append('Hora no válida.')
+        elif len(horas_dict) < len(dias):
+            errores.append('Debes elegir una hora para cada día seleccionado.')
 
         cantidad = 10
         if tipo == 'PRIVADA_REDUCIDO':
@@ -754,8 +766,7 @@ def reservar_clase_privada(request):
             errores.append('Debes elegir una fecha de inicio.')
 
         fechas = []
-        if not errores and fecha_inicio and hora and dias:
-            horas_dict = {d: hora for d in dias}
+        if not errores and fecha_inicio and horas_dict and dias:
             try:
                 fechas = generar_fechas_pack(fecha_inicio, dias, horas_dict, cantidad)
                 sin_cupo = [(f, h) for f, h in fechas if not slot_privado_disponible(f, h)]
@@ -770,26 +781,25 @@ def reservar_clase_privada(request):
 
         if errores:
             context.update({
-                'errores':        errores,
-                'sel_tipo':       tipo,
-                'sel_dias':       dias,
-                'sel_hora':       hora_str,
-                'sel_fecha':      fecha_str,
-                'sel_cantidad':   cantidad_str,
+                'errores':      errores,
+                'sel_tipo':     tipo,
+                'sel_dias':     dias,
+                'sel_horas':    horas_dict,
+                'sel_fecha':    fecha_str,
+                'sel_cantidad': cantidad_str,
             })
             return render(request, 'reservas/reservar_clase_privada.html', context)
 
         precio = (ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000) if tipo == 'PRIVADA10'
                   else cantidad * ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000))
 
-        horas_dict = {d: hora for d in dias}
-        fechas     = generar_fechas_pack(fecha_inicio, dias, horas_dict, cantidad)
+        fechas = generar_fechas_pack(fecha_inicio, dias, horas_dict, cantidad)
 
         request.session['privada_borrador'] = {
             'tipo':         tipo,
             'dias':         dias,
             'frecuencia':   _frecuencia_str(dias),
-            'hora':         hora,
+            'hora':         list(horas_dict.values())[0],  # hora representativa
             'fecha_inicio': fecha_inicio.isoformat(),
             'cantidad':     cantidad,
             'pares':        [[f.isoformat(), h] for f, h in fechas],

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load panel_tags %}
 {% block title %}Clase Privada – Pilates Paula{% endblock %}
 
 {% block extra_head %}
@@ -16,45 +17,25 @@
   --sombra:      0 2px 12px rgba(0,0,0,.07);
   --font:        'Poppins', sans-serif;
 }
-.pack-wrap {
-  width: 92%; max-width: 580px;
-  margin: 24px auto 100px;
-  font-family: var(--font);
-}
-.breadcrumb {
-  display: flex; align-items: center; gap: 6px;
-  font-size: .78rem; color: #999; margin-bottom: 20px;
-}
+.pack-wrap { width: 92%; max-width: 580px; margin: 24px auto 100px; font-family: var(--font); }
+
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: #999; margin-bottom: 20px; }
 .breadcrumb a { color: var(--verde); text-decoration: none; }
 .breadcrumb .sep { color: #ccc; }
 .breadcrumb .actual { color: var(--gris); font-weight: 600; }
 
-.pasos {
-  display: flex; gap: 0; margin-bottom: 28px;
-  border-radius: 30px; overflow: hidden; background: #f5f5f5;
-}
+.pack-titulo    { font-size: 1.3rem; font-weight: 700; color: var(--verde); margin-bottom: 4px; }
+.pack-subtitulo { font-size: .85rem; color: var(--gris); margin-bottom: 24px; }
+
+.pasos { display: flex; gap: 0; margin-bottom: 28px; border-radius: 30px; overflow: hidden; background: #f5f5f5; }
 .paso { flex: 1; text-align: center; padding: 8px 4px; font-size: .75rem; color: #aaa; font-weight: 500; }
 .paso.activo { background: var(--verde); color: #fff; border-radius: 30px; }
 
-.pack-titulo { font-size: 1.3rem; font-weight: 700; color: var(--verde); margin-bottom: 4px; }
-.pack-subtitulo { font-size: .85rem; color: var(--gris); margin-bottom: 24px; }
-
-.aviso {
-  background: #fff9e6; border-left: 4px solid var(--amarillo);
-  padding: 12px 14px; border-radius: 8px;
-  font-size: .82rem; color: #856404; margin-bottom: 22px;
-}
-.errores {
-  background: #fff0f0; border-left: 4px solid #e74c3c;
-  padding: 12px 14px; border-radius: 8px;
-  font-size: .82rem; color: #c0392b; margin-bottom: 20px;
-}
+.aviso { background: #fff9e6; border-left: 4px solid var(--amarillo); padding: 12px 14px; border-radius: 8px; font-size: .82rem; color: #856404; margin-bottom: 22px; }
+.errores { background: #fff0f0; border-left: 4px solid #e74c3c; padding: 12px 14px; border-radius: 8px; font-size: .82rem; color: #c0392b; margin-bottom: 20px; }
 .errores ul { margin: 6px 0 0; padding-left: 18px; }
 
-.seccion-label {
-  font-size: .7rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--verde); margin-bottom: 10px;
-}
+.seccion-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--verde); margin-bottom: 10px; }
 
 /* Tipo de pack */
 .tipo-opciones { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
@@ -80,7 +61,6 @@
 .cantidad-slider::-webkit-slider-thumb {
   -webkit-appearance: none; width: 22px; height: 22px;
   border-radius: 50%; background: var(--verde); cursor: pointer;
-  box-shadow: 0 2px 6px rgba(47,99,0,.3);
 }
 .cantidad-num { font-size: 1.6rem; font-weight: 700; color: var(--verde); min-width: 32px; text-align: center; }
 .cantidad-hint { font-size: .75rem; color: #999; }
@@ -95,44 +75,43 @@
 .precio-dinamico .det { font-size: .82rem; color: var(--gris); }
 .precio-dinamico .det strong { display: block; color: var(--verde); font-size: 1.4rem; }
 
-/* Frecuencias */
-.frecuencias { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
-.frec-option { display: none; }
-.frec-label {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 18px; border: 2px solid var(--borde); border-radius: var(--radio);
-  cursor: pointer; background: #fff; box-shadow: var(--sombra); transition: all .15s;
+/* Selector de días */
+.dias-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 26px; }
+.dia-check { display: none; }
+.dia-chip {
+  display: block; text-align: center; padding: 12px 6px;
+  border: 2px solid var(--borde); border-radius: 10px;
+  cursor: pointer; font-size: .85rem; font-weight: 600;
+  color: #555; background: #fff; transition: all .15s;
 }
-.frec-label .frec-nombre { font-weight: 600; color: #333; font-size: .95rem; }
-.frec-label .frec-sub { font-size: .78rem; color: #999; margin-top: 2px; }
-.frec-label .frec-pill {
-  background: #f0f0f0; color: #777; padding: 4px 10px;
-  border-radius: 20px; font-size: .72rem; font-weight: 600;
-}
-.frec-option:checked + .frec-label { border-color: var(--verde); background: var(--verde-pale); }
-.frec-option:checked + .frec-label .frec-pill { background: var(--verde); color: #fff; }
+.dia-check:checked + .dia-chip { border-color: var(--verde); background: var(--verde); color: #fff; }
 
-/* Horas */
-.horas-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 10px; margin-bottom: 26px;
+/* Horas por día */
+.horas-por-dia { margin-bottom: 26px; }
+.dia-grupo { margin-bottom: 18px; display: none; }
+.dia-grupo.visible { display: block; }
+.dia-titulo {
+  font-size: .78rem; font-weight: 700; color: var(--verde);
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
 }
+.dia-titulo::after { content: ''; flex: 1; height: 1px; background: var(--verde-light); }
+.horas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .hora-opt { display: none; }
 .hora-label {
-  display: block; text-align: center; padding: 16px;
+  display: block; text-align: center; padding: 12px 6px;
   border: 2px solid var(--borde); border-radius: 10px;
-  cursor: pointer; font-size: 1rem; font-weight: 600;
+  cursor: pointer; font-size: .9rem; font-weight: 600;
   color: #555; background: #fff; transition: all .15s;
 }
 .hora-opt:checked + .hora-label { border-color: var(--verde); background: var(--verde); color: #fff; }
 
 /* Fecha */
 .fecha-field {
-  width: 100%; padding: 14px 16px;
-  border: 2px solid var(--borde); border-radius: var(--radio);
-  font-family: var(--font); font-size: .95rem; color: #333;
-  background: #fff; box-sizing: border-box;
-  transition: border-color .15s; margin-bottom: 6px;
+  width: 100%; padding: 14px 16px; border: 2px solid var(--borde);
+  border-radius: var(--radio); font-family: var(--font); font-size: .95rem;
+  color: #333; background: #fff; box-sizing: border-box;
+  margin-bottom: 8px; transition: border-color .15s;
 }
 .fecha-field:focus { outline: none; border-color: var(--verde); }
 .fecha-hint { font-size: .75rem; color: #999; margin-bottom: 22px; display: block; }
@@ -142,9 +121,9 @@
   background: var(--verde); color: #fff; border: none;
   border-radius: var(--radio); font-family: var(--font);
   font-size: 1rem; font-weight: 700; cursor: pointer;
-  transition: background .15s, transform .1s; text-align: center;
+  transition: background .15s; text-align: center;
 }
-.btn-continuar:active { transform: scale(.98); background: #245200; }
+.btn-continuar:active { background: #245200; }
 </style>
 {% endblock %}
 
@@ -156,8 +135,6 @@
   <nav class="breadcrumb">
     <a href="{% url 'reservar' %}">Reservar</a>
     <span class="sep">›</span>
-    <a href="{% url 'reservar' %}">Pilates Reformer</a>
-    <span class="sep">›</span>
     <span class="actual">Clase Privada</span>
   </nav>
 
@@ -168,10 +145,11 @@
   </div>
 
   <p class="pack-titulo">Clase Privada</p>
-  <p class="pack-subtitulo">Personalizado 1 a 1 con Paula · Lunes a Jueves</p>
+  <p class="pack-subtitulo">Atención exclusiva 1 a 1 con Paula</p>
 
   <div class="aviso">
-    <strong>Atención exclusiva de Paula.</strong> Horario bloqueado solo para ti — 11:00 o 16:00 hrs.
+    <strong>Horario fijo:</strong> Elige los días y hora para cada uno.
+    Ese esquema se repetirá cada semana hasta completar tus clases.
   </div>
 
   {% if errores %}
@@ -184,7 +162,7 @@
   <form method="POST" action="{% url 'reservar_clase_privada' %}" id="form-privada">
     {% csrf_token %}
 
-    <!-- TIPO -->
+    <!-- ① Tipo -->
     <div class="seccion-label">① ¿Qué pack quieres?</div>
     <div class="tipo-opciones">
       <input type="radio" name="tipo" id="tipo_pack10" value="PRIVADA10"
@@ -208,7 +186,7 @@
       </label>
     </div>
 
-    <!-- CANTIDAD (solo para reducido) -->
+    <!-- Cantidad reducido -->
     <div class="cantidad-wrap {% if sel_tipo == 'PRIVADA_REDUCIDO' %}visible{% endif %}" id="cantidad-wrap">
       <div class="seccion-label">② ¿Cuántas clases?</div>
       <div class="cantidad-slider-row">
@@ -220,8 +198,8 @@
       <input type="hidden" name="cantidad" id="cantidad-valor" value="{{ sel_cantidad|default:5 }}">
     </div>
 
-    <!-- PRECIO DINÁMICO -->
-    <div class="precio-dinamico" id="precio-bloque">
+    <!-- Precio dinámico -->
+    <div class="precio-dinamico">
       <div class="det">
         <strong id="precio-total">$285.000</strong>
         <span id="precio-detalle">10 clases · $28.500 c/u</span>
@@ -229,40 +207,42 @@
       <div style="font-size:.75rem; color:#999; text-align:right;">Pago único<br>por adelantado</div>
     </div>
 
-    <!-- FRECUENCIA -->
-    <div class="seccion-label" id="label-frec">③ ¿Con qué frecuencia?</div>
-    <div class="frecuencias">
-      {% for f in frecuencias %}
-      <input type="radio" name="frecuencia" id="frec_{{ f.codigo }}"
-             value="{{ f.codigo }}" class="frec-option"
-             {% if sel_frecuencia == f.codigo %}checked{% endif %} required>
-      <label for="frec_{{ f.codigo }}" class="frec-label">
-        <div class="frec-info">
-          <span class="frec-nombre">{{ f.label }}</span>
-          <span class="frec-sub">{{ f.dias }}</span>
+    <!-- ② Días -->
+    <div class="seccion-label">② ¿Qué días quieres venir?</div>
+    <div class="dias-grid">
+      {% for d in dias_disponibles %}
+      <input type="checkbox" name="dia_{{ d.dia }}" id="dia_{{ d.dia }}"
+             class="dia-check" value="1"
+             {% if d.dia in sel_dias %}checked{% endif %}
+             onchange="toggleDia({{ d.dia }}, this.checked)">
+      <label for="dia_{{ d.dia }}" class="dia-chip">{{ d.nombre }}</label>
+      {% endfor %}
+    </div>
+
+    <!-- ③ Hora por día -->
+    <div class="seccion-label">③ ¿A qué hora cada día?</div>
+    <div class="horas-por-dia" id="horas-container">
+      {% for d in dias_disponibles %}
+      <div class="dia-grupo {% if d.dia in sel_dias %}visible{% endif %}" id="grupo_dia_{{ d.dia }}">
+        <div class="dia-titulo">{{ d.nombre }}</div>
+        <div class="horas-grid">
+          {% for h in d.horas %}
+          <input type="radio" name="hora_dia_{{ d.dia }}" id="h_{{ d.dia }}_{{ h.hora }}"
+                 value="{{ h.hora }}" class="hora-opt"
+                 {% if sel_horas and sel_horas|get_item:d.dia == h.hora %}checked{% endif %}>
+          <label for="h_{{ d.dia }}_{{ h.hora }}" class="hora-label">{{ h.label }}</label>
+          {% endfor %}
         </div>
-        <span class="frec-pill">{{ f.dias }}</span>
-      </label>
+      </div>
       {% endfor %}
     </div>
 
-    <!-- HORA -->
-    <div class="seccion-label">④ ¿A qué hora?</div>
-    <div class="horas-grid">
-      {% for h in horas %}
-      <input type="radio" name="hora" id="hora_{{ h.valor }}"
-             value="{{ h.valor }}" class="hora-opt"
-             {% if sel_hora == h.valor|stringformat:"s" %}checked{% endif %} required>
-      <label for="hora_{{ h.valor }}" class="hora-label">{{ h.label }}</label>
-      {% endfor %}
-    </div>
-
-    <!-- FECHA -->
-    <div class="seccion-label">⑤ ¿Cuándo empieza tu primera clase?</div>
+    <!-- ④ Fecha -->
+    <div class="seccion-label">④ ¿Cuándo empieza tu primera clase?</div>
     <input type="date" name="fecha_inicio" id="fecha_inicio"
            class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
            value="{{ sel_fecha|default:'' }}" required>
-    <span class="fecha-hint" id="fecha-hint">Selecciona la frecuencia primero.</span>
+    <span class="fecha-hint" id="fecha-hint">Selecciona los días primero.</span>
 
     <button type="submit" class="btn-continuar">Ver resumen →</button>
   </form>
@@ -272,13 +252,12 @@
 
 {% block extra_js %}
 <script>
+const NOMBRE_DIA   = {0:'Lunes',1:'Martes',2:'Miércoles',3:'Jueves',4:'Viernes',5:'Sábado'};
 const PRECIO_PACK10   = 285000;
 const PRECIO_REDUCIDO = 30000;
-const DIAS_FRECUENCIA = { LM: [1,3], MJ: [2,4] };
-const NOMBRE_DIA_CORTO = { LM: 'lunes o miércoles', MJ: 'martes o jueves' };
 
+let diasSeleccionados = new Set({{ sel_dias|default:"[]"|safe }});
 let tipoActual = "{{ sel_tipo|default:'' }}";
-let frecuenciaActual = "{{ sel_frecuencia|default:'' }}";
 
 const slider       = document.getElementById('slider-cantidad');
 const numCantidad  = document.getElementById('num-cantidad');
@@ -286,21 +265,18 @@ const cantidadVal  = document.getElementById('cantidad-valor');
 const precioTotal  = document.getElementById('precio-total');
 const precioDetalle = document.getElementById('precio-detalle');
 const cantidadWrap = document.getElementById('cantidad-wrap');
-const inputFecha   = document.getElementById('fecha_inicio');
-const hintFecha    = document.getElementById('fecha-hint');
 
 function actualizarPrecio() {
   if (tipoActual === 'PRIVADA10') {
-    precioTotal.textContent  = '$285.000';
+    precioTotal.textContent   = '$285.000';
     precioDetalle.textContent = '10 clases · $28.500 c/u';
   } else {
     const n = parseInt(cantidadVal.value);
-    precioTotal.textContent  = '$' + (n * PRECIO_REDUCIDO).toLocaleString('es-CL');
+    precioTotal.textContent   = '$' + (n * PRECIO_REDUCIDO).toLocaleString('es-CL');
     precioDetalle.textContent = `${n} clase${n > 1 ? 's' : ''} · $30.000 c/u`;
   }
 }
 
-// Tipo
 document.querySelectorAll('input[name="tipo"]').forEach(radio => {
   radio.addEventListener('change', () => {
     tipoActual = radio.value;
@@ -309,32 +285,47 @@ document.querySelectorAll('input[name="tipo"]').forEach(radio => {
   });
 });
 
-// Slider
 slider.addEventListener('input', () => {
   numCantidad.textContent = slider.value;
   cantidadVal.value = slider.value;
   actualizarPrecio();
 });
 
-// Frecuencia
-document.querySelectorAll('.frec-option').forEach(radio => {
-  radio.addEventListener('change', () => {
-    frecuenciaActual = radio.value;
-    hintFecha.textContent = `Elige un ${NOMBRE_DIA_CORTO[frecuenciaActual]} como día de inicio.`;
-    inputFecha.value = '';
-  });
-});
+function toggleDia(dia, checked) {
+  if (checked) diasSeleccionados.add(dia);
+  else diasSeleccionados.delete(dia);
+  const grupo = document.getElementById(`grupo_dia_${dia}`);
+  if (grupo) grupo.classList.toggle('visible', checked);
+  actualizarHintFecha();
+}
 
-// Fecha
-inputFecha.addEventListener('change', () => {
-  if (!frecuenciaActual) { alert('Primero elige la frecuencia.'); inputFecha.value = ''; return; }
-  const jsDate = new Date(inputFecha.value + 'T12:00:00');
-  if (!DIAS_FRECUENCIA[frecuenciaActual].includes(jsDate.getDay())) {
-    alert(`Para ${frecuenciaActual}, la primera clase debe ser un ${NOMBRE_DIA_CORTO[frecuenciaActual]}.`);
-    inputFecha.value = '';
+function actualizarHintFecha() {
+  const hint = document.getElementById('fecha-hint');
+  if (diasSeleccionados.size === 0) {
+    hint.textContent = 'Selecciona los días primero.';
+  } else {
+    const nombres = Array.from(diasSeleccionados).sort().map(d => NOMBRE_DIA[d]).join(', ');
+    hint.textContent = `La primera clase debe ser uno de: ${nombres}.`;
+  }
+}
+
+document.getElementById('fecha_inicio').addEventListener('change', function() {
+  if (diasSeleccionados.size === 0) {
+    alert('Primero elige los días en que quieres venir.');
+    this.value = ''; return;
+  }
+  const fecha = this.value;
+  if (!fecha) return;
+  const jsDay = new Date(fecha + 'T12:00:00').getDay();
+  const pyDay = jsDay === 0 ? 6 : jsDay - 1;
+  if (!diasSeleccionados.has(pyDay)) {
+    const nombres = Array.from(diasSeleccionados).sort().map(d => NOMBRE_DIA[d]).join(', ');
+    alert(`La primera clase debe ser uno de los días elegidos: ${nombres}.`);
+    this.value = '';
   }
 });
 
 actualizarPrecio();
+actualizarHintFecha();
 </script>
 {% endblock %}
