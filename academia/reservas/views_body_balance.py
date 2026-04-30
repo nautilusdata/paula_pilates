@@ -171,7 +171,24 @@ def reservar_body_balance(request):
             return render(request, 'reservas/reservar_body_balance.html', context)
 
         if tipo == 'BB_FULL':
-            pares  = generar_fechas_bb_full(fecha_inicio)
+            pares = generar_fechas_bb_full(fecha_inicio)
+            # Chequeo de cupo — si alguna fecha está llena no hay continuidad
+            sin_cupo = [(f, h) for f, h in pares if cupos_bb(f, h) < 1]
+            if sin_cupo:
+                fechas_str = ', '.join(fmt_fecha_bb(f) for f, _ in sin_cupo)
+                errores.append(
+                    f'No hay cupo para el mes completo y mantener continuidad. '
+                    f'Sin cupo en: {fechas_str}. '
+                    f'Puedes reservar una Clase Semanal en los días disponibles.'
+                )
+                context.update({
+                    'errores':    errores,
+                    'sel_tipo':   tipo,
+                    'sel_fecha':  fecha_str,
+                    'sel_dia_bb': dia_key,
+                })
+                return render(request, 'reservas/reservar_body_balance.html', context)
+
             precio = ConfiguracionPrecio.get('BB_FULL', 60_000)
             request.session['bb_borrador'] = {
                 'tipo':         tipo,
