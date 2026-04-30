@@ -22,7 +22,8 @@
     text-align: center;
     color: #666;
     font-size: .9rem;
-    margin-bottom: 30px;
+    margin-top: 5px;    /* Espacio pequeño respecto al botón/link de arriba */
+    margin-bottom: 20px; /* Espacio moderado respecto al borde inferior */
   }
 
   .signup-seccion {
@@ -128,7 +129,7 @@
 {% block content %}
 <div class="signup-container">
   <h2>Crear cuenta</h2>
-  <p class="signup-subtitulo">Academia de Pilates Paula Ayarza</p>
+  <p class="signup-subtitulo" style="margin-top: 70px;">Ficha alumnas</p>
 
   {% if form.non_field_errors %}
     <div class="form-errors">
