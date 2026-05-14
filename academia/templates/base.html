@@ -88,7 +88,7 @@
             <a href="{% url 'account_logout' %}" class="auth-btn logout">Salir</a>
         {% else %}
             <a href="{% url 'account_login' %}" class="auth-btn login">Login</a>
-            <a href="{% url 'account_signup' %}" class="auth-btn signup">Registrarse</a>
+            <a href="#" class="auth-btn signup" onclick="alert('Registro disponible próximamente. Contáctanos al Whatsapp.'); return false;">Registrarse</a>
         {% endif %}
     </div>
 
