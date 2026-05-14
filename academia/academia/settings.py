@@ -151,10 +151,18 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # ─── Webpay ───────────────────────────────────────────────────────────────────
-WEBPAY_COMMERCE_CODE = '597055555532'
-WEBPAY_API_KEY       = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1'
+WEBPAY_COMMERCE_CODE = os.getenv('WEBPAY_COMMERCE_CODE', '597055555532')
+WEBPAY_API_KEY       = os.getenv('WEBPAY_API_KEY', '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1')
 WEBPAY_URL_BASE = 'https://webpay3g.transbank.cl'
 
 # ─── Telegram ─────────────────────────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID   = os.getenv('TELEGRAM_CHAT_ID')
+
+# ─── Seguridad HTTPS ──────────────────────────────────────────────────────────
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 31536000  # 1 año
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
