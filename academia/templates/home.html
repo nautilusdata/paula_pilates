@@ -237,7 +237,7 @@
     {% if user.is_authenticated %}
       <a href="{% url 'dashboard' %}" class="cta">Ir a mis clases</a>
     {% else %}
-      <a href="{% url 'account_signup' %}" class="cta">Inscríbete ahora</a>
+      <a href="#" class="cta" onclick="alert('Registro disponible próximamente. Contáctanos al Whatsapp.'); return false;">Inscríbete ahora</a>
     {% endif %}
   </section>
 
