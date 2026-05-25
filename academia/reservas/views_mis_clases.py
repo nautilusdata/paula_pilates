@@ -2,21 +2,46 @@
 views_mis_clases.py
 Vista "Mis Clases" para la alumna — muestra sus packs activos y el listado
 de sesiones con estado visual (próximas vs completadas).
+Ahora incluye notificación a Telegram en el Login.
 """
 
 from datetime import date, datetime
+import requests  # <-- 1. Importamos requests para Telegram
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Pack, Sesion
+
+# 2. Tu función para conectar con Telegram
+def notificar_login_telegram(usuario):
+    token_bot = "TU_TOKEN_DE_TELEGRAM_AQUÍ"
+    chat_id = "TU_ID_DE_CHAT_AQUÍ"
+    url = f"https://api.telegram.org/bot{token_bot}/sendMessage"
+    
+    mensaje = f"✅ *Alumno logueado*:\nEl usuario *{usuario.username}* ({usuario.email}) acaba de entrar a ver sus clases."
+    
+    payload = {
+        "chat_id": chat_id,
+        "text": mensaje,
+        "parse_mode": "Markdown"
+    }
+    try:
+        requests.post(url, json=payload, timeout=5)
+    except Exception as e:
+        print(f"Error enviando a Telegram: {e}")
 
 
 @login_required
 def mis_clases(request):
     hoy = date.today()
     ahora = timezone.now()
+
+    # 3. 🔥 TRUCO: Revisamos si es la primera vez que entra en esta sesión web
+    # Si la variable 'login_notificado' no existe en la sesión del usuario, enviamos el Telegram
+    if not request.session.get('login_notificado', False):
+        notificar_login_telegram(request.user)
+        request.session['login_notificado'] = True # Guardamos que ya avisamos para no repetir
 
     packs = (
         Pack.objects
