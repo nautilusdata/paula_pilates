@@ -25,7 +25,7 @@ def notificar_login_telegram(usuario):
     """
     # Extraemos los secretos de forma segura (Zero-Knowledge en el código)
     token_bot = os.environ.get("TELEGRAM_PILATES_LOGIN")
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    chat_id = os.environ.get("TELEGRAM_USER_ID")
     
     # Control de seguridad: Si no están configuradas en GCP, evitamos que la app se caiga
     if not token_bot or not chat_id:
