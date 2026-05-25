@@ -35,7 +35,7 @@ def notificar_login_telegram(usuario):
     url = f"https://api.telegram.org/bot{token_bot}/sendMessage"
     
     # Construimos el mensaje (los datos del usuario solo viven aquí en la memoria volátil)
-    mensaje = f"🔑 *Alumno logueado*:\nEl usuario *{usuario.username}* ({usuario.email}) acaba de entrar a ver sus clases."
+    mensaje = f"🔑 *Alumno logueado*:\nEl usuario *{usuario.get_full_name()}* usuario <{usuario.username}> <{usuario.email}> acaba de entrar a ver sus clases."
     
     payload = {
         "chat_id": chat_id,
