@@ -24,7 +24,7 @@ def notificar_login_telegram(usuario):
     desde las variables de entorno inyectadas en la RAM por Secret Manager.
     """
     # Extraemos los secretos de forma segura (Zero-Knowledge en el código)
-    token_bot = os.environ.get("TELEGRAM_BOT_TOKEN")
+    token_bot = os.environ.get("TELEGRAM_PILATES_LOGIN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     
     # Control de seguridad: Si no están configuradas en GCP, evitamos que la app se caiga
