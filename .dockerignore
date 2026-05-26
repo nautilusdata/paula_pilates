@@ -8,3 +8,5 @@ __pycache__/
 *.sqlite3
 staticfiles/
 .DS_Store
+web_funcional/
+NOTAS_development/
