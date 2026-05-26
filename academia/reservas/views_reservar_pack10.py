@@ -183,6 +183,10 @@ def reservar_pack10(request):
         'hoy':              date.today(),
     }
 
+    error_previo = request.session.pop('reserva_error', None)
+    if error_previo:
+        context['errores'] = [error_previo]
+
     if request.method == 'POST':
         dias      = _parse_dias_post(request)
         horas     = _parse_horas_post(dias, request)
@@ -283,7 +287,7 @@ def reservar_pack10_confirmar(request):
     if request.method == 'POST':
         sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
         if sin_cupo:
-            messages.error(request, 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.')
+            request.session['reserva_error'] = 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.'
             return redirect('reservar_pack10')
 
         pack = Pack.objects.create(
@@ -308,7 +312,7 @@ def reservar_pack10_confirmar(request):
 
         if not token or not url:
             pack.delete()
-            messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+            request.session['reserva_error'] = 'Error al conectar con Webpay. Intenta de nuevo.'
             return redirect('reservar_pack10')
 
         request.session['webpay_pack_id'] = pack.pk
@@ -338,6 +342,10 @@ def reservar_pack_reducido(request):
         'cantidades':       range(2, 10),
         'hoy':              date.today(),
     }
+
+    error_previo = request.session.pop('reserva_error', None)
+    if error_previo:
+        context['errores'] = [error_previo]
 
     if request.method == 'POST':
         dias         = _parse_dias_post(request)
@@ -448,7 +456,7 @@ def reservar_pack_reducido_confirmar(request):
     if request.method == 'POST':
         sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
         if sin_cupo:
-            messages.error(request, 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.')
+            request.session['reserva_error'] = 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.'
             return redirect('reservar_pack_reducido')
 
         pack = Pack.objects.create(
@@ -473,7 +481,7 @@ def reservar_pack_reducido_confirmar(request):
 
         if not token or not url:
             pack.delete()
-            messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+            request.session['reserva_error'] = 'Error al conectar con Webpay. Intenta de nuevo.'
             return redirect('reservar_pack_reducido')
 
         request.session['webpay_pack_id'] = pack.pk
@@ -492,6 +500,10 @@ def reservar_clase_suelta(request):
         'precio': ConfiguracionPrecio.get('CLASE_SUELTA', 25_000),
         'hoy':    date.today(),
     }
+
+    error_previo = request.session.pop('reserva_error', None)
+    if error_previo:
+        context['errores'] = [error_previo]
 
     if request.method == 'POST':
         hora_str  = request.POST.get('hora')
@@ -549,7 +561,7 @@ def reservar_clase_suelta_confirmar(request):
 
     if request.method == 'POST':
         if Sesion.cupos_disponibles(fecha, borrador['hora']) < 1:
-            messages.error(request, 'El cupo se ocupó mientras confirmabas. Elige otro horario.')
+            request.session['reserva_error'] = 'El cupo se ocupó mientras confirmabas. Elige otro horario.'
             return redirect('reservar_clase_suelta')
 
         pack = Pack.objects.create(
@@ -570,7 +582,7 @@ def reservar_clase_suelta_confirmar(request):
 
         if not token or not url:
             pack.delete()
-            messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+            request.session['reserva_error'] = 'Error al conectar con Webpay. Intenta de nuevo.'
             return redirect('reservar_clase_suelta')
 
         request.session['webpay_pack_id'] = pack.pk
@@ -589,6 +601,10 @@ def reservar_clase_prueba(request):
         'precio': ConfiguracionPrecio.get('CLASE_PRUEBA', 15_000),
         'hoy':    date.today(),
     }
+
+    error_previo = request.session.pop('reserva_error', None)
+    if error_previo:
+        context['errores'] = [error_previo]
 
     if request.method == 'POST':
         fecha_str = request.POST.get('fecha_inicio')
@@ -651,7 +667,7 @@ def reservar_clase_prueba_confirmar(request):
 
     if request.method == 'POST':
         if Sesion.cupos_disponibles(fecha, borrador['hora']) < 1:
-            messages.error(request, 'El cupo se ocupó mientras confirmabas.')
+            request.session['reserva_error'] = 'El cupo se ocupó mientras confirmabas.'
             return redirect('reservar_clase_prueba')
 
         pack = Pack.objects.create(
@@ -672,7 +688,7 @@ def reservar_clase_prueba_confirmar(request):
 
         if not token or not url:
             pack.delete()
-            messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+            request.session['reserva_error'] = 'Error al conectar con Webpay. Intenta de nuevo.'
             return redirect('reservar_clase_prueba')
 
         request.session['webpay_pack_id'] = pack.pk
@@ -721,6 +737,10 @@ def reservar_clase_privada(request):
         'precio_pack10':    ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000),
         'precio_reducido':  ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000),
     }
+
+    error_previo = request.session.pop('reserva_error', None)
+    if error_previo:
+        context['errores'] = [error_previo]
 
     if request.method == 'POST':
         tipo         = request.POST.get('tipo')
@@ -840,7 +860,7 @@ def reservar_clase_privada_confirmar(request):
     if request.method == 'POST':
         sin_cupo = [(f, h) for f, h in pares if not slot_privado_disponible(f, h)]
         if sin_cupo:
-            messages.error(request, 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.')
+            request.session['reserva_error'] = 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.'
             return redirect('reservar_clase_privada')
 
         pack = Pack.objects.create(
@@ -862,7 +882,7 @@ def reservar_clase_privada_confirmar(request):
 
         if not token or not url:
             pack.delete()
-            messages.error(request, 'Error al conectar con Webpay. Intenta de nuevo.')
+            request.session['reserva_error'] = 'Error al conectar con Webpay. Intenta de nuevo.'
             return redirect('reservar_clase_privada')
 
         request.session['webpay_pack_id'] = pack.pk
