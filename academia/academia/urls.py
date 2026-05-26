@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 from reservas import views as reservas_views
+from . import views  # ← agregar
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -11,12 +12,11 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
     path('registro/', reservas_views.registro, name='registro'),
     path('dashboard/', TemplateView.as_view(template_name='dashboard.html'), name='dashboard'),
-    #path('reservar/', TemplateView.as_view(template_name='reservar.html'), name='reservar'), -->> Antiguo fuente del hardcodeo mal hecho
+    path('redirect-login/', views.login_redirect, name='login_redirect'),  # ← agregar
     path('reservar/', reservas_views.reservar, name='reservar'),
     path('perfil/', reservas_views.perfil, name='perfil'),
     path('reglamento/', TemplateView.as_view(template_name='reglamento.html'), name='reglamento'),
-    path('', include('reservas.urls')),  # ← agregar esta línea
-    
+    path('', include('reservas.urls')),
 ]
 
 if settings.DEBUG:
