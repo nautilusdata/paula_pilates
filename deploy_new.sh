@@ -1,5 +1,5 @@
 #!/bin/bash
-cd "$(dirname "$0")/academia"   # siempre desde academia/
+cd "$(dirname "$0")/academia"
 echo "🚀 Deployando Paula Pilates en modo Cloud-Native..."
 gcloud run deploy paula-pilates \
   --source . \
