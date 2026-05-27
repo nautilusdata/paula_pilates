@@ -326,6 +326,8 @@ def marcar_completada(request, sesion_id):
 @user_passes_test(es_staff, login_url='/')
 @require_http_methods(["GET", "POST"])
 def bulk_reschedule(request):
+    # Deshabilitado temporalmente — lógica de negocio no definida
+    return redirect('panel_principal')
     context = {'hoy': date.today()}
     if request.method == 'POST':
         fecha_inicio_str  = request.POST.get('fecha_inicio')
@@ -371,6 +373,8 @@ def bulk_reschedule(request):
 @user_passes_test(es_staff, login_url='/')
 @require_http_methods(["GET", "POST"])
 def bulk_reschedule_preview(request):
+    # Deshabilitado temporalmente — lógica de negocio no definida
+    return redirect('panel_principal')
     bulk_data = request.session.get('bulk_data')
     if not bulk_data:
         return redirect('bulk_reschedule')
