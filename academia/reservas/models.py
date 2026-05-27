@@ -6,6 +6,11 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from datetime import date, timedelta
 import holidays
+import os
+import requests as http_requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # ─── Helpers de fecha ────────────────────────────────────────────────────────
@@ -99,6 +104,24 @@ def crear_metadata(sender, instance, created, **kwargs):
             user=instance,
             numero_socio=f"{numero:03d}"
         )
+        # Notificar al developer
+        try:
+            token       = os.getenv('TELEGRAM_BOT_TOKEN')
+            chat_id_dev = os.getenv('TELEGRAM_USER_ID')
+            if token and chat_id_dev:
+                nombre = instance.get_full_name() or instance.username
+                mensaje = "\U0001f464 *Nueva alumna registrada*\n" + nombre + "\n\U0001f4e7 " + instance.email
+                http_requests.post(
+                    f"https://api.telegram.org/bot{token}/sendMessage",
+                    json={
+                        "chat_id":    chat_id_dev,
+                        "text":       mensaje,
+                        "parse_mode": "Markdown",
+                    },
+                    timeout=5,
+                )
+        except Exception as e:
+            logger.error("Telegram nueva alumna excepción: %s", e)
 
 
 class Pack(models.Model):
