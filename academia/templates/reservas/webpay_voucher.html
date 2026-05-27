@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if aprobado %}Pago Confirmado{% else %}Pago Rechazado{% endif %} – Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --rojo:        #c62828;
+  --rojo-pale:   #ffebee;
+  --gris:        #555;
+  --borde:       #e0e0e0;
+  --radio:       14px;
+  --font:        'Poppins', sans-serif;
+}
+
+.voucher-wrap {
+  width: 92%; max-width: 560px;
+  margin: 24px auto 100px;
+  font-family: var(--font);
+}
+
+/* ── Header estado ── */
+.estado-card {
+  border-radius: var(--radio);
+  padding: 28px 24px;
+  text-align: center;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+}
+.estado-card.aprobado {
+  background: var(--verde);
+  color: #fff;
+}
+.estado-card.rechazado {
+  background: var(--rojo);
+  color: #fff;
+}
+.estado-card .icono { font-size: 2.5rem; margin-bottom: 10px; }
+.estado-card .titulo { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+.estado-card .subtitulo { font-size: .88rem; opacity: .85; }
+
+/* ── Datos del comprobante ── */
+.voucher-card {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.voucher-card .card-titulo {
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--verde); margin-bottom: 14px;
+  border-bottom: 1px solid var(--verde-light);
+  padding-bottom: 8px;
+}
+.voucher-fila {
+  display: flex; justify-content: space-between;
+  align-items: baseline; padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: .88rem;
+}
+.voucher-fila:last-child { border-bottom: none; }
+.voucher-fila .etiq { color: #888; }
+.voucher-fila .valor { font-weight: 600; color: #333; }
+.voucher-fila .valor.monto {
+  font-size: 1.1rem; color: var(--verde); font-weight: 700;
+}
+
+/* ── Rechazo causas ── */
+.rechazo-card {
+  background: var(--rojo-pale);
+  border: 1px solid #ef9a9a;
+  border-radius: var(--radio);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  font-size: .85rem;
+  color: var(--rojo);
+}
+.rechazo-card .rechazo-titulo {
+  font-weight: 700; margin-bottom: 10px; font-size: .9rem;
+}
+.rechazo-card ul {
+  margin: 0; padding-left: 18px; line-height: 1.8;
+}
+
+/* ── Botones ── */
+.btn-principal {
+  display: block; width: 100%; padding: 16px;
+  background: var(--verde); color: #fff; border: none;
+  border-radius: var(--radio); font-family: var(--font);
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  text-align: center; text-decoration: none;
+  margin-bottom: 10px; transition: background .15s;
+}
+.btn-principal:hover { background: #245200; }
+.btn-principal.rojo { background: var(--rojo); }
+.btn-principal.rojo:hover { background: #b71c1c; }
+
+.btn-secundario {
+  display: block; width: 100%; padding: 14px;
+  background: transparent; color: var(--gris);
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  font-family: var(--font); font-size: .9rem;
+  cursor: pointer; text-align: center; text-decoration: none;
+}
+.btn-secundario:hover { background: #f5f5f5; }
+
+.comercio-nota {
+  text-align: center; font-size: .73rem; color: #aaa;
+  margin-top: 16px; line-height: 1.6;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='mis_clases' %}
+
+<div class="voucher-wrap">
+
+  {% if aprobado %}
+  <!-- ── PAGO APROBADO ── -->
+  <div class="estado-card aprobado">
+    <div class="icono">✅</div>
+    <div class="titulo">¡Pago confirmado!</div>
+    <div class="subtitulo">Tu {{ pack.get_tipo_display }} está activo</div>
+  </div>
+
+  <div class="voucher-card">
+    <div class="card-titulo">Comprobante de pago</div>
+
+    <div class="voucher-fila">
+      <span class="etiq">Comercio</span>
+      <span class="valor">Academia de Pilates Paula Ayarza</span>
+    </div>
+    <div class="voucher-fila">
+      <span class="etiq">Orden de compra</span>
+      <span class="valor">{{ buy_order }}</span>
+    </div>
+    <div class="voucher-fila">
+      <span class="etiq">Servicio</span>
+      <span class="valor">{{ pack.get_tipo_display }}</span>
+    </div>
+    <div class="voucher-fila">
+      <span class="etiq">Monto</span>
+      <span class="valor monto">${{ amount|floatformat:0 }}</span>
+    </div>
+    <div class="voucher-fila">
+      <span class="etiq">Moneda</span>
+      <span class="valor">CLP</span>
+    </div>
+    <div class="voucher-fila">
+      <span class="etiq">Código de autorización</span>
+      <span class="valor">{{ authorization_code }}</span>
+    </div>
+    <div class="voucher-fila">
+      <span class="etiq">Fecha transacción</span>
+      <span class="valor">{{ transaction_date }}</span>
+    </div>
+    <div class="voucher-fila">
+      <span class="etiq">Tipo de pago</span>
+      <span class="valor">{{ payment_type }}</span>
+    </div>
+    {% if installments and installments > 1 %}
+    <div class="voucher-fila">
+      <span class="etiq">Cuotas</span>
+      <span class="valor">{{ installments }}</span>
+    </div>
+    {% endif %}
+    <div class="voucher-fila">
+      <span class="etiq">Tarjeta</span>
+      <span class="valor">**** **** **** {{ card_number }}</span>
+    </div>
+  </div>
+
+  <a href="{% url 'mis_clases' %}" class="btn-principal">Ver mis clases →</a>
+
+  {% else %}
+  <!-- ── PAGO RECHAZADO ── -->
+  <div class="estado-card rechazado">
+    <div class="icono">❌</div>
+    <div class="titulo">Orden de compra {{ buy_order }} rechazada</div>
+    <div class="subtitulo">El pago no pudo ser procesado</div>
+  </div>
+
+  <div class="rechazo-card">
+    <div class="rechazo-titulo">Las posibles causas de este rechazo son:</div>
+    <ul>
+      <li>Error en el ingreso de los datos de tu tarjeta de crédito o débito (fecha y/o código de seguridad).</li>
+      <li>Tu tarjeta de crédito o débito no cuenta con saldo suficiente.</li>
+      <li>Tarjeta aún no habilitada en el sistema financiero.</li>
+    </ul>
+  </div>
+
+  <a href="{% url 'mis_clases' %}" class="btn-principal rojo">Reintentar pago →</a>
+  <a href="{% url 'reservar' %}" class="btn-secundario">Volver a reservar</a>
+
+  {% endif %}
+
+  <p class="comercio-nota">
+    Academia de Pilates Paula Ayarza · Punta Arenas, Chile<br>
+    Pago procesado de forma segura por Transbank WebPay
+  </p>
+
+</div>
+{% endblock %}

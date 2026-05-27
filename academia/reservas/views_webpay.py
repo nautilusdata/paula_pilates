@@ -257,8 +257,23 @@ def webpay_retorno(request):
         # ── Notificar a Paula por Telegram ────────────────────────────────────
         notificar_paula(pack)
 
-        messages.success(request, f'¡Pago confirmado! Tu {pack.get_tipo_display()} está activo. \U0001f389')
-        return redirect('mis_clases')
+        payment_type_code = data.get('payment_type_code', '')
+        payment_type_labels = {
+            'VD': 'Débito', 'VN': 'Crédito sin cuotas', 'VC': 'Crédito con cuotas',
+            'SI': 'Crédito 3 cuotas sin interés', 'S2': 'Crédito 2 cuotas sin interés',
+            'NC': 'Crédito N cuotas sin interés', 'VP': 'Prepago',
+        }
+        return render(request, 'reservas/webpay_voucher.html', {
+            'aprobado':        True,
+            'pack':            pack,
+            'buy_order':       buy_order,
+            'amount':          data.get('amount'),
+            'authorization_code': data.get('authorization_code'),
+            'transaction_date':   data.get('transaction_date'),
+            'payment_type':    payment_type_labels.get(payment_type_code, payment_type_code),
+            'installments':    data.get('installments_number', 0),
+            'card_number':     data.get('card_detail', {}).get('card_number', '****'),
+        })
 
     # ── Pago rechazado ────────────────────────────────────────────────────────
     logger.warning("WEBPAY pago rechazado pack=%s response_code=%s status=%s", pack_id, response_code, status)
@@ -269,8 +284,12 @@ def webpay_retorno(request):
         + f"\U0001f4b5 ${pack.precio_total:,}\n"
         + f"\U0001f534 response_code: {response_code}"
     )
-    messages.error(request, 'El pago fue rechazado. Verifica los datos de tu tarjeta e intenta de nuevo.')
-    return redirect('mis_clases')
+    return render(request, 'reservas/webpay_voucher.html', {
+        'aprobado':    False,
+        'pack':        pack,
+        'buy_order':   buy_order,
+        'response_code': response_code,
+    })
 
 
 # ── Reintentar pago ───────────────────────────────────────────────────────────
