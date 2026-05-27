@@ -511,7 +511,9 @@ def reservar_clase_suelta(request):
 
         errores = []
         hora = int(hora_str) if hora_str and hora_str.isdigit() else None
-        if not hora or hora not in horas_disponibles_por_tipo('PL'):
+        if not hora_str:
+            errores.append('Debes seleccionar una hora.')
+        elif hora is None or hora not in horas_disponibles_por_tipo('PL'):
             errores.append('Hora no válida.')
 
         fecha_inicio = None
