@@ -34,7 +34,7 @@ def _tx():
     return Transaction(options)
 
 
-# ── Notificación Telegram ─────────────────────────────────────────────────────
+# ── Notificación Telegram — Paula ─────────────────────────────────────────────
 
 def notificar_paula(pack: Pack):
     """Envía mensaje a Paula y al developer vía Telegram cuando se confirma un pago."""
@@ -47,11 +47,11 @@ def notificar_paula(pack: Pack):
         return
 
     mensaje = (
-        f"💰 *Nuevo pago confirmado*\n"
-        f"👤 {pack.alumna.get_full_name()}\n"
-        f"📦 {pack.get_tipo_display()}\n"
-        f"💵 ${pack.precio_total:,}\n"
-        f"📅 Inicio: {pack.fecha_inicio.strftime('%d/%m/%Y')}"
+        f"\U0001f4b0 *Nuevo pago confirmado*\n"
+        f"\U0001f464 {pack.alumna.get_full_name()}\n"
+        f"\U0001f4e6 {pack.get_tipo_display()}\n"
+        f"\U0001f4b5 ${pack.precio_total:,}\n"
+        f"\U0001f4c5 Inicio: {pack.fecha_inicio.strftime('%d/%m/%Y')}"
     )
 
     destinatarios = [chat_id]
@@ -75,6 +75,30 @@ def notificar_paula(pack: Pack):
                 logger.warning("Telegram error pack=%s chat=%s: %s", pack.pk, dest, resp.text)
         except Exception as e:
             logger.error("Telegram excepción pack=%s chat=%s: %s", pack.pk, dest, e)
+
+
+# ── Notificación Telegram — Developer ────────────────────────────────────────
+
+def notificar_dev(mensaje: str):
+    """Envía alerta al developer vía Telegram. Solo para errores críticos."""
+    token       = os.getenv('TELEGRAM_BOT_TOKEN')
+    chat_id_dev = os.getenv('TELEGRAM_USER_ID')
+
+    if not token or not chat_id_dev:
+        return
+
+    try:
+        http_requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={
+                "chat_id":    chat_id_dev,
+                "text":       mensaje,
+                "parse_mode": "Markdown",
+            },
+            timeout=5,
+        )
+    except Exception as e:
+        logger.error("notificar_dev excepción: %s", e)
 
 
 # ── Crear / verificar transacción ─────────────────────────────────────────────
@@ -188,6 +212,11 @@ def webpay_retorno(request):
         data = verificar_transaccion(token_ws)
     except TransbankError as e:
         logger.error("WEBPAY commit error token=%s: %s", token_ws[:8], e)
+        notificar_dev(
+            "\U0001f6a8 *Error commit Webpay*\n"
+            + f"\U0001f511 token: {token_ws[:8]}...\n"
+            + f"\u274c {e}"
+        )
         messages.error(request, 'Error al confirmar el pago con Webpay. Contacta a Paula.')
         return redirect('mis_clases')
 
@@ -216,17 +245,30 @@ def webpay_retorno(request):
             _activar_pack(pack, request=request)
         except Exception as e:
             logger.error("Error activando pack=%s tras pago aprobado: %s", pack_id, e)
+            notificar_dev(
+                "\U0001f6a8 *Error activando pack post-pago*\n"
+                + f"\U0001f4e6 Pack ID: {pack_id}\n"
+                + f"\U0001f464 {pack.alumna.get_full_name()}\n"
+                + f"\u274c {e}"
+            )
             messages.error(request, 'Pago recibido, pero hubo un error activando tu reserva. Avisa a Paula con urgencia.')
             return redirect('mis_clases')
 
         # ── Notificar a Paula por Telegram ────────────────────────────────────
         notificar_paula(pack)
 
-        messages.success(request, f'¡Pago confirmado! Tu {pack.get_tipo_display()} está activo. 🎉')
+        messages.success(request, f'¡Pago confirmado! Tu {pack.get_tipo_display()} está activo. \U0001f389')
         return redirect('mis_clases')
 
     # ── Pago rechazado ────────────────────────────────────────────────────────
     logger.warning("WEBPAY pago rechazado pack=%s response_code=%s status=%s", pack_id, response_code, status)
+    notificar_dev(
+        "\u26a0\ufe0f *Pago rechazado*\n"
+        + f"\U0001f464 {pack.alumna.get_full_name()}\n"
+        + f"\U0001f4e6 {pack.get_tipo_display()}\n"
+        + f"\U0001f4b5 ${pack.precio_total:,}\n"
+        + f"\U0001f534 response_code: {response_code}"
+    )
     messages.error(request, 'El pago fue rechazado. Verifica los datos de tu tarjeta e intenta de nuevo.')
     return redirect('mis_clases')
 
