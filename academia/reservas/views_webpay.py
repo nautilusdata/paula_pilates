@@ -3,6 +3,7 @@ import random
 import string
 import logging
 import requests as http_requests
+import os
 
 from django.conf import settings
 from django.shortcuts import redirect, get_object_or_404, render
@@ -36,9 +37,10 @@ def _tx():
 # ── Notificación Telegram ─────────────────────────────────────────────────────
 
 def notificar_paula(pack: Pack):
-    """Envía mensaje a Paula vía Telegram cuando se confirma un pago."""
-    token   = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
-    chat_id = getattr(settings, 'TELEGRAM_CHAT_ID', None)
+    """Envía mensaje a Paula y al developer vía Telegram cuando se confirma un pago."""
+    token       = os.getenv('TELEGRAM_BOT_TOKEN')
+    chat_id     = os.getenv('TELEGRAM_CHAT_ID')
+    chat_id_dev = os.getenv('TELEGRAM_USER_ID')
 
     if not token or not chat_id:
         logger.warning("Telegram no configurado — TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID falta.")
@@ -52,23 +54,27 @@ def notificar_paula(pack: Pack):
         f"📅 Inicio: {pack.fecha_inicio.strftime('%d/%m/%Y')}"
     )
 
-    try:
-        resp = http_requests.post(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            json={
-                "chat_id":    chat_id,
-                "text":       mensaje,
-                "parse_mode": "Markdown",
-            },
-            timeout=5,
-        )
-        if resp.ok:
-            logger.info("Telegram notificado OK pack=%s", pack.pk)
-        else:
-            logger.warning("Telegram error pack=%s: %s", pack.pk, resp.text)
-    except Exception as e:
-        # No interrumpir el flujo de pago si Telegram falla
-        logger.error("Telegram excepción pack=%s: %s", pack.pk, e)
+    destinatarios = [chat_id]
+    if chat_id_dev and chat_id_dev != chat_id:
+        destinatarios.append(chat_id_dev)
+
+    for dest in destinatarios:
+        try:
+            resp = http_requests.post(
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                json={
+                    "chat_id":    dest,
+                    "text":       mensaje,
+                    "parse_mode": "Markdown",
+                },
+                timeout=5,
+            )
+            if resp.ok:
+                logger.info("Telegram notificado OK pack=%s chat=%s", pack.pk, dest)
+            else:
+                logger.warning("Telegram error pack=%s chat=%s: %s", pack.pk, dest, resp.text)
+        except Exception as e:
+            logger.error("Telegram excepción pack=%s chat=%s: %s", pack.pk, dest, e)
 
 
 # ── Crear / verificar transacción ─────────────────────────────────────────────
