@@ -7,7 +7,7 @@ Cambio principal: días libres — la alumna elige cualquier combinación
 de días disponibles según ConfiguracionHorario, sin esquemas fijos.
 """
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -522,6 +522,9 @@ def reservar_clase_suelta(request):
                 fecha_inicio = date.fromisoformat(fecha_str)
                 if fecha_inicio < date.today():
                     errores.append('La fecha no puede ser en el pasado.')
+                elif fecha_inicio == date.today() and hora is not None:
+                    if hora <= datetime.now().hour:
+                        errores.append('Esa hora ya pasó hoy. Elige una hora futura.')
             except ValueError:
                 errores.append('Fecha no válida.')
         else:
@@ -627,6 +630,9 @@ def reservar_clase_prueba(request):
                     errores.append('La fecha no puede ser en el pasado.')
                 elif fecha_inicio.weekday() != 5:
                     errores.append('La clase de prueba es solo los sábados.')
+                elif fecha_inicio == date.today() and hora is not None:
+                    if hora <= datetime.now().hour:
+                        errores.append('Esa hora ya pasó hoy. Elige una fecha futura.')
             except ValueError:
                 errores.append('Fecha no válida.')
         else:
