@@ -176,11 +176,14 @@ def reservar_pack10(request):
         for dia, horas in sorted(slots.items())
     ]
 
+    import json
+    feriados = feriados_punta_arenas()
     context = {
         'dias_disponibles': dias_disponibles,
         'precio_total':     ConfiguracionPrecio.get('PACK10', 0),
         'precio_por_clase': ConfiguracionPrecio.get('PACK10', 0) // 10,
         'hoy':              date.today(),
+        'feriados_json':    json.dumps([f.isoformat() for f in feriados]),
     }
 
     error_previo = request.session.pop('reserva_error', None)
