@@ -534,6 +534,16 @@ def reservar_clase_suelta(request):
             cupo = Sesion.cupos_disponibles(fecha_inicio, hora)
             if cupo < 1:
                 errores.append('No hay cupo disponible en ese horario.')
+            else:
+                ya_reservado = Sesion.objects.filter(
+                    pack__alumna=request.user,
+                    pack__estado__in=['ACTIVO', 'PENDIENTE_PAGO'],
+                    fecha=fecha_inicio,
+                    hora=hora,
+                    estado__in=['PROGRAMADA', 'RECUPERAR'],
+                ).exists()
+                if ya_reservado:
+                    errores.append('Ya tienes una clase reservada para ese día y hora.')
 
         if errores:
             context.update({'errores': errores, 'sel_hora': hora_str, 'sel_fecha': fecha_str})
@@ -642,6 +652,16 @@ def reservar_clase_prueba(request):
             cupo = Sesion.cupos_disponibles(fecha_inicio, hora)
             if cupo < 1:
                 errores.append('No hay cupo disponible en ese horario.')
+            else:
+                ya_reservado = Sesion.objects.filter(
+                    pack__alumna=request.user,
+                    pack__estado__in=['ACTIVO', 'PENDIENTE_PAGO'],
+                    fecha=fecha_inicio,
+                    hora=hora,
+                    estado__in=['PROGRAMADA', 'RECUPERAR'],
+                ).exists()
+                if ya_reservado:
+                    errores.append('Ya tienes una clase reservada para ese día y hora.')
 
         if errores:
             context.update({'errores': errores, 'sel_fecha': fecha_str})
