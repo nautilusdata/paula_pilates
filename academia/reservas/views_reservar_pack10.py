@@ -339,11 +339,14 @@ def reservar_pack_reducido(request):
         for dia, horas in sorted(slots.items())
     ]
 
+    import json
+    feriados = feriados_punta_arenas()
     context = {
         'dias_disponibles': dias_disponibles,
         'precio_por_clase': ConfiguracionPrecio.get('PACK_REDUCIDO_CLASE', 20_000),
         'cantidades':       range(2, 10),
         'hoy':              date.today(),
+        'feriados_json':    json.dumps([f.isoformat() for f in feriados]),
     }
 
     error_previo = request.session.pop('reserva_error', None)
@@ -766,11 +769,14 @@ def reservar_clase_privada(request):
         for dia, horas in sorted(slots.items())
     ]
 
+    import json
+    feriados = feriados_punta_arenas()
     context = {
         'hoy':              date.today(),
         'dias_disponibles': dias_disponibles,
         'precio_pack10':    ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000),
         'precio_reducido':  ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000),
+        'feriados_json':    json.dumps([f.isoformat() for f in feriados]),
     }
 
     error_previo = request.session.pop('reserva_error', None)

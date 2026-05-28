@@ -276,7 +276,7 @@ inputFechaOrig.addEventListener('change', function() {
     if (!fecha) { avisoFeriado.classList.remove('visible'); return; }
     if (FERIADOS.includes(fecha)) {
         const siguiente = siguienteDiaHabil(fecha);
-        avisoFeriado.innerHTML = `⚠️ Ese día es <strong>feriado</strong>. El siguiente día hábil es <strong>${formatFechaES(siguiente)}</strong>.`;
+        avisoFeriado.innerHTML = `⚠️ Ese día de inicio es <strong>feriado</strong>. El siguiente día hábil es <strong>${formatFechaES(siguiente)}</strong>.`;
         avisoFeriado.classList.add('visible');
     } else {
         avisoFeriado.classList.remove('visible');

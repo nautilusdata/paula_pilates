@@ -124,6 +124,13 @@
   transition: background .15s; text-align: center;
 }
 .btn-continuar:active { background: #245200; }
+.aviso-feriado {
+  display: none;
+  background: #fff9e6; border-left: 4px solid var(--amarillo);
+  padding: 12px 14px; border-radius: 8px;
+  font-size: .82rem; color: #856404; margin-bottom: 8px;
+}
+.aviso-feriado.visible { display: block; }
 </style>
 {% endblock %}
 
@@ -243,6 +250,7 @@
            class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
            value="{{ sel_fecha|default:'' }}" required>
     <span class="fecha-hint" id="fecha-hint">Selecciona los días primero.</span>
+    <div class="aviso-feriado" id="aviso-feriado"></div>
 
     <button type="submit" class="btn-continuar">Ver resumen →</button>
   </form>
@@ -309,7 +317,10 @@ function actualizarHintFecha() {
   }
 }
 
+const avisoFeriado = document.getElementById('aviso-feriado');
+
 document.getElementById('fecha_inicio').addEventListener('change', function() {
+  checkFeriado(this, avisoFeriado);
   if (diasSeleccionados.size === 0) {
     alert('Primero elige los días en que quieres venir.');
     this.value = ''; return;
@@ -327,5 +338,38 @@ document.getElementById('fecha_inicio').addEventListener('change', function() {
 
 actualizarPrecio();
 actualizarHintFecha();
+
+// ── Validación feriados ──
+const FERIADOS = {{ feriados_json|safe }};
+const MES_ES = {0:'enero',1:'febrero',2:'marzo',3:'abril',4:'mayo',5:'junio',
+                6:'julio',7:'agosto',8:'septiembre',9:'octubre',10:'noviembre',11:'diciembre'};
+
+function siguienteDiaHabil(fechaStr) {
+    let d = new Date(fechaStr + 'T12:00:00');
+    d.setDate(d.getDate() + 1);
+    while (true) {
+        const iso = d.toISOString().split('T')[0];
+        const jsDay = d.getDay();
+        if (jsDay !== 0 && !FERIADOS.includes(iso)) return iso;
+        d.setDate(d.getDate() + 1);
+    }
+}
+
+function formatFechaES(fechaStr) {
+    const d = new Date(fechaStr + 'T12:00:00');
+    return `${d.getDate()} de ${MES_ES[d.getMonth()]} de ${d.getFullYear()}`;
+}
+
+function checkFeriado(inputEl, avisoEl) {
+    const fecha = inputEl.value;
+    if (!fecha) { avisoEl.classList.remove('visible'); return; }
+    if (FERIADOS.includes(fecha)) {
+        const siguiente = siguienteDiaHabil(fecha);
+        avisoEl.innerHTML = `⚠️ Ese día de inicio es <strong>feriado</strong>. El siguiente día hábil es <strong>${formatFechaES(siguiente)}</strong>.`;
+        avisoEl.classList.add('visible');
+    } else {
+        avisoEl.classList.remove('visible');
+    }
+}
 </script>
 {% endblock %}

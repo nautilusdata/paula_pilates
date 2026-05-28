@@ -106,6 +106,9 @@ def reservar_body_balance(request):
     dias_corto = ' + '.join(s['dia_nombre'][:3] for s in slots_bb)
     full_sub  = f"{veces_txt} · {dias_corto}"
 
+    import json
+    from .models import feriados_punta_arenas
+    feriados = feriados_punta_arenas()
     context = {
         'hoy':           hoy,
         'slots_bb':      slots_bb,
@@ -115,6 +118,7 @@ def reservar_body_balance(request):
         'full_sub':      full_sub,
         'precio_full':   ConfiguracionPrecio.get('BB_FULL', 60_000),
         'precio_semanal': ConfiguracionPrecio.get('BB_SEMANAL', 15_000),
+        'feriados_json': json.dumps([f.isoformat() for f in feriados]),
     }
 
     if request.method == 'POST':
