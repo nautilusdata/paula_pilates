@@ -62,9 +62,19 @@ def perfil(request):
 
 @login_required
 def reservar(request):
+    precio_pack12 = ConfiguracionPrecio.get('PACK12', 115_000)
+    precio_pack10 = ConfiguracionPrecio.get('PACK10', 110_000)
+    precio_pack8  = ConfiguracionPrecio.get('PACK8', 105_000)
+    precio_pack4  = ConfiguracionPrecio.get('PACK4', 60_000)
     return render(request, 'reservar.html', {
-        'precio_pack10':        ConfiguracionPrecio.get('PACK10', 0),
-        'precio_reducido_clase': ConfiguracionPrecio.get('PACK_REDUCIDO_CLASE', 0),
+        'precio_pack12':         precio_pack12,
+        'precio_pack12_clase':   precio_pack12 // 12,
+        'precio_pack10':         precio_pack10,
+        'precio_pack10_clase':   precio_pack10 // 10,
+        'precio_pack8':          precio_pack8,
+        'precio_pack8_clase':    precio_pack8 // 8,
+        'precio_pack4':          precio_pack4,
+        'precio_pack4_clase':    precio_pack4 // 4,
         'precio_suelta':        ConfiguracionPrecio.get('CLASE_SUELTA', 0),
         'precio_prueba':        ConfiguracionPrecio.get('CLASE_PRUEBA', 0),
         'precio_privada':       ConfiguracionPrecio.get('PRIVADA_PACK10', 0),

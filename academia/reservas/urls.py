@@ -6,10 +6,12 @@ from . import views_panel_paula
 from . import views_webpay
 
 urlpatterns = [
-    path('reservar/pack10/', views_reservar_pack10.reservar_pack10, name='reservar_pack10'),
-    path('reservar/pack10/confirmar/', views_reservar_pack10.reservar_pack10_confirmar, name='reservar_pack10_confirmar'),
+    path('reservar/pack/<str:tier>/', views_reservar_pack10.reservar_pack, name='reservar_pack'),
+    path('reservar/pack/<str:tier>/confirmar/', views_reservar_pack10.reservar_pack_confirmar, name='reservar_pack_confirmar'),
     path('reservar/pack10/horas/', views_reservar_pack10.horas_disponibles_ajax, name='horas_disponibles_ajax'),
     path('reservar/pack10/dias/', views_reservar_pack10.dias_disponibles_ajax, name='dias_disponibles_ajax'),
+    path('reservar/pack4/', views_reservar_pack10.reservar_pack4, name='reservar_pack4'),
+    path('reservar/pack4/confirmar/', views_reservar_pack10.reservar_pack4_confirmar, name='reservar_pack4_confirmar'),
     path('mis-clases/', views_mis_clases.mis_clases, name='mis_clases'),
     path('reservar/pack-reducido/', views_reservar_pack10.reservar_pack_reducido, name='reservar_pack_reducido'),
     path('reservar_pack_reducido/confirmar/', views_reservar_pack10.reservar_pack_reducido_confirmar, name='reservar_pack_reducido_confirmar'),

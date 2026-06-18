@@ -126,8 +126,11 @@ def crear_metadata(sender, instance, created, **kwargs):
 
 class Pack(models.Model):
     TIPO_CHOICES = [
+        ('PACK12',     'Pack 12 Clases'),
         ('PACK10',     'Pack 10 Clases'),
-        ('REDUCIDO',   'Pack Reducido (2–9 clases)'),
+        ('PACK8',      'Pack 8 Clases'),
+        ('PACK4',      'Pack 4 Clases'),
+        ('REDUCIDO',   'Pack Reducido (2–9 clases) — legacy'),
         ('SUELTA',     'Clase Suelta'),
         ('PRUEBA',     'Clase de Prueba'),
         ('PRIVADA',    'Clase Privada'),
@@ -174,9 +177,16 @@ class Pack(models.Model):
     creado_en    = models.DateTimeField(auto_now_add=True)
 
     def calcular_precio(self):
-        if self.tipo == 'PACK10':
-            return ConfiguracionPrecio.get('PACK10', 140_000)
+        PRECIOS_TIER_DEFAULT = {
+            'PACK12': 115_000,
+            'PACK10': 110_000,
+            'PACK8':  105_000,
+            'PACK4':  60_000,
+        }
+        if self.tipo in PRECIOS_TIER_DEFAULT:
+            return ConfiguracionPrecio.get(self.tipo, PRECIOS_TIER_DEFAULT[self.tipo])
         if self.tipo == 'REDUCIDO':
+            # Legacy — dormido, solo por compatibilidad con packs antiguos
             if not (2 <= self.cantidad <= 9):
                 raise ValidationError('Pack reducido debe tener entre 2 y 9 clases.')
             return self.cantidad * ConfiguracionPrecio.get('PACK_REDUCIDO_CLASE', 20_000)
@@ -193,10 +203,10 @@ class Pack(models.Model):
         return 0
 
     def clean(self):
-        # Validación simplificada — solo verifica horas contra slots activos PL
-        if self.tipo in ('PACK10', 'REDUCIDO') and self.frecuencia:
+        # Validación de horas contra slots activos PL — packs con frecuencia semanal
+        TIPOS_FRECUENCIA = ('PACK12', 'PACK10', 'PACK8', 'REDUCIDO')
+        if self.tipo in TIPOS_FRECUENCIA and self.frecuencia:
             dias = dias_para_pack(self)
-            horas_validas = horas_disponibles_por_tipo('PL')
             campos = [self.hora_dia1, self.hora_dia2, self.hora_dia3, self.hora_dia4]
             for i, dia in enumerate(dias):
                 if i < len(campos) and campos[i] is not None:
@@ -205,6 +215,8 @@ class Pack(models.Model):
                         raise ValidationError(
                             f'Hora {campos[i]} no válida para Pilates el día {dia}.'
                         )
+        # PACK4 — modo libre, sin frecuencia fija. Las horas de cada
+        # sesión se validan al momento de crear el pack (ver views), no aquí.
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -257,8 +269,19 @@ class Sesion(models.Model):
 # ─── Helper: crear sesiones al confirmar pago ─────────────────────────────────
 
 def crear_sesiones_pack(pack: Pack):
-    if pack.tipo not in ('PACK10', 'REDUCIDO', 'PRIVADA'):
-        raise ValueError('Solo packs tienen sesiones múltiples con esta función.')
+    """
+    Crea las sesiones de un pack con frecuencia semanal recurrente
+    (PACK12, PACK10, PACK8, REDUCIDO legacy, PRIVADA).
+    PACK4 NO usa esta función — sus sesiones se crean directo desde
+    los pares (fecha, hora) explícitos elegidos en modo libre (ver
+    views_webpay.py, igual patrón que Body Balance).
+    """
+    TIPOS_FRECUENCIA = ('PACK12', 'PACK10', 'PACK8', 'REDUCIDO', 'PRIVADA')
+    if pack.tipo not in TIPOS_FRECUENCIA:
+        raise ValueError(
+            f'{pack.tipo} no usa crear_sesiones_pack — sus sesiones se crean '
+            'directo desde pares explícitos (ver views_webpay.py).'
+        )
 
     # PRIVADA usa una sola hora para todos los días
     if pack.tipo == 'PRIVADA':

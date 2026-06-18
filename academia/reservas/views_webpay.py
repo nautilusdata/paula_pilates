@@ -128,8 +128,33 @@ def _activar_pack(pack: Pack, request=None):
     if pack.estado == 'ACTIVO':
         return
 
-    if pack.tipo in ('PACK10', 'REDUCIDO', 'PRIVADA'):
+    if pack.tipo in ('PACK12', 'PACK10', 'PACK8', 'REDUCIDO', 'PRIVADA'):
         crear_sesiones_pack(pack)
+
+    elif pack.tipo == 'PACK4':
+        # Modo libre — 4 sesiones con fecha/hora explícitas, sin repetición semanal.
+        # Mismo patrón que BB_FULL: pares guardados en sesión antes de ir a Webpay.
+        pares = None
+        if request is not None:
+            raw = request.session.pop('pack4_pares', None)
+            if raw:
+                from datetime import date as _date
+                pares = [(_date.fromisoformat(f), h) for f, h in raw]
+
+        if pares is None:
+            raise ValueError(
+                f'No se encontraron los pares de sesiones para PACK4 pack={pack.pk}. '
+                'No se puede activar sin ellos.'
+            )
+
+        sesiones = [
+            Sesion(pack=pack, fecha=f, hora=h, numero=i + 1)
+            for i, (f, h) in enumerate(pares)
+        ]
+        Sesion.objects.bulk_create(sesiones)
+        pack.fecha_fin = pares[-1][0]
+        pack.estado    = 'ACTIVO'
+        pack.save(update_fields=['fecha_fin', 'estado'])
 
     elif pack.tipo in ('SUELTA', 'PRUEBA'):
         Sesion.objects.create(pack=pack, fecha=pack.fecha_inicio, hora=pack.hora, numero=1)

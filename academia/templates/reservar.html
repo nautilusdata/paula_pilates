@@ -32,8 +32,8 @@
 
   .btn-producto {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 12px;
     padding: 20px;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -51,6 +51,8 @@
 
   .btn-producto .info {
     text-align: left;
+    flex: 1;
+    min-width: 0;
   }
 
   .btn-producto .titulo {
@@ -71,6 +73,9 @@
     font-weight: 700;
     color: #408601;
     font-size: 1.1rem;
+    text-align: right;
+    width: 92px;
+    flex-shrink: 0;
   }
 
   /* Icono de flecha para indicar acción */
@@ -106,20 +111,36 @@
   <div class="categoria-header">Pilates Reformer</div>
   <div class="menu-reserva">
     
-    <a href="{% url 'reservar_pack10' %}" class="btn-producto">
+    <a href="{% url 'reservar_pack' tier='PACK12' %}" class="btn-producto">
+      <div class="info">
+        <span class="titulo">Pack 12 Clases</span>
+        <span class="subtitulo">${{ precio_pack12_clase|floatformat:0 }} cada clase · Mejor precio</span>
+      </div>
+      <div class="precio">${{ precio_pack12|floatformat:0 }}</div>
+    </a>
+
+    <a href="{% url 'reservar_pack' tier='PACK10' %}" class="btn-producto">
       <div class="info">
         <span class="titulo">Pack 10 Clases</span>
-        <span class="subtitulo">Horario fijo • Recomendado</span>
+        <span class="subtitulo">${{ precio_pack10_clase|floatformat:0 }} cada clase</span>
       </div>
       <div class="precio">${{ precio_pack10|floatformat:0 }}</div>
     </a>
 
-    <a href="{% url 'reservar_pack_reducido' %}" class="btn-producto">
+    <a href="{% url 'reservar_pack' tier='PACK8' %}" class="btn-producto">
       <div class="info">
-        <span class="titulo">Pack Reducido (2 a 9)</span>
-        <span class="subtitulo">Elige cantidad de sesiones</span>
+        <span class="titulo">Pack 8 Clases</span>
+        <span class="subtitulo">${{ precio_pack8_clase|floatformat:0 }} cada clase</span>
       </div>
-      <div class="precio">${{ precio_reducido_clase|floatformat:0 }} c/u</div>
+      <div class="precio">${{ precio_pack8|floatformat:0 }}</div>
+    </a>
+
+    <a href="{% url 'reservar_pack4' %}" class="btn-producto">
+      <div class="info">
+        <span class="titulo">Pack 4 Clases</span>
+        <span class="subtitulo">${{ precio_pack4_clase|floatformat:0 }} cada clase · Elige fechas libres</span>
+      </div>
+      <div class="precio">${{ precio_pack4|floatformat:0 }}</div>
     </a>
 
     <a href="{% url 'reservar_clase_suelta' %}" class="btn-producto">

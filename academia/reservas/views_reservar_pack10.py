@@ -163,9 +163,24 @@ def dias_disponibles_ajax(request):
 
 # ─── PACK 10 ──────────────────────────────────────────────────────────────────
 
+# ─── PACKS CON FRECUENCIA SEMANAL (12 / 10 / 8 clases) ───────────────────────
+
+TIERS_PACK = {
+    'PACK12': 12,
+    'PACK10': 10,
+    'PACK8':  8,
+}
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
-def reservar_pack10(request):
+def reservar_pack(request, tier):
+    if tier not in TIERS_PACK:
+        messages.error(request, 'Pack no válido.')
+        return redirect('reservar')
+
+    cantidad = TIERS_PACK[tier]
+
     slots   = slots_disponibles_pl()  # {dia: [horas]}
     dias_disponibles = [
         {
@@ -178,12 +193,15 @@ def reservar_pack10(request):
 
     import json
     feriados = feriados_punta_arenas()
+    precio_total = ConfiguracionPrecio.get(tier, 0)
     context = {
-        'dias_disponibles': dias_disponibles,
-        'precio_total':     ConfiguracionPrecio.get('PACK10', 0),
-        'precio_por_clase': ConfiguracionPrecio.get('PACK10', 0) // 10,
-        'hoy':              date.today(),
-        'feriados_json':    json.dumps([f.isoformat() for f in feriados]),
+        'tier':              tier,
+        'cantidad':          cantidad,
+        'dias_disponibles':  dias_disponibles,
+        'precio_total':      precio_total,
+        'precio_por_clase':  precio_total // cantidad if cantidad else 0,
+        'hoy':               date.today(),
+        'feriados_json':     json.dumps([f.isoformat() for f in feriados]),
     }
 
     error_previo = request.session.pop('reserva_error', None)
@@ -224,7 +242,7 @@ def reservar_pack10(request):
 
         if not errores:
             try:
-                pares, sin_cupo = _slots_disponibles(dias, horas, fecha_inicio, 10)
+                pares, sin_cupo = _slots_disponibles(dias, horas, fecha_inicio, cantidad)
             except ValidationError as e:
                 errores.extend(e.messages)
 
@@ -240,50 +258,55 @@ def reservar_pack10(request):
 
         if errores:
             context.update({
-                'errores':     errores,
-                'sel_dias':    dias,
-                'sel_horas':   horas,
-                'sel_fecha':   fecha_str,
+                'errores':   errores,
+                'sel_dias':  dias,
+                'sel_horas': horas,
+                'sel_fecha': fecha_str,
             })
-            return render(request, 'reservas/reservar_pack10.html', context)
+            return render(request, 'reservas/reservar_pack.html', context)
 
-        # Guardar borrador con nuevo formato
-        request.session['pack10_borrador'] = {
+        request.session['pack_borrador'] = {
+            'tier':         tier,
+            'cantidad':     cantidad,
             'dias':         dias,
             'horas':        {str(k): v for k, v in horas.items()},
             'frecuencia':   _frecuencia_str(dias),
             'fecha_inicio': fecha_inicio.isoformat(),
             'pares':        [[f.isoformat(), h] for f, h in pares],
         }
-        return redirect('reservar_pack10_confirmar')
+        return redirect('reservar_pack_confirmar', tier=tier)
 
-    return render(request, 'reservas/reservar_pack10.html', context)
+    return render(request, 'reservas/reservar_pack.html', context)
 
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def reservar_pack10_confirmar(request):
-    borrador = request.session.get('pack10_borrador')
-    if not borrador:
+def reservar_pack_confirmar(request, tier):
+    borrador = request.session.get('pack_borrador')
+    if not borrador or borrador.get('tier') != tier:
         messages.warning(request, 'Sesión expirada. Inicia la reserva de nuevo.')
-        return redirect('reservar_pack10')
+        return redirect('reservar_pack', tier=tier)
 
-    pares  = [(date.fromisoformat(f), h) for f, h in borrador['pares']]
-    dias   = borrador['dias']
-    horas  = {int(k): v for k, v in borrador['horas'].items()}
+    pares    = [(date.fromisoformat(f), h) for f, h in borrador['pares']]
+    dias     = borrador['dias']
+    horas    = {int(k): v for k, v in borrador['horas'].items()}
+    cantidad = borrador['cantidad']
 
     horario_dias = [
         {'nombre': NOMBRE_DIA[d], 'hora': horas[d], 'label': hora_label(d, horas[d])}
         for d in dias
     ]
 
+    precio_total = ConfiguracionPrecio.get(tier, 0)
     context = {
+        'tier':             tier,
+        'cantidad':         cantidad,
         'frecuencia_label': ' · '.join(NOMBRE_DIA_CORTO[d] for d in dias),
         'fecha_inicio':     pares[0][0],
         'fecha_fin':        pares[-1][0],
         'sesiones':         [(i + 1, f, h, fmt_fecha(f)) for i, (f, h) in enumerate(pares)],
-        'precio_total':     ConfiguracionPrecio.get('PACK10', 0),
-        'precio_por_clase': ConfiguracionPrecio.get('PACK10', 0) // 10,
+        'precio_total':     precio_total,
+        'precio_por_clase': precio_total // cantidad if cantidad else 0,
         'horario_dias':     horario_dias,
     }
 
@@ -291,20 +314,20 @@ def reservar_pack10_confirmar(request):
         sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
         if sin_cupo:
             request.session['reserva_error'] = 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.'
-            return redirect('reservar_pack10')
+            return redirect('reservar_pack', tier=tier)
 
         pack = Pack.objects.create(
             alumna       = request.user,
-            tipo         = 'PACK10',
+            tipo         = tier,
             frecuencia   = borrador['frecuencia'],
             hora_dia1    = horas.get(dias[0]) if len(dias) > 0 else None,
             hora_dia2    = horas.get(dias[1]) if len(dias) > 1 else None,
             hora_dia3    = horas.get(dias[2]) if len(dias) > 2 else None,
             hora_dia4    = horas.get(dias[3]) if len(dias) > 3 else None,
             fecha_inicio = pares[0][0],
-            cantidad     = 10,
+            cantidad     = cantidad,
         )
-        del request.session['pack10_borrador']
+        del request.session['pack_borrador']
 
         from .views_webpay import crear_transaccion
         return_url = request.build_absolute_uri('/pago/webpay/retorno/')
@@ -316,15 +339,159 @@ def reservar_pack10_confirmar(request):
         if not token or not url:
             pack.delete()
             request.session['reserva_error'] = 'Error al conectar con Webpay. Intenta de nuevo.'
-            return redirect('reservar_pack10')
+            return redirect('reservar_pack', tier=tier)
 
         request.session['webpay_pack_id'] = pack.pk
         return render(request, 'reservas/webpay_redirect.html', {'url': url, 'token': token})
 
-    return render(request, 'reservas/reservar_pack10_confirmar.html', context)
+    return render(request, 'reservas/reservar_pack_confirmar.html', context)
 
 
-# ─── PACK REDUCIDO ────────────────────────────────────────────────────────────
+# ─── PACK 4 — MODO LIBRE (sin repetición semanal) ────────────────────────────
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_pack4(request):
+    import json
+    feriados = feriados_punta_arenas()
+    precio_total = ConfiguracionPrecio.get('PACK4', 60_000)
+    context = {
+        'hoy':              date.today(),
+        'precio_total':     precio_total,
+        'precio_por_clase': precio_total // 4,
+        'feriados_json':    json.dumps([f.isoformat() for f in feriados]),
+    }
+
+    error_previo = request.session.pop('reserva_error', None)
+    if error_previo:
+        context['errores'] = [error_previo]
+
+    if request.method == 'POST':
+        errores = []
+        pares   = []
+        sel_fechas_horas = []
+
+        for i in range(1, 5):
+            fecha_str = request.POST.get(f'fecha_{i}')
+            hora_str  = request.POST.get(f'hora_{i}')
+            sel_fechas_horas.append({'fecha': fecha_str, 'hora': hora_str})
+
+            if not fecha_str or not hora_str:
+                errores.append(f'Completa la sesión {i}: falta fecha u hora.')
+                continue
+            try:
+                fecha = date.fromisoformat(fecha_str)
+                hora  = int(hora_str)
+            except ValueError:
+                errores.append(f'Sesión {i}: fecha u hora no válida.')
+                continue
+
+            if fecha < date.today():
+                errores.append(f'Sesión {i}: la fecha no puede ser en el pasado.')
+                continue
+            if fecha in feriados:
+                errores.append(f'Sesión {i}: {fmt_fecha(fecha)} es feriado. Elige otro día.')
+                continue
+
+            horas_validas = horas_disponibles_por_tipo('PL', dia=fecha.weekday())
+            if hora not in horas_validas:
+                errores.append(f'Sesión {i}: esa hora no está disponible ese día.')
+                continue
+
+            pares.append((fecha, hora))
+
+        if not errores:
+            if len(set(pares)) != len(pares):
+                errores.append('No puedes elegir la misma fecha y hora dos veces.')
+
+        if not errores:
+            sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
+            if sin_cupo:
+                dias_str = ', '.join(f"{fmt_fecha(f)} {h:02d}:00" for f, h in sin_cupo)
+                errores.append(f'Sin cupo disponible en: {dias_str}.')
+
+        if not errores:
+            colisiones = detectar_overlap(request.user, pares)
+            if colisiones:
+                dias_str = ', '.join(f"{fmt_fecha(f)} {h:02d}:00" for f, h in colisiones)
+                errores.append(f'Ya tienes una clase reservada en: {dias_str}.')
+
+        if errores:
+            context.update({'errores': errores})
+            for idx, sh in enumerate(sel_fechas_horas, start=1):
+                context[f'sel_fecha_{idx}'] = sh['fecha']
+                context[f'sel_hora_{idx}']  = sh['hora']
+            return render(request, 'reservas/reservar_pack4.html', context)
+
+        pares.sort(key=lambda x: (x[0], x[1]))
+
+        request.session['pack4_borrador'] = {
+            'pares': [[f.isoformat(), h] for f, h in pares],
+        }
+        return redirect('reservar_pack4_confirmar')
+
+    return render(request, 'reservas/reservar_pack4.html', context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def reservar_pack4_confirmar(request):
+    borrador = request.session.get('pack4_borrador')
+    if not borrador:
+        messages.warning(request, 'Sesión expirada. Inicia la reserva de nuevo.')
+        return redirect('reservar_pack4')
+
+    pares  = [(date.fromisoformat(f), h) for f, h in borrador['pares']]
+    precio_total = ConfiguracionPrecio.get('PACK4', 60_000)
+
+    context = {
+        'fecha_inicio':     pares[0][0],
+        'fecha_fin':        pares[-1][0],
+        'sesiones':         [(i + 1, f, h, fmt_fecha(f)) for i, (f, h) in enumerate(pares)],
+        'precio_total':     precio_total,
+        'precio_por_clase': precio_total // 4,
+    }
+
+    if request.method == 'POST':
+        sin_cupo = [(f, h) for f, h in pares if Sesion.cupos_disponibles(f, h) < 1]
+        if sin_cupo:
+            request.session['reserva_error'] = 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.'
+            return redirect('reservar_pack4')
+
+        pack = Pack.objects.create(
+            alumna       = request.user,
+            tipo         = 'PACK4',
+            fecha_inicio = pares[0][0],
+            cantidad     = 4,
+        )
+        del request.session['pack4_borrador']
+
+        from .views_webpay import crear_transaccion
+        return_url = request.build_absolute_uri('/pago/webpay/retorno/')
+
+        # Guardar pares ANTES de ir a Webpay — se consumen en _activar_pack tras pago aprobado
+        request.session['pack4_pares'] = borrador['pares']
+
+        data = crear_transaccion(pack, return_url)
+        token = data.get('token')
+        url   = data.get('url')
+
+        if not token or not url:
+            pack.delete()
+            request.session.pop('pack4_pares', None)
+            request.session['reserva_error'] = 'Error al conectar con Webpay. Intenta de nuevo.'
+            return redirect('reservar_pack4')
+
+        request.session['webpay_pack_id'] = pack.pk
+        return render(request, 'reservas/webpay_redirect.html', {'url': url, 'token': token})
+
+    return render(request, 'reservas/reservar_pack4_confirmar.html', context)
+
+
+# ─── PACK REDUCIDO — DORMIDO ──────────────────────────────────────────────────
+# Ya no se ofrece en el menú de reserva (reemplazado por tiers PACK12/10/8/4).
+# Se deja el código funcional por si Paula decide reactivarlo en el futuro.
+# Los packs antiguos creados con este tipo siguen funcionando normalmente.
 
 @login_required
 @require_http_methods(["GET", "POST"])

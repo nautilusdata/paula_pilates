@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% load static %}
+{% load panel_tags %}
+{% block title %}Reservar Pack {{ cantidad }} Clases – Pilates Paula{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --verde:       #2f6300;
+  --verde-mid:   #408601;
+  --verde-light: #d4eac8;
+  --verde-pale:  #f0f7ea;
+  --amarillo:    #f1c40f;
+  --gris:        #555;
+  --borde:       #ddd;
+  --radio:       14px;
+  --sombra:      0 2px 12px rgba(0,0,0,.07);
+  --font:        'Poppins', sans-serif;
+}
+.pack-wrap { width: 92%; max-width: 580px; margin: 24px auto 100px; font-family: var(--font); }
+
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: #999; margin-bottom: 20px; }
+.breadcrumb a { color: var(--verde); text-decoration: none; }
+.breadcrumb .sep { color: #ccc; }
+.breadcrumb .actual { color: var(--gris); font-weight: 600; }
+
+.pack-titulo    { font-size: 1.3rem; font-weight: 700; color: var(--verde); margin-bottom: 4px; }
+.pack-subtitulo { font-size: .85rem; color: var(--gris); margin-bottom: 24px; }
+
+.pasos { display: flex; gap: 0; margin-bottom: 28px; border-radius: 30px; overflow: hidden; background: #f5f5f5; }
+.paso { flex: 1; text-align: center; padding: 8px 4px; font-size: .75rem; color: #aaa; font-weight: 500; }
+.paso.activo { background: var(--verde); color: #fff; border-radius: 30px; }
+
+.aviso { background: #fff9e6; border-left: 4px solid var(--amarillo); padding: 12px 14px; border-radius: 8px; font-size: .82rem; color: #856404; margin-bottom: 22px; }
+.errores { background: #fff0f0; border-left: 4px solid #e74c3c; padding: 12px 14px; border-radius: 8px; font-size: .82rem; color: #c0392b; margin-bottom: 20px; }
+.errores ul { margin: 6px 0 0; padding-left: 18px; }
+
+.seccion-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--verde); margin-bottom: 10px; }
+
+/* ── Selector de días ── */
+.dias-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 26px; }
+.dia-check { display: none; }
+.dia-chip {
+  display: block; text-align: center; padding: 12px 6px;
+  border: 2px solid var(--borde); border-radius: 10px;
+  cursor: pointer; font-size: .85rem; font-weight: 600;
+  color: #555; background: #fff; transition: all .15s;
+  user-select: none;
+}
+.dia-check:checked + .dia-chip { border-color: var(--verde); background: var(--verde); color: #fff; }
+
+/* ── Horas por día ── */
+.horas-por-dia { margin-bottom: 26px; }
+.dia-grupo { margin-bottom: 18px; display: none; }
+.dia-grupo.visible { display: block; }
+.dia-titulo {
+  font-size: .78rem; font-weight: 700; color: var(--verde);
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+}
+.dia-titulo::after { content: ''; flex: 1; height: 1px; background: var(--verde-light); }
+.horas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.hora-opt { display: none; }
+.hora-label {
+  display: block; text-align: center; padding: 12px 6px;
+  border: 2px solid var(--borde); border-radius: 10px;
+  cursor: pointer; font-size: .9rem; font-weight: 600;
+  color: #555; background: #fff; transition: all .15s;
+}
+.hora-opt:checked + .hora-label { border-color: var(--verde); background: var(--verde); color: #fff; }
+.hora-loading { text-align: center; color: #aaa; font-size: .8rem; padding: 12px 0; }
+
+/* ── Fecha ── */
+.fecha-field {
+  width: 100%; padding: 14px 16px; border: 2px solid var(--borde);
+  border-radius: var(--radio); font-family: var(--font); font-size: .95rem;
+  color: #333; background: #fff; box-sizing: border-box;
+  margin-bottom: 8px; transition: border-color .15s;
+}
+.fecha-field:focus { outline: none; border-color: var(--verde); }
+.fecha-hint { font-size: .75rem; color: #999; margin-bottom: 22px; display: block; }
+
+/* ── Precio ── */
+.precio-badge {
+  background: var(--verde-pale); border: 1px solid var(--verde-light);
+  border-radius: var(--radio); padding: 16px 18px;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+}
+.precio-badge .det { font-size: .82rem; color: var(--gris); }
+.precio-badge .det strong { display: block; color: var(--verde); font-size: 1.4rem; }
+
+.btn-continuar {
+  display: block; width: 100%; padding: 16px;
+  background: var(--verde); color: #fff; border: none;
+  border-radius: var(--radio); font-family: var(--font);
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: background .15s; text-align: center;
+}
+.btn-continuar:active { background: #245200; }
+.aviso-feriado {
+  display: none;
+  background: #fff9e6; border-left: 4px solid var(--amarillo);
+  padding: 12px 14px; border-radius: 8px;
+  font-size: .82rem; color: #856404; margin-bottom: 8px;
+}
+.aviso-feriado.visible { display: block; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include '_menu_alumno.html' with activo='reservar' %}
+
+<div class="pack-wrap">
+
+  <nav class="breadcrumb">
+    <a href="{% url 'reservar' %}">Reservar</a>
+    <span class="sep">›</span>
+    <a href="{% url 'reservar' %}">Pilates Reformer</a>
+    <span class="sep">›</span>
+    <span class="actual">Pack {{ cantidad }} Clases</span>
+  </nav>
+
+  <div class="pasos">
+    <div class="paso activo">1 · Configurar</div>
+    <div class="paso">2 · Confirmar</div>
+    <div class="paso">3 · Pagar</div>
+  </div>
+
+  <p class="pack-titulo">Pack {{ cantidad }} Clases</p>
+  <p class="pack-subtitulo">Pilates Reformer · ${{ precio_por_clase|floatformat:0 }} por clase · Horario fijo semanal</p>
+
+  {% if not errores %}
+  <div class="aviso">
+    <strong>Horario fijo:</strong> Elige los días y hora para cada uno.
+    Ese esquema se repetirá cada semana hasta completar las {{ cantidad }} clases.
+  </div>
+  {% endif %}
+
+  {% if errores %}
+  <div class="errores">
+    <strong>Por favor corrige lo siguiente:</strong>
+    <ul>{% for e in errores %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <form method="POST" action="{% url 'reservar_pack' tier=tier %}" id="form-pack">
+    {% csrf_token %}
+
+    <!-- ① Días -->
+    <div class="seccion-label">① ¿Qué días quieres venir?</div>
+    <div class="dias-grid">
+      {% for d in dias_disponibles %}
+      <input type="checkbox" name="dia_{{ d.dia }}" id="dia_{{ d.dia }}"
+             class="dia-check" value="1"
+             {% if d.dia in sel_dias %}checked{% endif %}
+             onchange="toggleDia({{ d.dia }}, this.checked)">
+      <label for="dia_{{ d.dia }}" class="dia-chip">{{ d.nombre }}</label>
+      {% endfor %}
+    </div>
+
+    <!-- ② Hora por día -->
+    <div class="seccion-label">② ¿A qué hora cada día?</div>
+    <div class="horas-por-dia" id="horas-container">
+      {% for d in dias_disponibles %}
+      <div class="dia-grupo {% if d.dia in sel_dias %}visible{% endif %}" id="grupo_dia_{{ d.dia }}">
+        <div class="dia-titulo">{{ d.nombre }}</div>
+        <div class="horas-grid">
+          {% for h in d.horas %}
+          <input type="radio" name="hora_dia_{{ d.dia }}" id="h_{{ d.dia }}_{{ h.hora }}"
+                 value="{{ h.hora }}" class="hora-opt"
+                 {% if sel_horas and sel_horas|get_item:d.dia == h.hora %}checked{% endif %}>
+          <label for="h_{{ d.dia }}_{{ h.hora }}" class="hora-label">{{ h.label }}</label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ③ Fecha de inicio -->
+    <div class="seccion-label">③ ¿Cuándo empieza tu primera clase?</div>
+    <input type="date" name="fecha_inicio" id="fecha_inicio"
+           class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
+           value="{{ sel_fecha|default:'' }}" required>
+    <span class="fecha-hint" id="fecha-hint">Selecciona los días primero.</span>
+    <div class="aviso-feriado" id="aviso-feriado"></div>
+
+    <!-- Precio -->
+    <div class="precio-badge">
+      <div class="det">
+        <strong>${{ precio_total|floatformat:0 }}</strong>
+        {{ cantidad }} clases · ${{ precio_por_clase|floatformat:0 }} c/u
+      </div>
+      <div style="font-size:.75rem; color:#999; text-align:right;">Pago único<br>por adelantado</div>
+    </div>
+
+    <button type="submit" class="btn-continuar">Ver resumen →</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const NOMBRE_DIA = {0:'Lunes',1:'Martes',2:'Miércoles',3:'Jueves',4:'Viernes',5:'Sábado'};
+
+let diasSeleccionados = new Set({{ sel_dias|default:"[]"|safe }});
+
+function toggleDia(dia, checked) {
+  if (checked) diasSeleccionados.add(dia);
+  else diasSeleccionados.delete(dia);
+  const grupo = document.getElementById(`grupo_dia_${dia}`);
+  if (grupo) grupo.classList.toggle('visible', checked);
+  actualizarHintFecha();
+}
+
+function actualizarHintFecha() {
+  const hint = document.getElementById('fecha-hint');
+  if (diasSeleccionados.size === 0) {
+    hint.textContent = 'Selecciona los días primero.';
+  } else {
+    const nombres = Array.from(diasSeleccionados).sort().map(d => NOMBRE_DIA[d]).join(', ');
+    hint.textContent = `La primera clase debe ser uno de: ${nombres}.`;
+  }
+}
+
+document.getElementById('fecha_inicio').addEventListener('change', function() {
+  if (diasSeleccionados.size === 0) {
+    alert('Primero elige los días en que quieres venir.');
+    this.value = '';
+    return;
+  }
+  const fecha = this.value;
+  if (!fecha) return;
+  const jsDay = new Date(fecha + 'T12:00:00').getDay();
+  const pyDay = jsDay === 0 ? 6 : jsDay - 1;
+  if (!diasSeleccionados.has(pyDay)) {
+    const nombres = Array.from(diasSeleccionados).sort().map(d => NOMBRE_DIA[d]).join(', ');
+    alert(`La primera clase debe ser uno de los días elegidos: ${nombres}.`);
+    this.value = '';
+  }
+});
+
+actualizarHintFecha();
+
+// ── Validación feriados ──
+const FERIADOS = {{ feriados_json|safe }};
+const MES_ES = {0:'enero',1:'febrero',2:'marzo',3:'abril',4:'mayo',5:'junio',
+                6:'julio',7:'agosto',8:'septiembre',9:'octubre',10:'noviembre',11:'diciembre'};
+
+function siguienteDiaHabil(fechaStr) {
+    let d = new Date(fechaStr + 'T12:00:00');
+    d.setDate(d.getDate() + 1);
+    while (true) {
+        const iso = d.toISOString().split('T')[0];
+        const jsDay = d.getDay();
+        if (jsDay !== 0 && !FERIADOS.includes(iso)) return iso;
+        d.setDate(d.getDate() + 1);
+    }
+}
+
+function formatFechaES(fechaStr) {
+    const d = new Date(fechaStr + 'T12:00:00');
+    return `${d.getDate()} de ${MES_ES[d.getMonth()]} de ${d.getFullYear()}`;
+}
+
+const avisoFeriado = document.getElementById('aviso-feriado');
+const inputFechaOrig = document.getElementById('fecha_inicio');
+
+inputFechaOrig.addEventListener('change', function() {
+    const fecha = this.value;
+    if (!fecha) { avisoFeriado.classList.remove('visible'); return; }
+    if (FERIADOS.includes(fecha)) {
+        const siguiente = siguienteDiaHabil(fecha);
+        avisoFeriado.innerHTML = `⚠️ Ese día de inicio es <strong>feriado</strong>. El siguiente día hábil es <strong>${formatFechaES(siguiente)}</strong>.`;
+        avisoFeriado.classList.add('visible');
+    } else {
+        avisoFeriado.classList.remove('visible');
+    }
+});
+</script>
+{% endblock %}
