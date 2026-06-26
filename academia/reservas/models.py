@@ -162,6 +162,7 @@ class Pack(models.Model):
     hora_dia2 = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Hora día 2')
     hora_dia3 = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Hora día 3')
     hora_dia4 = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Hora día 4')
+    hora_dia5 = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Hora día 5')
 
     # Para productos de una sola hora (SUELTA, PRUEBA, BB, PRIVADA)
     hora = models.PositiveSmallIntegerField(

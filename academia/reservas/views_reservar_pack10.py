@@ -217,8 +217,8 @@ def reservar_pack(request, tier):
 
         if not dias:
             errores.append('Selecciona al menos un día.')
-        elif len(dias) > 4:
-            errores.append('Puedes elegir máximo 4 días por semana.')
+        elif len(dias) > 5:
+            errores.append('Puedes elegir máximo 5 días por semana.')
 
         if dias and len(horas) < len(dias):
             errores.append('Selecciona la hora para cada día elegido.')
@@ -324,6 +324,7 @@ def reservar_pack_confirmar(request, tier):
             hora_dia2    = horas.get(dias[1]) if len(dias) > 1 else None,
             hora_dia3    = horas.get(dias[2]) if len(dias) > 2 else None,
             hora_dia4    = horas.get(dias[3]) if len(dias) > 3 else None,
+            hora_dia5    = horas.get(dias[4]) if len(dias) > 4 else None,
             fecha_inicio = pares[0][0],
             cantidad     = cantidad,
         )
@@ -640,6 +641,7 @@ def reservar_pack_reducido_confirmar(request):
             hora_dia2    = horas.get(dias[1]) if len(dias) > 1 else None,
             hora_dia3    = horas.get(dias[2]) if len(dias) > 2 else None,
             hora_dia4    = horas.get(dias[3]) if len(dias) > 3 else None,
+            hora_dia5    = horas.get(dias[4]) if len(dias) > 4 else None,
             fecha_inicio = pares[0][0],
             cantidad     = cantidad,
         )
