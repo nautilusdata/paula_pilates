@@ -149,7 +149,7 @@
   <div class="clase-card">
     <div class="eyebrow">Clase Privada · 1 a 1 con Paula</div>
     <div class="tipo-grande">{{ tipo_label }}</div>
-    <div class="detalle">{{ frecuencia_label }} · {{ hora }}:00 hrs</div>
+    <div class="detalle">{{ frecuencia_label }}</div>
     <span class="badge">{{ fecha_inicio|date:"d/m/Y" }} → {{ fecha_fin|date:"d/m/Y" }}</span>
   </div>
 
@@ -162,10 +162,6 @@
     <div class="resumen-fila">
       <span class="etiq">Frecuencia</span>
       <span class="valor">{{ frecuencia_label }}</span>
-    </div>
-    <div class="resumen-fila">
-      <span class="etiq">Horario fijo</span>
-      <span class="valor">{{ hora }}:00 hrs</span>
     </div>
     <div class="resumen-fila">
       <span class="etiq">Primera clase</span>
@@ -183,12 +179,12 @@
 
   <div class="timeline-titulo">Tus {{ cantidad }} clases programadas</div>
   <div class="timeline">
-    {% for num, fecha, label in fechas %}
+    {% for num, fecha, hora_ses, label in sesiones %}
     <div class="timeline-item {% if forloop.first %}primera{% elif forloop.last %}ultima{% endif %}">
       <div class="timeline-num">{{ num }}</div>
       <div class="timeline-fecha">
         {{ label }}
-        <span class="hora-tag">{{ hora }}:00</span>
+        <span class="hora-tag">{{ hora_ses }}:00</span>
       </div>
     </div>
     {% endfor %}
