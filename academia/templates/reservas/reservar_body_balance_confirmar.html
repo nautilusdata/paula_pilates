@@ -152,11 +152,7 @@
     <div class="eyebrow">Body Balance</div>
     <div class="tipo-grande">{{ tipo_label }}</div>
     <div class="detalle">
-      {% if es_full %}
-        Mar 20:00 · Jue 20:00 · Sáb 11:00
-      {% else %}
-        {{ fecha_inicio|date:"l" }} · {{ hora }}:00 hrs
-      {% endif %}
+      {% for num, fecha, hora, label in fechas|slice:":3" %}{{ label }}{% if not forloop.last %} · {% endif %}{% endfor %}{% if fechas|length > 3 %}…{% endif %}
     </div>
     <span class="badge">{{ fecha_inicio|date:"d/m/Y" }} → {{ fecha_fin|date:"d/m/Y" }}</span>
   </div>
