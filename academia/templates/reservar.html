@@ -174,17 +174,9 @@
     <a href="{% url 'reservar_body_balance' %}" class="btn-producto">
       <div class="info">
         <span class="titulo">Mensualidad Full</span>
-        <span class="subtitulo">3 veces por semana</span>
+        <span class="subtitulo">{{ precio_bb_full_sub|default:"3 veces por semana" }}</span>
       </div>
       <div class="precio">${{ precio_bb_full|floatformat:0 }}</div>
-    </a>
-
-    <a href="{% url 'reservar_body_balance' %}" class="btn-producto">
-      <div class="info">
-        <span class="titulo">Clase Semanal</span>
-        <span class="subtitulo">1 vez por semana</span>
-      </div>
-      <div class="precio">${{ precio_bb_semanal|floatformat:0 }}</div>
     </a>
 
   </div>

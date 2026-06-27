@@ -173,71 +173,26 @@
 
   <form method="POST" id="form-bb">
     {% csrf_token %}
+    <input type="hidden" name="tipo" value="BB_FULL">
 
-    <!-- TIPO -->
-    <div class="seccion-label">① ¿Qué modalidad quieres?</div>
-    <div class="tipo-opciones">
-      <input type="radio" name="tipo" id="tipo_full" value="BB_FULL"
-             class="tipo-opt" {% if sel_tipo == 'BB_FULL' %}checked{% endif %} required>
-      <label for="tipo_full" class="tipo-label">
-        <div class="tipo-info">
-          <span class="tipo-nombre">Mensualidad Full</span>
-          <span class="tipo-sub">{{ full_sub }}</span>
-        </div>
-        <span class="tipo-precio">$60.000</span>
-      </label>
-
-      <input type="radio" name="tipo" id="tipo_semanal" value="BB_SEMANAL"
-             class="tipo-opt" {% if sel_tipo == 'BB_SEMANAL' %}checked{% endif %}>
-      <label for="tipo_semanal" class="tipo-label">
-        <div class="tipo-info">
-          <span class="tipo-nombre">Clase Semanal</span>
-          <span class="tipo-sub">1 vez por semana · Elige el día</span>
-        </div>
-        <span class="tipo-precio">$15.000</span>
-      </label>
-    </div>
-
-    <!-- MENSUALIDAD FULL: info horarios + fecha inicio -->
-    <div class="seccion-full {% if sel_tipo == 'BB_FULL' %}visible{% endif %}" id="seccion-full">
-      <div class="seccion-label">② Horarios fijos</div>
-      <div class="horarios-full">
-        {% for slot in slots_bb %}
-        <div class="horario-full-fila">
-          <span class="dia">{{ slot.dia_nombre }}</span>
-          <span class="hora">{{ slot.hora }}:00 hrs</span>
-        </div>
-        {% endfor %}
+    <!-- Horarios fijos -->
+    <div class="seccion-label">① Horarios fijos</div>
+    <div class="horarios-full">
+      {% for slot in slots_bb %}
+      <div class="horario-full-fila">
+        <span class="dia">{{ slot.dia_nombre }}</span>
+        <span class="hora">{{ slot.hora }}:00 hrs</span>
       </div>
-      <div class="seccion-label">③ ¿Cuándo empiezas?</div>
-      <input type="date" name="fecha_full" id="fecha_full"
-             class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
-             value="{{ sel_fecha|default:'' }}">
-      <span class="fecha-hint" id="hint-full">Elige el primer martes, jueves o sábado desde el que quieres partir.</span>
-      <div class="aviso-feriado" id="aviso-feriado-full"></div>
+      {% endfor %}
     </div>
 
-    <!-- CLASE SEMANAL: elegir día + fecha -->
-    <div class="seccion-semanal {% if sel_tipo == 'BB_SEMANAL' %}visible{% endif %}" id="seccion-semanal">
-      <div class="seccion-label">② ¿Qué día de la semana?</div>
-      <div class="horarios-bb">
-        {% for slot in slots_bb %}
-        <input type="radio" name="dia_bb" id="dia_{{ slot.key }}" value="{{ slot.key }}"
-               class="dia-opt" {% if sel_dia_bb == slot.key %}checked{% endif %}>
-        <label for="dia_{{ slot.key }}" class="dia-label">
-          <span class="dia-nombre">{{ slot.dia_nombre }}</span>
-          <span class="dia-hora">{{ slot.hora }}:00 hrs</span>
-        </label>
-        {% endfor %}
-      </div>
-
-      <div class="seccion-label">③ ¿Cuándo es tu primera clase?</div>
-      <input type="date" name="fecha_semanal" id="fecha_semanal"
-             class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
-             value="{{ sel_fecha|default:'' }}">
-      <span class="fecha-hint" id="hint-semanal">Debe coincidir con el día elegido.</span>
-      <div class="aviso-feriado" id="aviso-feriado-semanal"></div>
-    </div>
+    <!-- Fecha inicio -->
+    <div class="seccion-label">② ¿Cuándo empiezas?</div>
+    <input type="date" name="fecha_full" id="fecha_full"
+           class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
+           value="{{ sel_fecha|default:'' }}" required>
+    <span class="fecha-hint" id="hint-full">Elige el primer {{ dias_nombres }} desde el que quieres partir.</span>
+    <div class="aviso-feriado" id="aviso-feriado-full"></div>
 
     <button type="submit" class="btn-continuar">Ver resumen →</button>
   </form>
@@ -247,34 +202,11 @@
 
 {% block extra_js %}
 <script>
-// Días activos leídos desde ConfiguracionHorario (sin hardcodeo)
-const DIAS_JS_FULL = {{ dias_js_full|safe }};          // ej: [2, 4, 6]
-const DIAS_JS_MAP  = {{ dias_js_map|safe }};           // ej: {"1": 2, "3": 4, "5": 6}
+const DIAS_JS_FULL = {{ dias_js_full|safe }};
 
-const seccionFull    = document.getElementById('seccion-full');
-const seccionSemanal = document.getElementById('seccion-semanal');
-const fechaFull      = document.getElementById('fecha_full');
-const fechaSemanal   = document.getElementById('fecha_semanal');
-
-// ── Mostrar/ocultar secciones según tipo ──
-document.querySelectorAll('input[name="tipo"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    if (radio.value === 'BB_FULL') {
-      seccionFull.classList.add('visible');
-      seccionSemanal.classList.remove('visible');
-      fechaSemanal.removeAttribute('required');
-      fechaFull.setAttribute('required', '');
-    } else {
-      seccionSemanal.classList.add('visible');
-      seccionFull.classList.remove('visible');
-      fechaFull.removeAttribute('required');
-      fechaSemanal.setAttribute('required', '');
-    }
-  });
-});
-
-// ── Validar fecha Full (solo días activos BDB) ──
+const fechaFull        = document.getElementById('fecha_full');
 const avisoFeriadoFull = document.getElementById('aviso-feriado-full');
+
 fechaFull.addEventListener('change', () => {
   const fecha = fechaFull.value;
   if (!fecha) return;
@@ -284,39 +216,6 @@ fechaFull.addEventListener('change', () => {
     alert('Para Mensualidad Full elige un día en que haya clases de Body Balance.');
     fechaFull.value = '';
     avisoFeriadoFull.classList.remove('visible');
-  }
-});
-
-// ── Validar fecha Semanal contra día elegido ──
-const avisoFeriadoSemanal = document.getElementById('aviso-feriado-semanal');
-fechaSemanal.addEventListener('change', () => {
-  const fecha  = fechaSemanal.value;
-  const diaOpt = document.querySelector('input[name="dia_bb"]:checked');
-  if (!fecha) return;
-  checkFeriadoBB(fechaSemanal, avisoFeriadoSemanal);
-  if (!diaOpt) { alert('Primero elige el día de la semana.'); fechaSemanal.value = ''; return; }
-  const diaEsperado = DIAS_JS_MAP[diaOpt.value];
-  const diaFecha    = new Date(fecha + 'T12:00:00').getDay();
-  if (diaFecha !== diaEsperado) {
-    alert('La fecha debe coincidir con el día elegido.');
-    fechaSemanal.value = '';
-  }
-});
-
-// ── Si cambia el día semanal, limpiar fecha ──
-document.querySelectorAll('input[name="dia_bb"]').forEach(radio => {
-  radio.addEventListener('change', () => { fechaSemanal.value = ''; });
-});
-
-// ── Restaurar sección al volver de error ──
-window.addEventListener('DOMContentLoaded', () => {
-  const selTipo = "{{ sel_tipo|default:'' }}";
-  if (selTipo === 'BB_FULL') {
-    seccionFull.classList.add('visible');
-    fechaFull.setAttribute('required', '');
-  } else if (selTipo === 'BB_SEMANAL') {
-    seccionSemanal.classList.add('visible');
-    fechaSemanal.setAttribute('required', '');
   }
 });
 
