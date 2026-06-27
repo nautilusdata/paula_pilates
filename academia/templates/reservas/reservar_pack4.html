@@ -75,8 +75,16 @@
   color: #555; background: #fff; transition: all .15s;
 }
 .hora-opt:checked + .hora-label { border-color: var(--verde); background: var(--verde); color: #fff; }
+.hora-label.sin-cupo { opacity: .4; cursor: not-allowed; text-decoration: line-through; }
+.hora-cupos { display: block; font-size: .62rem; font-weight: 400; margin-top: 2px; opacity: .75; }
 .hora-loading { text-align: center; color: #aaa; font-size: .78rem; padding: 10px 0; }
 .hora-vacio { text-align: center; color: #c0392b; font-size: .78rem; padding: 10px 0; }
+.aviso-feriado-bloque {
+  display: none; background: #fff9e6; border-left: 4px solid var(--amarillo);
+  padding: 10px 12px; border-radius: 8px;
+  font-size: .78rem; color: #856404; margin-bottom: 8px;
+}
+.aviso-feriado-bloque.visible { display: block; }
 
 .precio-badge {
   background: var(--verde-pale); border: 1px solid var(--verde-light);
@@ -142,6 +150,7 @@
              class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
              value="{% if i == '1' %}{{ sel_fecha_1|default:'' }}{% elif i == '2' %}{{ sel_fecha_2|default:'' }}{% elif i == '3' %}{{ sel_fecha_3|default:'' }}{% else %}{{ sel_fecha_4|default:'' }}{% endif %}"
              onchange="cargarHoras('{{ i }}')" required>
+      <div class="aviso-feriado-bloque" id="feriado_{{ i }}"></div>
       <div class="horas-grid" id="horas_{{ i }}">
         <div class="hora-loading">Elige una fecha primero</div>
       </div>
@@ -164,16 +173,60 @@
 
 {% block extra_js %}
 <script>
+const FERIADOS = {{ feriados_json|safe }};
+const MES_ES = {0:'enero',1:'febrero',2:'marzo',3:'abril',4:'mayo',5:'junio',
+                6:'julio',7:'agosto',8:'septiembre',9:'octubre',10:'noviembre',11:'diciembre'};
+
+function formatFecha(fechaStr) {
+  const d = new Date(fechaStr + 'T12:00:00');
+  return `${d.getDate()} de ${MES_ES[d.getMonth()]}`;
+}
+
+function siguienteDiaHabil(fechaStr) {
+  let d = new Date(fechaStr + 'T12:00:00');
+  d.setDate(d.getDate() + 1);
+  while (true) {
+    const iso = d.toISOString().split('T')[0];
+    const jsDay = d.getDay();
+    if (jsDay !== 0 && !FERIADOS.includes(iso)) return iso;
+    d.setDate(d.getDate() + 1);
+  }
+}
+
 async function cargarHoras(i) {
-  const fecha = document.getElementById(`fecha_${i}`).value;
-  const cont  = document.getElementById(`horas_${i}`);
-  const bloque = document.getElementById(`bloque-${i}`);
+  const inputFecha = document.getElementById(`fecha_${i}`);
+  const fecha      = inputFecha.value;
+  const cont       = document.getElementById(`horas_${i}`);
+  const bloque     = document.getElementById(`bloque-${i}`);
+  const avisoFer   = document.getElementById(`feriado_${i}`);
 
   if (!fecha) {
     cont.innerHTML = '<div class="hora-loading">Elige una fecha primero</div>';
+    avisoFer.classList.remove('visible');
     return;
   }
 
+  // Validar feriado
+  if (FERIADOS.includes(fecha)) {
+    const siguiente = siguienteDiaHabil(fecha);
+    avisoFer.innerHTML = `⚠️ Ese día es <strong>feriado</strong>. El siguiente día hábil es <strong>${formatFecha(siguiente)}</strong>.`;
+    avisoFer.classList.add('visible');
+    cont.innerHTML = '<div class="hora-vacio">No hay clases ese día — es feriado</div>';
+    bloque.classList.remove('completo');
+    return;
+  }
+
+  // Validar fin de semana
+  const jsDay = new Date(fecha + 'T12:00:00').getDay();
+  if (jsDay === 0 || jsDay === 6) {
+    avisoFer.innerHTML = '⚠️ No hay clases los fines de semana. Elige un día de lunes a viernes.';
+    avisoFer.classList.add('visible');
+    cont.innerHTML = '';
+    bloque.classList.remove('completo');
+    return;
+  }
+
+  avisoFer.classList.remove('visible');
   cont.innerHTML = '<div class="hora-loading">Cargando horas disponibles…</div>';
 
   try {
@@ -188,21 +241,27 @@ async function cargarHoras(i) {
 
     let html = '';
     data.horas.forEach(h => {
-      const disabled = h.disponible ? '' : 'disabled';
-      const opacity  = h.disponible ? '' : 'style="opacity:.35; pointer-events:none;"';
+      const sinCupo  = !h.disponible;
+      const disabled = sinCupo ? 'disabled' : '';
+      const clsLabel = sinCupo ? 'hora-label sin-cupo' : 'hora-label';
+      const cuposLabel = sinCupo
+        ? `<span class="hora-cupos">Sin cupo</span>`
+        : `<span class="hora-cupos">${h.cupos_min} cupo${h.cupos_min !== 1 ? 's' : ''}</span>`;
       html += `
-        <input type="radio" name="hora_${i}" id="h_${i}_${h.hora}" value="${h.hora}" class="hora-opt" ${disabled} onchange="marcarCompleto('${i}')">
-        <label for="h_${i}_${h.hora}" class="hora-label" ${opacity}>${h.label}</label>
+        <input type="radio" name="hora_${i}" id="h_${i}_${h.hora}" value="${h.hora}"
+               class="hora-opt" ${disabled} onchange="marcarCompleto('${i}')">
+        <label for="h_${i}_${h.hora}" class="${clsLabel}">${h.label}${cuposLabel}</label>
       `;
     });
     cont.innerHTML = html;
+
   } catch (e) {
     cont.innerHTML = '<div class="hora-vacio">Error cargando horas. Intenta de nuevo.</div>';
   }
 }
 
 function marcarCompleto(i) {
-  const bloque = document.getElementById(`bloque-${i}`);
+  const bloque  = document.getElementById(`bloque-${i}`);
   const elegido = document.querySelector(`input[name="hora_${i}"]:checked`);
   bloque.classList.toggle('completo', !!elegido);
 }

@@ -101,6 +101,21 @@
   transition: background .15s, transform .1s; text-align: center;
 }
 .btn-continuar:active { transform: scale(.98); background: #245200; }
+
+.cupos-prueba {
+  background: var(--verde-pale); border: 1px solid var(--verde-light);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: .82rem; color: var(--verde); font-weight: 600;
+  margin-bottom: 16px; display: none;
+}
+.cupos-prueba.visible { display: block; }
+.cupos-prueba.sin-cupo { background: #fff0f0; border-color: #e74c3c; color: #c0392b; }
+.aviso-feriado-prueba {
+  display: none; background: #fff9e6; border-left: 4px solid var(--amarillo);
+  padding: 10px 12px; border-radius: 8px;
+  font-size: .78rem; color: #856404; margin-bottom: 8px;
+}
+.aviso-feriado-prueba.visible { display: block; }
 </style>
 {% endblock %}
 
@@ -167,6 +182,8 @@
            min="{{ hoy|date:'Y-m-d' }}"
            value="{{ sel_fecha|default:'' }}" required>
     <span class="fecha-hint">Solo sábados — otros días serán rechazados.</span>
+    <div class="aviso-feriado-prueba" id="aviso-feriado"></div>
+    <div class="cupos-prueba" id="cupos-info"></div>
 
     <div class="precio-badge">
       <div class="det">
@@ -186,15 +203,69 @@
 
 {% block extra_js %}
 <script>
-const inputFecha = document.getElementById('fecha_inicio');
+const FERIADOS = {{ feriados_json|safe }};
+const MES_ES = {0:'enero',1:'febrero',2:'marzo',3:'abril',4:'mayo',5:'junio',
+                6:'julio',7:'agosto',8:'septiembre',9:'octubre',10:'noviembre',11:'diciembre'};
 
-inputFecha.addEventListener('change', () => {
+function formatFecha(fechaStr) {
+  const d = new Date(fechaStr + 'T12:00:00');
+  return `${d.getDate()} de ${MES_ES[d.getMonth()]}`;
+}
+
+function siguienteSabadoHabil(fechaStr) {
+  let d = new Date(fechaStr + 'T12:00:00');
+  d.setDate(d.getDate() + 7);
+  while (true) {
+    const iso = d.toISOString().split('T')[0];
+    if (d.getDay() === 6 && !FERIADOS.includes(iso)) return iso;
+    d.setDate(d.getDate() + 7);
+  }
+}
+
+const inputFecha  = document.getElementById('fecha_inicio');
+const avisoFer    = document.getElementById('aviso-feriado');
+const cuposInfo   = document.getElementById('cupos-info');
+
+inputFecha.addEventListener('change', async () => {
   const fecha = inputFecha.value;
+  avisoFer.classList.remove('visible');
+  cuposInfo.classList.remove('visible', 'sin-cupo');
+
   if (!fecha) return;
+
   const jsDate = new Date(fecha + 'T12:00:00');
+
+  // Solo sábados
   if (jsDate.getDay() !== 6) {
     alert('La clase de prueba es solo los sábados. Por favor elige un sábado.');
     inputFecha.value = '';
+    return;
+  }
+
+  // Feriado
+  if (FERIADOS.includes(fecha)) {
+    const siguiente = siguienteSabadoHabil(fecha);
+    avisoFer.innerHTML = `⚠️ Ese sábado es <strong>feriado</strong>. El siguiente sábado hábil es <strong>${formatFecha(siguiente)}</strong>.`;
+    avisoFer.classList.add('visible');
+    inputFecha.value = '';
+    return;
+  }
+
+  // Consultar cupos
+  try {
+    const resp = await fetch(`{% url 'horas_disponibles_ajax' %}?fecha=${fecha}`);
+    const data = await resp.json();
+    const horaInfo = data.horas?.find(h => h.hora === {{ hora_int }});
+
+    if (!horaInfo || !horaInfo.disponible) {
+      cuposInfo.textContent = '⚠️ No hay cupos disponibles ese sábado. Elige otro.';
+      cuposInfo.classList.add('visible', 'sin-cupo');
+    } else {
+      cuposInfo.textContent = `✓ Quedan ${horaInfo.cupos_min} cupo${horaInfo.cupos_min !== 1 ? 's' : ''} disponibles para ese sábado.`;
+      cuposInfo.classList.add('visible');
+    }
+  } catch (e) {
+    // Si falla el AJAX, no bloqueamos — el backend valida igual
   }
 });
 </script>

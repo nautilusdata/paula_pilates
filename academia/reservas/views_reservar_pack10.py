@@ -788,10 +788,18 @@ def reservar_clase_suelta_confirmar(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def reservar_clase_prueba(request):
+    import json
+    horas_test = horas_disponibles_por_tipo('TEST')
+    hora_int   = horas_test[0] if horas_test else 12
+    feriados   = feriados_punta_arenas()
     context = {
-        'horas':  [{'valor': h, 'label': f'{h:02d}:00'} for h in horas_disponibles_por_tipo('TEST')],
-        'precio': ConfiguracionPrecio.get('CLASE_PRUEBA', 15_000),
-        'hoy':    date.today(),
+        'horas':         [{'valor': h, 'label': f'{h:02d}:00'} for h in horas_test],
+        'hora':          f'{hora_int:02d}:00',
+        'hora_int':      hora_int,
+        'duracion':      '60 min',
+        'precio':        ConfiguracionPrecio.get('CLASE_PRUEBA', 15_000),
+        'hoy':           date.today(),
+        'feriados_json': json.dumps([f.isoformat() for f in feriados]),
     }
 
     error_previo = request.session.pop('reserva_error', None)
