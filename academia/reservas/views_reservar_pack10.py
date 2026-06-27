@@ -129,7 +129,8 @@ def horas_disponibles_ajax(request):
             return JsonResponse({'error': 'Fecha inválida'}, status=400)
 
         result = []
-        for h in horas_disponibles_por_tipo('PL'):
+        tipo = request.GET.get('tipo', 'PL')
+        for h in horas_disponibles_por_tipo(tipo, dia=fecha.weekday()):
             cupo = Sesion.cupos_disponibles(fecha, h)
             result.append({
                 'hora':       h,

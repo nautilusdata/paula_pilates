@@ -253,7 +253,7 @@ inputFecha.addEventListener('change', async () => {
 
   // Consultar cupos
   try {
-    const resp = await fetch(`{% url 'horas_disponibles_ajax' %}?fecha=${fecha}`);
+    const resp = await fetch(`{% url 'horas_disponibles_ajax' %}?fecha=${fecha}&tipo=TEST`);
     const data = await resp.json();
     const horaInfo = data.horas?.find(h => h.hora === {{ hora_int }});
 
