@@ -794,7 +794,7 @@ def reservar_clase_prueba(request):
     feriados   = feriados_punta_arenas()
     context = {
         'horas':         [{'valor': h, 'label': f'{h:02d}:00'} for h in horas_test],
-        'hora':          f'{hora_int:02d}:00',
+        'hora':          f'{hora_int:02d}:30',
         'hora_int':      hora_int,
         'duracion':      '60 min',
         'precio':        ConfiguracionPrecio.get('CLASE_PRUEBA', 15_000),
