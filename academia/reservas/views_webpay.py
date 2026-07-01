@@ -220,14 +220,29 @@ def webpay_iniciar(request, pack_id):
 # ── Retorno de Webpay ─────────────────────────────────────────────────────────
 
 def webpay_retorno(request):
-    tbk_token = request.POST.get('TBK_TOKEN') or request.GET.get('TBK_TOKEN')
-    token_ws  = request.POST.get('token_ws')  or request.GET.get('token_ws')
+    tbk_token     = request.POST.get('TBK_TOKEN')     or request.GET.get('TBK_TOKEN')
+    token_ws      = request.POST.get('token_ws')      or request.GET.get('token_ws')
+    tbk_id_sesion = request.POST.get('TBK_ID_SESION') or request.GET.get('TBK_ID_SESION')
 
-    if tbk_token and not token_ws:
-        logger.warning("WEBPAY abandono/timeout TBK_TOKEN=%s", tbk_token[:8])
-        messages.warning(request, 'Cancelaste el pago o la sesión expiró. Puedes intentarlo cuando quieras.')
+    # ── Caso 1: Error en formulario — llegan token_ws + TBK_TOKEN juntos ─────
+    if tbk_token and token_ws:
+        logger.warning("WEBPAY error formulario token_ws=%s TBK_TOKEN=%s", token_ws[:8], tbk_token[:8])
+        messages.warning(request, 'Hubo un error en el formulario de pago. Puedes intentarlo nuevamente.')
         return redirect('mis_clases')
 
+    # ── Caso 2: Timeout — llega solo TBK_ID_SESION, sin tokens ──────────────
+    if tbk_id_sesion and not tbk_token and not token_ws:
+        logger.warning("WEBPAY timeout sesión=%s", tbk_id_sesion)
+        messages.warning(request, 'Tu sesión de pago expiró. Puedes intentarlo cuando quieras.')
+        return redirect('mis_clases')
+
+    # ── Caso 3: Abandono/cancelación — solo TBK_TOKEN ────────────────────────
+    if tbk_token and not token_ws:
+        logger.warning("WEBPAY abandono TBK_TOKEN=%s", tbk_token[:8])
+        messages.warning(request, 'Cancelaste el pago. Puedes intentarlo cuando quieras.')
+        return redirect('mis_clases')
+
+    # ── Caso normal: token_ws → verificar pago ────────────────────────────────
     if not token_ws:
         logger.error("WEBPAY retorno sin token_ws ni TBK_TOKEN")
         messages.error(request, 'No se recibió confirmación de Webpay.')
@@ -289,15 +304,15 @@ def webpay_retorno(request):
             'NC': 'Crédito N cuotas sin interés', 'VP': 'Prepago',
         }
         return render(request, 'reservas/webpay_voucher.html', {
-            'aprobado':        True,
-            'pack':            pack,
-            'buy_order':       buy_order,
-            'amount':          data.get('amount'),
+            'aprobado':           True,
+            'pack':               pack,
+            'buy_order':          buy_order,
+            'amount':             data.get('amount'),
             'authorization_code': data.get('authorization_code'),
             'transaction_date':   data.get('transaction_date'),
-            'payment_type':    payment_type_labels.get(payment_type_code, payment_type_code),
-            'installments':    data.get('installments_number', 0),
-            'card_number':     data.get('card_detail', {}).get('card_number', '****'),
+            'payment_type':       payment_type_labels.get(payment_type_code, payment_type_code),
+            'installments':       data.get('installments_number', 0),
+            'card_number':        data.get('card_detail', {}).get('card_number', '****'),
         })
 
     # ── Pago rechazado ────────────────────────────────────────────────────────
@@ -310,9 +325,9 @@ def webpay_retorno(request):
         + f"\U0001f534 response_code: {response_code}"
     )
     return render(request, 'reservas/webpay_voucher.html', {
-        'aprobado':    False,
-        'pack':        pack,
-        'buy_order':   buy_order,
+        'aprobado':      False,
+        'pack':          pack,
+        'buy_order':     buy_order,
         'response_code': response_code,
     })
 
