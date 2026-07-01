@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Reglamento - Pilates Paula{% endblock %}
-
 {% block extra_head %}
 <style>
   .reglamento-container {
@@ -10,7 +9,6 @@
     margin: 40px auto 80px;
     font-family: 'Poppins', sans-serif;
   }
-
   .reglamento-container h2 {
     color: #2f6300;
     font-size: 1.4rem;
@@ -18,20 +16,22 @@
     border-bottom: 2px solid #d4eac8;
     padding-bottom: 10px;
   }
-
+  .reglamento-container h3 {
+    color: #2f6300;
+    font-size: 1.05rem;
+    margin: 24px 0 10px;
+  }
   .reglamento-container p {
     line-height: 1.8;
     color: #333;
     font-size: .95rem;
     margin-bottom: 12px;
   }
-
   .reglamento-container ul {
     list-style: none;
     padding: 0;
     margin: 0 0 24px;
   }
-
   .reglamento-container ul li {
     padding: 10px 0;
     border-bottom: 1px solid #eee;
@@ -39,21 +39,18 @@
     font-size: .95rem;
     line-height: 1.6;
   }
-
   .reglamento-container ul li::before {
     content: "•";
     color: #408601;
     font-weight: 700;
     margin-right: 10px;
   }
-
   .reglamento-firma {
     margin-top: 32px;
     font-style: italic;
     color: #555;
     font-size: .9rem;
   }
-
   .reglamento-aviso {
     background-color: #f0f7ea;
     border-left: 4px solid #408601;
@@ -64,19 +61,22 @@
     color: #2f6300;
     font-size: .95rem;
   }
+  .seccion-divider {
+    border: none;
+    border-top: 2px solid #d4eac8;
+    margin: 48px 0;
+  }
 </style>
 {% endblock %}
-
 {% block content %}
 {% include '_menu_alumno.html' with activo='reglamento' %}
-
 <div class="reglamento-container">
-  <h2>Reglamento de la Academia</h2>
 
+  <!-- REGLAMENTO -->
+  <h2>Reglamento de la Academia</h2>
   <div class="reglamento-aviso">
     ** Exclusivamente damas **
   </div>
-
   <ul>
     <li>Se excluyen embarazadas, menores de 18 años, acompañantes y mascotas.</li>
     <li>La clases se pueden recuperar a través de la app, siempre respetando la fecha de término del pack.</li>
@@ -87,10 +87,68 @@
     <li>Este sistema de pagos y reservas, no considera la devolución de dineros.</li>
     <li>Los pagos se realizarán sólo a través de la app (no transferencias).</li>
   </ul>
-
   <p class="reglamento-firma">
     Paula Ayarza<br>
     Instructora de Pilates y Body Balance
   </p>
+
+  <hr class="seccion-divider">
+
+  <!-- POLÍTICA DE PRIVACIDAD -->
+  <h2>Política de Privacidad</h2>
+  <div class="reglamento-aviso">
+    Ley N° 19.628 sobre Protección de la Vida Privada
+  </div>
+
+  <h3>Responsable del tratamiento</h3>
+  <p>
+    Paula Ayarza, Instructora de Pilates y Body Balance, Academia de Pilates Paula Ayarza,
+    Punta Arenas, Chile.<br>
+    Contacto: <a href="mailto:pfayarza@gmail.com" style="color:#2f6300;">pfayarza@gmail.com</a>
+  </p>
+
+  <h3>Datos que recopilamos</h3>
+  <ul>
+    <li>Nombre completo y correo electrónico, proporcionados al crear tu cuenta.</li>
+    <li>Historial de reservas y asistencia a clases.</li>
+    <li>Información de pagos procesados a través de Webpay Plus (Transbank).</li>
+    <li>Correo electrónico ingresado voluntariamente en el newsletter del sitio.</li>
+  </ul>
+
+  <h3>Finalidad del tratamiento</h3>
+  <ul>
+    <li>Gestionar tu cuenta, reservas y asistencia a clases.</li>
+    <li>Procesar los pagos de forma segura a través de Transbank.</li>
+    <li>Enviar notificaciones relacionadas con tus clases y reservas.</li>
+    <li>Enviar el newsletter si te suscribiste voluntariamente.</li>
+  </ul>
+
+  <h3>Terceros con acceso a tus datos</h3>
+  <ul>
+    <li><strong>Transbank</strong> — procesa los pagos con tarjeta. Tiene su propia política de privacidad.</li>
+    <li><strong>Formspree</strong> — gestiona las suscripciones al newsletter.</li>
+    <li>No vendemos ni cedemos tus datos personales a terceros.</li>
+  </ul>
+
+  <h3>Tus derechos</h3>
+  <p>
+    De acuerdo a la Ley N° 19.628, tienes derecho a acceder, rectificar, cancelar u oponerte
+    al tratamiento de tus datos personales. Para ejercer estos derechos escríbenos a
+    <a href="mailto:pfayarza@gmail.com" style="color:#2f6300;">pfayarza@gmail.com</a>
+    y te responderemos a la brevedad.
+  </p>
+
+  <h3>Seguridad</h3>
+  <p>
+    Tus datos se almacenan en servidores seguros. Los pagos son procesados directamente
+    por Transbank — no almacenamos datos de tarjetas de crédito o débito.
+  </p>
+
+  <p class="reglamento-firma">
+    Paula Ayarza<br>
+    Instructora de Pilates y Body Balance<br>
+    Academia de Pilates Paula Ayarza — Punta Arenas, Chile
+  </p>
+
 </div>
 {% endblock %}
