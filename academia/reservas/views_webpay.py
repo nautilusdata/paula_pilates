@@ -27,9 +27,9 @@ def _session_id():
 
 def _tx():
     options = WebpayOptions(
-        IntegrationCommerceCodes.WEBPAY_PLUS,
-        IntegrationApiKeys.WEBPAY,
-        IntegrationType.TEST
+        os.getenv('WEBPAY_COMMERCE_CODE'),
+        os.getenv('WEBPAY_API_KEY'),
+        IntegrationType.LIVE
     )
     return Transaction(options)
 
