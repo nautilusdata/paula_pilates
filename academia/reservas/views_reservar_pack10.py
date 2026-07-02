@@ -954,7 +954,7 @@ def reservar_clase_privada(request):
         'dias_disponibles': dias_disponibles,
         'precio_pack10':    ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000),
         'precio_reducido':  ConfiguracionPrecio.get('PRIVADA_CLASE', 30_000),
-        'precio_por_clase': ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000) // 10,  # ← agrega esto
+        'precio_por_clase': ConfiguracionPrecio.get('PRIVADA_PACK10', 285_000) // 10,  # ← agregado esto
         'feriados_json':    json.dumps([f.isoformat() for f in feriados]),
     }
 
