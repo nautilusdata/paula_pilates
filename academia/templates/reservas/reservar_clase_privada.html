@@ -187,9 +187,9 @@
       <label for="tipo_reducido" class="tipo-label">
         <div>
           <span class="tipo-nombre">Pack Reducido (2–9 clases)</span>
-          <span class="tipo-sub">$30.000 por clase</span>
+          <span class="tipo-sub">${{ precio_reducido|floatformat:0 }} por clase</span>
         </div>
-        <span class="tipo-precio">$30k c/u</span>
+        <span class="tipo-precio">${{ precio_reducido|floatformat:0 }} c/u </span>
       </label>
     </div>
 
@@ -261,8 +261,9 @@
 {% block extra_js %}
 <script>
 const NOMBRE_DIA   = {0:'Lunes',1:'Martes',2:'Miércoles',3:'Jueves',4:'Viernes',5:'Sábado'};
-const PRECIO_PACK10   = {{ precio_pack10 }};
-const PRECIO_REDUCIDO = {{ precio_reducido }};
+const PRECIO_PACK10    = {{ precio_pack10 }};
+const PRECIO_POR_CLASE = {{ precio_por_clase }};
+const PRECIO_REDUCIDO  = {{ precio_reducido }};
 
 let diasSeleccionados = new Set({{ sel_dias|default:"[]"|safe }});
 let tipoActual = "{{ sel_tipo|default:'' }}";
@@ -276,12 +277,12 @@ const cantidadWrap = document.getElementById('cantidad-wrap');
 
 function actualizarPrecio() {
   if (tipoActual === 'PRIVADA10') {
-    precioTotal.textContent   = '$285.000';
-    precioDetalle.textContent = '10 clases · $28.500 c/u';
+    precioTotal.textContent   = '$' + PRECIO_PACK10.toLocaleString('es-CL');
+    precioDetalle.textContent = '10 clases · $' + PRECIO_POR_CLASE.toLocaleString('es-CL') + ' c/u';
   } else {
     const n = parseInt(cantidadVal.value);
     precioTotal.textContent   = '$' + (n * PRECIO_REDUCIDO).toLocaleString('es-CL');
-    precioDetalle.textContent = `${n} clase${n > 1 ? 's' : ''} · $30.000 c/u`;
+    precioDetalle.textContent = `${n} clase${n > 1 ? 's' : ''} · $` + PRECIO_REDUCIDO.toLocaleString('es-CL') + ' c/u';
   }
 }
 
