@@ -177,9 +177,9 @@
       <label for="tipo_pack10" class="tipo-label">
         <div>
           <span class="tipo-nombre">Pack 10 Clases</span>
-          <span class="tipo-sub">$28.500 por clase</span>
+          <span class="tipo-sub">${{ precio_por_clase|floatformat:0 }} por clase</span>
         </div>
-        <span class="tipo-precio">$285.000</span>
+        <span class="tipo-precio">${{ precio_pack10|floatformat:0 }}</span>
       </label>
 
       <input type="radio" name="tipo" id="tipo_reducido" value="PRIVADA_REDUCIDO"
@@ -208,8 +208,8 @@
     <!-- Precio dinámico -->
     <div class="precio-dinamico">
       <div class="det">
-        <strong id="precio-total">$285.000</strong>
-        <span id="precio-detalle">10 clases · $28.500 c/u</span>
+        <strong id="precio-total">${{ precio_pack10|floatformat:0 }}</strong>
+        <span id="precio-detalle">10 clases · ${{ precio_por_clase|floatformat:0 }} c/u</span>
       </div>
       <div style="font-size:.75rem; color:#999; text-align:right;">Pago único<br>por adelantado</div>
     </div>
@@ -261,8 +261,8 @@
 {% block extra_js %}
 <script>
 const NOMBRE_DIA   = {0:'Lunes',1:'Martes',2:'Miércoles',3:'Jueves',4:'Viernes',5:'Sábado'};
-const PRECIO_PACK10   = 285000;
-const PRECIO_REDUCIDO = 30000;
+const PRECIO_PACK10   = {{ precio_pack10 }};
+const PRECIO_REDUCIDO = {{ precio_reducido }};
 
 let diasSeleccionados = new Set({{ sel_dias|default:"[]"|safe }});
 let tipoActual = "{{ sel_tipo|default:'' }}";
