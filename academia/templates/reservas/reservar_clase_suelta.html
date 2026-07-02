@@ -122,7 +122,7 @@
   </div>
 
   <p class="pack-titulo">Clase Suelta</p>
-  <p class="pack-subtitulo">Pilates Reformer · Sesión única · $25.000</p>
+  <p class="pack-subtitulo">Pilates Reformer · Sesión única · ${{ precio|floatformat:0 }}</p>
 
   <div class="aviso">
     <strong>Disponible lunes a viernes.</strong> Solo necesitas elegir el día y la hora. Sin compromiso de continuidad.
@@ -156,7 +156,7 @@
     <!-- PRECIO -->
     <div class="precio-badge">
       <div class="det">
-        <strong>$25.000</strong>
+        <strong>${{ precio|floatformat:0 }}</strong>
         Sesión única · Pilates Reformer
       </div>
       <div style="font-size:.75rem; color:#999; text-align:right;">
