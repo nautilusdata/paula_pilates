@@ -275,6 +275,11 @@ def reservar_body_balance_confirmar(request):
         request.session['bb_pares']       = borrador['pares']
         request.session['webpay_pack_id'] = pack.pk
 
+        # Respaldo en DB — por si la sesión se pierde (ej: browser in-app de Instagram)
+        if tipo == 'BB_FULL':
+            pack.pares_json = borrador['pares']
+            pack.save(update_fields=['pares_json'])
+
         return render(request, 'reservas/webpay_redirect.html', {
             'url':   url,
             'token': token,

@@ -474,6 +474,10 @@ def reservar_pack4_confirmar(request):
         # Guardar pares ANTES de ir a Webpay — se consumen en _activar_pack tras pago aprobado
         request.session['pack4_pares'] = borrador['pares']
 
+        # Respaldo en DB — por si la sesión se pierde (ej: browser in-app de Instagram)
+        pack.pares_json = borrador['pares']
+        pack.save(update_fields=['pares_json'])
+
         data = crear_transaccion(pack, return_url)
         token = data.get('token')
         url   = data.get('url')

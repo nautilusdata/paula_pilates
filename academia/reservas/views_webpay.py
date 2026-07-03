@@ -141,6 +141,12 @@ def _activar_pack(pack: Pack, request=None):
                 from datetime import date as _date
                 pares = [(_date.fromisoformat(f), h) for f, h in raw]
 
+        # Fallback — si la sesión se perdió (browser in-app), buscar en DB
+        if pares is None and pack.pares_json:
+            from datetime import date as _date
+            logger.warning("PACK4 pack=%s — sesión perdida, recuperando pares desde DB", pack.pk)
+            pares = [(_date.fromisoformat(f), h) for f, h in pack.pares_json]
+
         if pares is None:
             raise ValueError(
                 f'No se encontraron los pares de sesiones para PACK4 pack={pack.pk}. '
@@ -171,6 +177,12 @@ def _activar_pack(pack: Pack, request=None):
             if raw:
                 from datetime import date as _date
                 pares = [(_date.fromisoformat(f), h) for f, h in raw]
+
+        # Fallback — si la sesión se perdió (browser in-app), buscar en DB
+        if pares is None and pack.pares_json:
+            from datetime import date as _date
+            logger.warning("BB_FULL pack=%s — sesión perdida, recuperando pares desde DB", pack.pk)
+            pares = [(_date.fromisoformat(f), h) for f, h in pack.pares_json]
 
         if pares is None:
             pares = generar_fechas_bb_full(pack.fecha_inicio)

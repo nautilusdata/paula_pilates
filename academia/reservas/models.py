@@ -176,6 +176,7 @@ class Pack(models.Model):
     precio_total = models.PositiveIntegerField(editable=False)
     estado       = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='PENDIENTE_PAGO')
     creado_en    = models.DateTimeField(auto_now_add=True)
+    pares_json   = models.JSONField(null=True, blank=True, help_text='Pares fecha/hora para PACK4 y BB_FULL — respaldo si la sesión se pierde')
 
     def calcular_precio(self):
         PRECIOS_TIER_DEFAULT = {
