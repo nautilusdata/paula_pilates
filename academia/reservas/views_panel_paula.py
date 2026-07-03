@@ -466,14 +466,25 @@ def bulk_reschedule_preview(request):
     return render(request, 'reservas/bulk_reschedule_preview.html', context)
 
 
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+
 def limpiar_packs_view(request):
     token = request.headers.get('X-Scheduler-Token')
-    if token != 'paula-pilates-scheduler-2026':
+    token_esperado = os.environ.get('SCHEDULER_TOKEN')
+
+    if not token_esperado or token != token_esperado:
+        logger.warning('limpiar_packs_view: intento no autorizado')
         return JsonResponse({'error': 'No autorizado'}, status=401)
+
     umbral = timezone.now() - timedelta(hours=24)
-    packs  = Pack.objects.filter(estado='PENDIENTE_PAGO', creado_en__lt=umbral)
-    total  = packs.count()
+    packs = Pack.objects.filter(estado='PENDIENTE_PAGO', creado_en__lt=umbral)
+    total = packs.count()
     packs.delete()
+
+    logger.info(f'limpiar_packs_view: {total} packs eliminados')
     return JsonResponse({'eliminados': total})
 
 
