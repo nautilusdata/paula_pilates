@@ -207,6 +207,22 @@ def panel_precios(request):
             if nuevo and nuevo.isdigit():
                 precio.valor = int(nuevo)
                 precio.save()
+
+        reformers = request.POST.get('reformers')
+        cap_bb    = request.POST.get('cap_bb')
+
+        if reformers and reformers.isdigit():
+            obj, _ = ConfiguracionGeneral.objects.get_or_create(
+                clave='CAPACIDAD_REFORMERS', defaults={'valor': 7})
+            obj.valor = int(reformers)
+            obj.save()
+
+        if cap_bb and cap_bb.isdigit():
+            obj, _ = ConfiguracionGeneral.objects.get_or_create(
+                clave='CAPACIDAD_BODY_BALANCE', defaults={'valor': 20})
+            obj.valor = int(cap_bb)
+            obj.save()
+
         messages.success(request, 'Precios actualizados correctamente.')
         return redirect('panel_precios')
 
