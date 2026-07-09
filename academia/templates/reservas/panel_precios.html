@@ -189,6 +189,7 @@ body { font-family: var(--font); }
       </div>
     </div>
     {% endif %}
+    <!-- PRIVADA_CLASE eliminado por Paula — no hay pack reducido privado
     {% if precio.clave == 'PRIVADA_CLASE' %}
     <div class="precio-card">
       <div class="desc">Pack Reducido Privado <small>Precio por clase</small></div>
@@ -196,7 +197,7 @@ body { font-family: var(--font); }
         <input type="number" name="precio_{{ precio.clave }}" value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
       </div>
     </div>
-    {% endif %}
+    {% endif %} -->
     {% endfor %}
 
     <!-- Body Balance -->
