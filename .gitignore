@@ -34,3 +34,5 @@ Thumbs.db
 
 envvars.yaml
 commits.txt
+env.yaml
+*.gpg
