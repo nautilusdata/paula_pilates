@@ -139,11 +139,9 @@ placeholder="Tu contraseña">
 <p class="field-error">{{ form.password.errors.0 }}</p>
 {% endif %}
 </div>
-<!-- ¿Olvidaste tu contraseña? — desactivado hasta configurar SMTP
 <div class="login-forgot">
-    <a href="{% url 'account_reset_password' %}">¿Olvidaste tu contraseña?</a>
+    <a href="{% url 'account_reset_password' %}">¿Olvidaste o quieres cambiar tu contraseña?</a>
 </div>
--->
 <button type="submit" class="login-btn">Ingresar</button>
 </form>
 <!-- Registro desactivado temporalmente
