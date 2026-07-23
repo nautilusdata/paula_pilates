@@ -621,6 +621,9 @@ def reprogramar_sesion_confirmar(request, sesion_id):
         f'Clase de {sesion.pack.alumna.get_full_name()} '
         f'movida al {nueva_fecha.strftime("%d/%m/%Y")} {nueva_hora:02d}:00.'
     )
+    es_gestora = request.user.groups.filter(name='alumna_gestora').exists()
+    if es_gestora:
+        return redirect('mis_clases')
     return redirect('panel_principal')
 
 
