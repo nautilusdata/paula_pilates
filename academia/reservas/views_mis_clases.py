@@ -137,5 +137,6 @@ def mis_clases(request):
         'packs_data':     packs_data,
         'proxima_global': proxima_global,
         'hoy':            hoy,
+        'es_gestora':     request.user.groups.filter(name='alumna_gestora').exists(),
     }
     return render(request, 'reservas/mis_clases.html', context)
