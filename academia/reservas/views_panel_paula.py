@@ -11,6 +11,7 @@ from .models import (
 from django.utils import timezone
 from django.http import JsonResponse
 from django.db import transaction
+from django.core.exceptions import PermissionDenied
 
 def es_staff(user):
     return user.is_staff
@@ -491,11 +492,15 @@ def limpiar_packs_view(request):
 # ── Reprogramar sesión ────────────────────────────────────────────────────────
 
 @login_required
-@user_passes_test(es_staff, login_url='/')
 def reprogramar_sesion(request, sesion_id):
     """Página liviana — solo datepicker. Las horas se cargan vía AJAX."""
     from .models import horas_disponibles_por_tipo
+    es_gestora = request.user.groups.filter(name='alumna_gestora').exists()
+    if not request.user.is_staff and not es_gestora:
+        raise PermissionDenied
     sesion = get_object_or_404(Sesion, pk=sesion_id)
+    if es_gestora and sesion.pack.alumna != request.user:
+        raise PermissionDenied
     context = {
         'sesion': sesion,
         'hoy':    date.today(),
