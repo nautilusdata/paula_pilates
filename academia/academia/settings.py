@@ -138,6 +138,7 @@ ACCOUNT_SIGNUP_FIELDS = [
     'password2*',
 ]
 ACCOUNT_EMAIL_VERIFICATION = 'none'  # por mientras, lo habilitamos después
+ACCOUNT_ADAPTER = 'reservas.account_adapter.WhitelistEmailAdapter'
 
 LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_ON_GET = True
