@@ -366,7 +366,11 @@
             {% elif s.sesion.estado == 'RECUPERADA' %}
               <span class="sesion-badge badge-completada">✓ Recuperada</span>
             {% else %}
-              <span class="sesion-badge badge-programada">—</span>
+              {% if not s.pasada and request.user.groups.filter(name='alumna_gestora').exists %}
+                <a href="{% url 'reprogramar_sesion' s.sesion.pk %}" class="sesion-badge badge-reprog">Cambiar →</a>
+              {% else %}
+                <span class="sesion-badge badge-programada">—</span>
+              {% endif %}
             {% endif %}
 
           </div>
