@@ -348,7 +348,11 @@
             </div>
 
             {% if s.es_proxima %}
-              <span class="sesion-badge badge-proxima">Próxima</span>
+              {% if es_gestora %}
+                <a href="{% url 'reprogramar_sesion' s.sesion.pk %}" class="sesion-badge badge-proxima">Cambiar →</a>
+              {% else %}
+                <span class="sesion-badge badge-proxima">Próxima</span>
+              {% endif %}
             {% elif s.sesion.estado == 'COMPLETADA' %}
               <span class="sesion-badge badge-completada">✓ Hecha</span>
             {% elif s.sesion.estado == 'CONGELADA' %}

@@ -520,11 +520,15 @@ TIPO_PACK_A_SLOT = {
 
 
 @login_required
-@user_passes_test(es_staff, login_url='/')
 def reprogramar_horas_ajax(request, sesion_id):
     """AJAX — retorna horas disponibles para la fecha elegida, filtradas por tipo de producto."""
     from .models import horas_disponibles_por_tipo
-    sesion    = get_object_or_404(Sesion, pk=sesion_id)
+    es_gestora = request.user.groups.filter(name='alumna_gestora').exists()
+    if not request.user.is_staff and not es_gestora:
+        raise PermissionDenied
+    sesion = get_object_or_404(Sesion, pk=sesion_id)
+    if es_gestora and sesion.pack.alumna != request.user:
+        raise PermissionDenied
     fecha_str = request.GET.get('fecha')
     if not fecha_str:
         return JsonResponse({'error': 'Fecha requerida'}, status=400)
