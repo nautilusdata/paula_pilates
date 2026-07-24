@@ -578,11 +578,16 @@ def reprogramar_horas_ajax(request, sesion_id):
 
 
 @login_required
-@user_passes_test(es_staff, login_url='/')
 @require_POST
 def reprogramar_sesion_confirmar(request, sesion_id):
     """Ejecuta el movimiento de la sesión al nuevo slot."""
-    sesion    = get_object_or_404(Sesion, pk=sesion_id)
+    es_gestora = request.user.groups.filter(name='alumna_gestora').exists()
+    if not request.user.is_staff and not es_gestora:
+        raise PermissionDenied
+    sesion = get_object_or_404(Sesion, pk=sesion_id)
+    if es_gestora and sesion.pack.alumna != request.user:
+        raise PermissionDenied
+
     fecha_str = request.POST.get('nueva_fecha')
     hora_str  = request.POST.get('nueva_hora')
 
@@ -593,12 +598,10 @@ def reprogramar_sesion_confirmar(request, sesion_id):
         messages.error(request, 'Datos inválidos.')
         return redirect('reprogramar_sesion', sesion_id=sesion_id)
 
-    # Verificar cupo general
     if Sesion.cupos_disponibles(nueva_fecha, nueva_hora) < 1:
         messages.error(request, 'Ese slot ya no tiene cupo. Elige otro.')
         return redirect('reprogramar_sesion', sesion_id=sesion_id)
 
-    # Verificar que la alumna no tenga otra clase en ese slot
     ya_tiene = Sesion.objects.filter(
         pack__alumna=sesion.pack.alumna,
         pack__estado__in=['ACTIVO', 'PENDIENTE_PAGO'],
@@ -611,10 +614,8 @@ def reprogramar_sesion_confirmar(request, sesion_id):
         messages.error(request, f'{sesion.pack.alumna.first_name} ya tiene una clase en ese horario. Elige otro.')
         return redirect('reprogramar_sesion', sesion_id=sesion_id)
 
-    # Mover la sesión
     sesion.fecha = nueva_fecha
     sesion.hora  = nueva_hora
-    print(f"DEBUG nueva_fecha={nueva_fecha} nueva_hora={nueva_hora}")
     sesion.save(update_fields=['fecha', 'hora'])
 
     messages.success(
@@ -622,7 +623,6 @@ def reprogramar_sesion_confirmar(request, sesion_id):
         f'Clase de {sesion.pack.alumna.get_full_name()} '
         f'movida al {nueva_fecha.strftime("%d/%m/%Y")} {nueva_hora:02d}:00.'
     )
-    es_gestora = request.user.groups.filter(name='alumna_gestora').exists()
     if es_gestora:
         return redirect('mis_clases')
     return redirect('panel_principal')
