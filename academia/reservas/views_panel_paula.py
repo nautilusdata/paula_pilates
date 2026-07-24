@@ -614,6 +614,7 @@ def reprogramar_sesion_confirmar(request, sesion_id):
     # Mover la sesión
     sesion.fecha = nueva_fecha
     sesion.hora  = nueva_hora
+    print(f"DEBUG nueva_fecha={nueva_fecha} nueva_hora={nueva_hora}")
     sesion.save(update_fields=['fecha', 'hora'])
 
     messages.success(
