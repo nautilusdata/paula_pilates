@@ -504,6 +504,7 @@ def reprogramar_sesion(request, sesion_id):
     context = {
         'sesion': sesion,
         'hoy':    date.today(),
+        'es_gestora': es_gestora,
     }
     return render(request, 'reservas/reprogramar_sesion.html', context)
 

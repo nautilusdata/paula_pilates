@@ -63,7 +63,11 @@ input[type=date]:focus { outline: none; border-color: var(--verde); }
 
 {% block content %}
 <div class="wrap">
-  <a href="{% url 'panel_principal' %}" class="back">← Volver a Agenda</a>
+  {% if es_gestora %}
+    <a href="{% url 'mis_clases' %}" class="back">← Volver a Mis Clases</a>
+  {% else %}
+    <a href="{% url 'panel_principal' %}" class="back">← Volver a Agenda</a>
+  {% endif %}
 
   {% if messages %}
     {% for message in messages %}
@@ -83,8 +87,12 @@ input[type=date]:focus { outline: none; border-color: var(--verde); }
     </div>
   </div>
 
-  <label for="nueva-fecha">① Elige la nueva fecha</label>
-  <input type="date" id="nueva-fecha" min="{{ hoy|date:'Y-m-d' }}">
+  {% if es_gestora %}
+    <input type="hidden" id="nueva-fecha" value="{{ hoy|date:'Y-m-d' }}">
+  {% else %}
+    <label for="nueva-fecha">① Elige la nueva fecha</label>
+    <input type="date" id="nueva-fecha" min="{{ hoy|date:'Y-m-d' }}">
+  {% endif %}
 
   <div class="slots-wrap" id="slots-wrap" style="display:none;">
     <div class="slots-titulo">② Elige la hora</div>
@@ -179,5 +187,8 @@ function elegir(fecha, hora, label, cupos) {
 function cerrarModal() {
   document.getElementById('modal').classList.remove('visible');
 }
+{% if es_gestora %}
+document.getElementById('nueva-fecha').dispatchEvent(new Event('change'));
+{% endif %}
 </script>
 {% endblock %}
