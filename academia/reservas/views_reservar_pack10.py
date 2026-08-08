@@ -317,6 +317,13 @@ def reservar_pack_confirmar(request, tier):
             request.session['reserva_error'] = 'Un horario se ocupó mientras confirmabas. Intenta de nuevo.'
             return redirect('reservar_pack', tier=tier)
 
+        # Verificar colisiones propias
+        colisiones = detectar_overlap(request.user, pares)
+        if colisiones:
+            dias_str = ', '.join(f"{fmt_fecha(f)} {h:02d}:00" for f, h in colisiones[:3])
+            request.session['reserva_error'] = f'Ya tienes una clase programada en: {dias_str}. Elige otro horario.'
+            return redirect('reservar_pack', tier=tier)
+
         pack = Pack.objects.create(
             alumna       = request.user,
             tipo         = tier,
