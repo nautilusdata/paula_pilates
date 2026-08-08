@@ -218,7 +218,7 @@ async function cargarHoras(i) {
 
   // Validar fin de semana
   const jsDay = new Date(fecha + 'T12:00:00').getDay();
-  if (jsDay === 0 || jsDay === 6) {
+  if (jsDay === 0) {
     avisoFer.innerHTML = '⚠️ No hay clases los fines de semana. Elige un día de lunes a viernes.';
     avisoFer.classList.add('visible');
     cont.innerHTML = '';
