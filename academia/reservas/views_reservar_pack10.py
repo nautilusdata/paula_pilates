@@ -795,11 +795,16 @@ def reservar_clase_suelta_confirmar(request):
     return render(request, 'reservas/reservar_clase_suelta_confirmar.html', context)
 
 
-# ─── CLASE DE PRUEBA ──────────────────────────────────────────────────────────
+# ─── CLASE PRUEBA — DORMIDA 20260816 ───────────────────────────────────────────────────
+# Desactivada temporalmente por Paula — el botón del frontend está comentado.
+# Se deja el código funcional por si se reactiva en el futuro.
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def reservar_clase_prueba(request):
+
+    return redirect('reservar')  # DORMIDA — redirige al menú principal
+    
     import json
     horas_test = horas_disponibles_por_tipo('TEST')
     hora_int   = horas_test[0] if horas_test else 12
