@@ -212,6 +212,14 @@ body { font-family: var(--font); }
       </div>
     </div>
     {% endif %}
+    {% if precio.clave == 'BB_SEMANAL_2' %}
+    <div class="precio-card">
+      <div class="desc">2 veces por semana <small>Martes y Jueves · 30 días</small></div>
+      <div class="precio-input-wrap"><span>$</span>
+        <input type="number" name="precio_{{ precio.clave }}" value="{{ precio.valor }}" class="precio-input" min="0" step="1000">
+      </div>
+    </div>
+    {% endif %}
     {% endfor %}
 
     <!-- Configuración general -->

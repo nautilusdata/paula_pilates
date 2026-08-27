@@ -23,6 +23,7 @@ COLOR_TIPO = {
     'PRIVADA':   'pv',
     'BB_FULL':   'bb',
     'BB_SEMANAL':'bb',
+    'BB_SEMANAL_2':'bb',
     'PRUEBA':    'pr',
 }
 
@@ -516,6 +517,7 @@ TIPO_PACK_A_SLOT = {
     'PRIVADA':    'PV',
     'BB_FULL':    'BDB',
     'BB_SEMANAL': 'BDB',
+    'BB_SEMANAL_2': 'BDB',
     'PRUEBA':     'TEST',
 }
 
@@ -542,7 +544,7 @@ def reprogramar_horas_ajax(request, sesion_id):
     dia_semana = fecha.weekday()
     horas      = horas_disponibles_por_tipo(tipo_slot, dia=dia_semana)
     alumna     = sesion.pack.alumna
-    es_bb      = sesion.pack.tipo in ('BB_FULL', 'BB_SEMANAL')
+    es_bb = sesion.pack.tipo in ('BB_FULL', 'BB_SEMANAL', 'BB_SEMANAL_2')
 
     slots = []
     for h in horas:
@@ -552,7 +554,7 @@ def reprogramar_horas_ajax(request, sesion_id):
                 fecha=fecha,
                 hora=h,
                 estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
-                pack__tipo__in=['BB_FULL', 'BB_SEMANAL'],
+                pack__tipo__in=['BB_FULL', 'BB_SEMANAL', 'BB_SEMANAL_2'],
             ).count()
             cap   = ConfiguracionGeneral.get('CAPACIDAD_BODY_BALANCE', 20)
             cupos = max(cap - ocupados, 0)

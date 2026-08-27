@@ -136,6 +136,7 @@ class Pack(models.Model):
         ('PRIVADA',    'Clase Privada'),
         ('BB_FULL',    'Body Balance Mensualidad'),
         ('BB_SEMANAL', 'Body Balance Clase Semanal'),
+        ('BB_SEMANAL_2', 'Body Balance 2 veces por semana'),
     ]
 
     ESTADO_CHOICES = [
@@ -202,6 +203,8 @@ class Pack(models.Model):
             return ConfiguracionPrecio.get('BB_FULL', 60_000)
         if self.tipo == 'BB_SEMANAL':
             return ConfiguracionPrecio.get('BB_SEMANAL', 15_000)
+        if self.tipo == 'BB_SEMANAL_2':
+            return ConfiguracionPrecio.get('BB_SEMANAL_2', 55_000)
         return 0
 
     def clean(self):

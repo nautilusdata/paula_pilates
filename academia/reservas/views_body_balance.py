@@ -59,7 +59,7 @@ def cupos_bb(fecha: date, hora: int) -> int:
         fecha=fecha,
         hora=hora,
         estado__in=['PROGRAMADA', 'RECUPERAR', 'RECUPERADA'],
-        pack__tipo__in=['BB_FULL', 'BB_SEMANAL'],
+        pack__tipo__in=['BB_FULL', 'BB_SEMANAL', 'BB_SEMANAL_2'],
     ).count()
     return ConfiguracionGeneral.get('CAPACIDAD_BODY_BALANCE', 20) - ocupados
 
@@ -79,6 +79,28 @@ def generar_fechas_bb_full(fecha_inicio: date) -> list:
         if cursor.weekday() in dia_hora_bb and cursor not in feriados:
             hora = dia_hora_bb[cursor.weekday()]
             fechas.append((cursor, hora))
+        cursor += timedelta(days=1)
+
+    return fechas  # [(date, hora), ...]
+
+
+def generar_fechas_bb_semanal_2(fecha_inicio: date) -> list:
+    """
+    Genera pares (fecha, hora) para BB_SEMANAL_2 — Martes y Jueves durante 30 días.
+    La alumna elige la fecha de inicio (martes o jueves) y el sistema
+    genera todas las clases alternando Mar/Jue hasta completar 30 días.
+    """
+    dia_hora = get_dia_hora_bdb()
+    feriados = feriados_punta_arenas()
+    fechas   = []
+    cursor   = fecha_inicio
+    fin      = fecha_inicio + timedelta(days=30)
+
+    while cursor < fin:
+        if cursor.weekday() in (1, 3) and cursor not in feriados:
+            hora = dia_hora.get(cursor.weekday())
+            if hora:
+                fechas.append((cursor, hora))
         cursor += timedelta(days=1)
 
     return fechas  # [(date, hora), ...]
@@ -110,30 +132,33 @@ def reservar_body_balance(request):
     from .models import feriados_punta_arenas
     feriados = feriados_punta_arenas()
     context = {
-        'hoy':           hoy,
-        'slots_bb':      slots_bb,
-        'dias_nombres':  dias_nombres,
-        'dias_js_full':  dias_js_full,
-        'dias_js_map':   dias_js_map,
-        'full_sub':      full_sub,
-        'precio_full':   ConfiguracionPrecio.get('BB_FULL', 60_000),
-        'precio_semanal': ConfiguracionPrecio.get('BB_SEMANAL', 15_000),
-        'feriados_json': json.dumps([f.isoformat() for f in feriados]),
+        'hoy':              hoy,
+        'slots_bb':         slots_bb,
+        'dias_nombres':     dias_nombres,
+        'dias_js_full':     dias_js_full,
+        'dias_js_map':      dias_js_map,
+        'full_sub':         full_sub,
+        'precio_full':      ConfiguracionPrecio.get('BB_FULL', 60_000),
+        'precio_semanal':   ConfiguracionPrecio.get('BB_SEMANAL', 15_000),
+        'precio_semanal_2': ConfiguracionPrecio.get('BB_SEMANAL_2', 55_000),
+        'feriados_json':    json.dumps([f.isoformat() for f in feriados]),
     }
 
     if request.method == 'POST':
         tipo      = request.POST.get('tipo')
-        dia_key   = request.POST.get('dia_bb')   # ahora es str(dia) ej: '1', '3', '5'
+        dia_key   = request.POST.get('dia_bb')
 
         if tipo == 'BB_FULL':
             fecha_str = request.POST.get('fecha_full')
+        elif tipo == 'BB_SEMANAL_2':
+            fecha_str = request.POST.get('fecha_semanal_2')
         else:
             fecha_str = request.POST.get('fecha_semanal')
 
         errores = []
 
-        if tipo not in ('BB_FULL', 'BB_SEMANAL'):
-            errores.append('Debes elegir Mensualidad Full o Clase Semanal.')
+        if tipo not in ('BB_FULL', 'BB_SEMANAL', 'BB_SEMANAL_2'):
+            errores.append('Debes elegir una modalidad de Body Balance.')
 
         fecha_inicio = None
         if fecha_str:
@@ -164,6 +189,11 @@ def reservar_body_balance(request):
                         errores.append(
                             f'Para esa clase la fecha debe ser un {nombre_esp}.'
                         )
+            elif tipo == 'BB_SEMANAL_2':
+                if fecha_inicio.weekday() not in (1, 3):
+                    errores.append(
+                        'Para Body Balance 2 veces por semana debes partir un Martes o Jueves.'
+                    )
 
         if errores:
             context.update({
@@ -201,6 +231,18 @@ def reservar_body_balance(request):
                 'pares':        [[f.isoformat(), h] for f, h in pares],
                 'precio':       precio,
             }
+
+        elif tipo == 'BB_SEMANAL_2':
+            pares = generar_fechas_bb_semanal_2(fecha_inicio)
+            precio = ConfiguracionPrecio.get('BB_SEMANAL_2', 55_000)
+            request.session['bb_borrador'] = {
+                'tipo':         tipo,
+                'fecha_inicio': fecha_inicio.isoformat(),
+                'dia_bb':       None,
+                'pares':        [[f.isoformat(), h] for f, h in pares],
+                'precio':       precio,
+            }
+
         else:
             dia_int = int(dia_key)
             hora    = get_dia_hora_bdb()[dia_int]
@@ -230,9 +272,16 @@ def reservar_body_balance_confirmar(request):
     tipo   = borrador['tipo']
     fechas = [f for f, h in pares]
 
+    if tipo == 'BB_FULL':
+        tipo_label = 'Mensualidad Full'
+    elif tipo == 'BB_SEMANAL_2':
+        tipo_label = 'Body Balance 2 veces por semana'
+    else:
+        tipo_label = 'Clase Semanal'
+
     context = {
         'tipo':         tipo,
-        'tipo_label':   'Mensualidad Full' if tipo == 'BB_FULL' else 'Clase Semanal',
+        'tipo_label':   tipo_label,
         'fecha_inicio': fechas[0],
         'fecha_fin':    fechas[-1],
         'fechas':       [(i + 1, f, h, fmt_fecha_bb(f)) for i, (f, h) in enumerate(pares)],
@@ -241,7 +290,7 @@ def reservar_body_balance_confirmar(request):
     }
 
     if request.method == 'POST':
-        hora_pack = None if tipo == 'BB_FULL' else pares[0][1]
+        hora_pack = None if tipo in ('BB_FULL', 'BB_SEMANAL_2') else pares[0][1]
 
         # ── Chequeo de cupo antes de crear el pack ────────────────────────
         sin_cupo = [(f, h) for f, h in pares if cupos_bb(f, h) < 1]
@@ -276,7 +325,7 @@ def reservar_body_balance_confirmar(request):
         request.session['webpay_pack_id'] = pack.pk
 
         # Respaldo en DB — por si la sesión se pierde (ej: browser in-app de Instagram)
-        if tipo == 'BB_FULL':
+        if tipo in ('BB_FULL', 'BB_SEMANAL_2'):
             pack.pares_json = borrador['pares']
             pack.save(update_fields=['pares_json'])
 

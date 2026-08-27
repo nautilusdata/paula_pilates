@@ -107,9 +107,11 @@
 .fecha-field:focus { outline: none; border-color: var(--verde); }
 .fecha-hint { font-size: .75rem; color: #999; margin-bottom: 22px; display: block; }
 
-/* Sección semanal oculta por defecto */
-.seccion-semanal { display: none; }
+/* Secciones ocultas por defecto */
+.seccion-semanal   { display: none; }
 .seccion-semanal.visible { display: block; }
+.seccion-semanal-2 { display: none; }
+.seccion-semanal-2.visible { display: block; }
 .seccion-full { display: none; }
 .seccion-full.visible { display: block; }
 
@@ -173,26 +175,88 @@
 
   <form method="POST" id="form-bb">
     {% csrf_token %}
-    <input type="hidden" name="tipo" value="BB_FULL">
+    <input type="hidden" name="tipo" id="tipo-hidden" value="{{ sel_tipo|default:'BB_FULL' }}">
 
-    <!-- Horarios fijos -->
-    <div class="seccion-label">① Horarios fijos</div>
-    <div class="horarios-full">
-      {% for slot in slots_bb %}
-      <div class="horario-full-fila">
-        <span class="dia">{{ slot.dia_nombre }}</span>
-        <span class="hora">{{ slot.hora }}:00 hrs</span>
-      </div>
-      {% endfor %}
+    <!-- ① Elige modalidad -->
+    <div class="seccion-label">① Elige tu modalidad</div>
+    <div class="tipo-opciones">
+
+      <!-- Mensualidad Full -->
+      <input type="radio" name="tipo_sel" id="opt-full" class="tipo-opt"
+             value="BB_FULL" {% if sel_tipo == 'BB_FULL' or not sel_tipo %}checked{% endif %}>
+      <label for="opt-full" class="tipo-label">
+        <div class="tipo-info">
+          <div class="tipo-nombre">Mensualidad Full</div>
+          <div class="tipo-sub">{{ full_sub }} · todos los horarios del mes</div>
+        </div>
+        <div class="tipo-precio">${{ precio_full|floatformat:0 }}</div>
+      </label>
+
+      <!-- 2 veces por semana -->
+      <input type="radio" name="tipo_sel" id="opt-semanal-2" class="tipo-opt"
+             value="BB_SEMANAL_2" {% if sel_tipo == 'BB_SEMANAL_2' %}checked{% endif %}>
+      <label for="opt-semanal-2" class="tipo-label">
+        <div class="tipo-info">
+          <div class="tipo-nombre">2 veces por semana</div>
+          <div class="tipo-sub">Martes y Jueves · 30 días</div>
+        </div>
+        <div class="tipo-precio">${{ precio_semanal_2|floatformat:0 }}</div>
+      </label>
+
+      <!-- Clase Semanal -->
+      <input type="radio" name="tipo_sel" id="opt-semanal" class="tipo-opt"
+             value="BB_SEMANAL" {% if sel_tipo == 'BB_SEMANAL' %}checked{% endif %}>
+      <label for="opt-semanal" class="tipo-label">
+        <div class="tipo-info">
+          <div class="tipo-nombre">Clase Semanal</div>
+          <div class="tipo-sub">1 vez por semana · elige tu día</div>
+        </div>
+        <div class="tipo-precio">${{ precio_semanal|floatformat:0 }}</div>
+      </label>
+
     </div>
 
-    <!-- Fecha inicio -->
-    <div class="seccion-label">② ¿Cuándo empiezas?</div>
-    <input type="date" name="fecha_full" id="fecha_full"
-           class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
-           value="{{ sel_fecha|default:'' }}" required>
-    <span class="fecha-hint" id="hint-full">Elige el primer {{ dias_nombres }} desde el que quieres partir.</span>
-    <div class="aviso-feriado" id="aviso-feriado-full"></div>
+    <!-- ② Sección Full -->
+    <div class="seccion-full {% if sel_tipo == 'BB_FULL' or not sel_tipo %}visible{% endif %}" id="seccion-full">
+      <div class="seccion-label">② Horarios fijos</div>
+      <div class="horarios-full">
+        {% for slot in slots_bb %}
+        <div class="horario-full-fila">
+          <span class="dia">{{ slot.dia_nombre }}</span>
+          <span class="hora">{{ slot.hora }}:00 hrs</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="seccion-label">③ ¿Cuándo empiezas?</div>
+      <input type="date" name="fecha_full" id="fecha_full"
+             class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
+             value="{{ sel_fecha|default:'' }}">
+      <span class="fecha-hint">Elige el primer {{ dias_nombres }} desde el que quieres partir.</span>
+      <div class="aviso-feriado" id="aviso-feriado-full"></div>
+    </div>
+
+    <!-- ② Sección 2 veces por semana -->
+    <div class="seccion-semanal-2 {% if sel_tipo == 'BB_SEMANAL_2' %}visible{% endif %}" id="seccion-semanal-2">
+      <div class="seccion-label">② Horarios fijos</div>
+      <div class="horarios-full">
+        <div class="horario-full-fila">
+          <span class="dia">Martes</span>
+          <span class="hora">{% for slot in slots_bb %}{% if slot.dia == 1 %}{{ slot.hora }}:00 hrs{% endif %}{% endfor %}</span>
+        </div>
+        <div class="horario-full-fila">
+          <span class="dia">Jueves</span>
+          <span class="hora">{% for slot in slots_bb %}{% if slot.dia == 3 %}{{ slot.hora }}:00 hrs{% endif %}{% endfor %}</span>
+        </div>
+      </div>
+      <div class="seccion-label">③ ¿Cuándo empiezas?</div>
+      <input type="date" name="fecha_semanal_2" id="fecha_semanal_2"
+             class="fecha-field" min="{{ hoy|date:'Y-m-d' }}"
+             value="{{ sel_fecha|default:'' }}">
+      <span class="fecha-hint">Elige un Martes o Jueves para comenzar.</span>
+      <div class="aviso-feriado" id="aviso-feriado-semanal-2"></div>
+    </div>
+
+<!-- Sección BB_SEMANAL — pendiente implementación -->
 
     <button type="submit" class="btn-continuar">Ver resumen →</button>
   </form>
@@ -203,7 +267,27 @@
 {% block extra_js %}
 <script>
 const DIAS_JS_FULL = {{ dias_js_full|safe }};
+const FERIADOS = {{ feriados_json|safe }};
+const MES_ES_BB = {0:'enero',1:'febrero',2:'marzo',3:'abril',4:'mayo',5:'junio',
+                7:'julio',8:'agosto',9:'septiembre',10:'octubre',11:'noviembre',12:'diciembre'};
 
+// ── Mostrar/ocultar secciones según tipo ──
+const tipoHidden    = document.getElementById('tipo-hidden');
+const seccionFull   = document.getElementById('seccion-full');
+const seccionSem2   = document.getElementById('seccion-semanal-2');
+const seccionSem    = document.getElementById('seccion-semanal');
+
+document.querySelectorAll('input[name="tipo_sel"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const val = radio.value;
+    tipoHidden.value = val;
+    seccionFull.classList.toggle('visible', val === 'BB_FULL');
+    seccionSem2.classList.toggle('visible', val === 'BB_SEMANAL_2');
+    seccionSem.classList.toggle('visible',  val === 'BB_SEMANAL');
+  });
+});
+
+// ── Validación fecha Full ──
 const fechaFull        = document.getElementById('fecha_full');
 const avisoFeriadoFull = document.getElementById('aviso-feriado-full');
 
@@ -219,11 +303,23 @@ fechaFull.addEventListener('change', () => {
   }
 });
 
-// ── Validación feriados ──
-const FERIADOS = {{ feriados_json|safe }};
-const MES_ES_BB = {0:'enero',1:'febrero',2:'marzo',3:'abril',4:'mayo',5:'junio',
-                6:'julio',7:'agosto',8:'septiembre',9:'octubre',10:'noviembre',11:'diciembre'};
+// ── Validación fecha 2 veces por semana (Martes=2 o Jueves=4 en JS) ──
+const fechaSem2        = document.getElementById('fecha_semanal_2');
+const avisoFeriadoSem2 = document.getElementById('aviso-feriado-semanal-2');
 
+fechaSem2.addEventListener('change', () => {
+  const fecha = fechaSem2.value;
+  if (!fecha) return;
+  checkFeriadoBB(fechaSem2, avisoFeriadoSem2);
+  const dia = new Date(fecha + 'T12:00:00').getDay();
+  if (dia !== 2 && dia !== 4) {  // JS: 2=Martes, 4=Jueves
+    alert('Para Body Balance 2 veces por semana debes elegir un Martes o Jueves para comenzar.');
+    fechaSem2.value = '';
+    avisoFeriadoSem2.classList.remove('visible');
+  }
+});
+
+// ── Validación feriados ──
 function siguienteDiaHabilBB(fechaStr) {
     let d = new Date(fechaStr + 'T12:00:00');
     d.setDate(d.getDate() + 1);
