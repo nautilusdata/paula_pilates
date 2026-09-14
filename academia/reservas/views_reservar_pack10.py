@@ -839,8 +839,7 @@ def reservar_clase_prueba(request):
                     errores.append('La fecha no puede ser en el pasado.')
                 elif fecha_inicio in feriados_punta_arenas():
                     errores.append('Ese día es feriado. El estudio no tiene clases.')
-                elif fecha_inicio.weekday() != 5:
-                    errores.append('La clase de prueba es solo los sábados.')
+                # acá se eliminó el sábado
                 elif fecha_inicio == date.today() and hora is not None:
                     if hora <= datetime.now().hour:
                         errores.append('Esa hora ya pasó hoy. Elige una fecha futura.')
