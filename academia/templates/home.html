@@ -3,8 +3,14 @@
 {% block title %}Inicio - Pilates Paula{% endblock %}
 
 {% block extra_head %}
-{% if user.is_authenticated %}
+<!-- Fuentes necesarias para emular fielmente el afiche promocional de LesMills -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Montserrat:wght@600;700;800;900&family=Orbitron:ital,wght@1,900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
+  /* --- ESTILOS ÁREA DE ALUMNO --- */
+  {% if user.is_authenticated %}
   .alumno-titulo {
     background-color: #f0f7ea;
     text-align: center;
@@ -54,8 +60,213 @@
   .nav-alumno a.nav-reservar:hover {
     background-color: #4d9e01;
   }
+  {% endif %}
+
+  /* --- CONTENEDOR ANGOSTO PARA LAS DOS CAJAS LESMILLS --- */
+  .lesmills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 310px));
+    justify-content: center;
+    gap: 42px;
+    max-width: 680px;
+    margin: 20px auto 40px;
+  }
+
+  /* --- TARJETA ANGOSTA CON PLANTITAS REALISTAS --- */
+  .lesmills-poster-card {
+    background: linear-gradient(180deg, #e4efe1 0%, #f7faf5 45%, #d4e6cf 100%);
+    border-radius: 24px;
+    padding: 28px 16px 20px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    border: 1px solid #b2d3ad;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    max-width: 310px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  /* Posicionamiento de Ramas/Hojas Ajustadas a Cajas Estrechas */
+  .leaf-branch-tr {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 110px;
+    height: 110px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .leaf-branch-bl {
+    position: absolute;
+    bottom: -2px;
+    left: -2px;
+    width: 110px;
+    height: 110px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Bloques Marca LesMills */
+  .lesmills-brand-block {
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .lesmills-logo-text {
+    font-family: 'Orbitron', 'Arial Black', sans-serif;
+    font-style: italic;
+    font-weight: 900;
+    font-size: 1.25rem;
+    color: #0b2000;
+    letter-spacing: -0.5px;
+    line-height: 1;
+    display: inline-block;
+    border-bottom: 2px solid #0b2000;
+    padding-bottom: 2px;
+  }
+
+  .lesmills-title-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 2.2rem;
+    color: #061700;
+    letter-spacing: 1.5px;
+    line-height: 1;
+    margin-top: 4px;
+  }
+
+  /* Precio Destacado */
+  .lesmills-price-tag {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1.9rem;
+    color: #1f4208;
+    margin: 6px 0 2px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .lesmills-price-tag span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #3b6e16;
+  }
+
+  /* Banner Central Cursivo Verde */
+  .banner-primera-vez {
+    background: radial-gradient(ellipse at center, rgba(162,205,140,0.85) 0%, rgba(140,188,118,0.55) 70%, rgba(255,255,255,0) 100%);
+    font-family: 'Caveat', cursive, sans-serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: #051400;
+    padding: 6px 6px;
+    margin: 10px 0 14px;
+    border-radius: 12px;
+    line-height: 1.1;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Cápsula Verde de Horario */
+  .schedule-pill {
+    background-color: #1f4208;
+    color: #ffffff;
+    border-radius: 40px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto 12px;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 4px 10px rgba(31, 66, 8, 0.2);
+    position: relative;
+    z-index: 2;
+  }
+
+  .schedule-pill svg {
+    flex-shrink: 0;
+  }
+
+  .schedule-days {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: left;
+  }
+
+  .schedule-time {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: left;
+  }
+
+  /* Cápsula Verde de WhatsApp */
+  .whatsapp-pill {
+    background-color: #1f4208;
+    color: #ffffff;
+    border-radius: 40px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 800;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(31, 66, 8, 0.25);
+    transition: transform 0.2s, background-color 0.2s;
+    position: relative;
+    z-index: 2;
+  }
+
+  .whatsapp-pill:hover {
+    background-color: #28540a;
+    transform: translateY(-2px);
+  }
+
+  .whatsapp-pill svg {
+    flex-shrink: 0;
+  }
+
+  /* Eslogan Inferior */
+  .slogan-footer {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #2b520f;
+    letter-spacing: 1.2px;
+    margin-top: 14px;
+    line-height: 1.5;
+    position: relative;
+    padding-top: 8px;
+    z-index: 2;
+  }
+
+  .slogan-footer::before {
+    content: "🌿";
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+  }
 </style>
-{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -118,6 +329,213 @@
 
   <!-- Precios -->
   <section class="price container">
+
+    <h2 class="subtitle">Programas Nuevos</h2>
+
+    <!-- GRID CON LAS DOS CAJAS ANGOSTAS DE LESMILLS -->
+    <div class="lesmills-grid">
+
+      <!-- CAJA 1: LESMILLS YOGA -->
+      <div class="lesmills-poster-card">
+        
+        <!-- RAMA DE PLANTITAS REALISTA (ESQUINA SUPERIOR DERECHA) -->
+        <svg class="leaf-branch-tr" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="leafGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4d8236"/>
+              <stop offset="60%" stop-color="#2a571b"/>
+              <stop offset="100%" stop-color="#122f08"/>
+            </linearGradient>
+            <linearGradient id="leafGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7ebd5b"/>
+              <stop offset="70%" stop-color="#3d7326"/>
+              <stop offset="100%" stop-color="#1f420d"/>
+            </linearGradient>
+            <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3a6e26"/>
+              <stop offset="100%" stop-color="#122d07"/>
+            </linearGradient>
+            <filter id="shadowTR" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-color="#0a1a03" flood-opacity="0.22"/>
+            </filter>
+          </defs>
+          <path d="M160 -10 C125 30 75 70 20 150" stroke="url(#stemGrad)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M125 22 C100 8 72 20 70 42 C92 50 118 42 125 22 Z" fill="url(#leafGradDark)" filter="url(#shadowTR)"/>
+          <path d="M125 22 C105 28 88 35 70 42" stroke="#82c761" stroke-width="1.2" opacity="0.65"/>
+          <path d="M142 42 C152 68 132 92 110 88 C102 65 120 42 142 42 Z" fill="url(#leafGradLight)" filter="url(#shadowTR)"/>
+          <path d="M142 42 C130 58 118 74 110 88" stroke="#a4ea83" stroke-width="1.2" opacity="0.65"/>
+          <path d="M88 62 C60 50 40 68 45 92 C68 96 86 82 88 62 Z" fill="url(#leafGradDark)" filter="url(#shadowTR)"/>
+          <path d="M88 62 C72 72 58 82 45 92" stroke="#82c761" stroke-width="1.2" opacity="0.65"/>
+          <path d="M68 98 C78 124 55 146 32 138 C30 114 48 95 68 98 Z" fill="url(#leafGradLight)" filter="url(#shadowTR)"/>
+          <path d="M68 98 C54 112 42 126 32 138" stroke="#a4ea83" stroke-width="1.2" opacity="0.65"/>
+          <path d="M42 132 C18 126 8 146 15 162 C32 160 44 148 42 132 Z" fill="url(#leafGradDark)" filter="url(#shadowTR)"/>
+        </svg>
+
+        <!-- RAMA DE PLANTITAS REALISTA (ESQUINA INFERIOR IZQUIERDA) -->
+        <svg class="leaf-branch-bl" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="leafGradDarkBL" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#4d8236"/>
+              <stop offset="60%" stop-color="#2a571b"/>
+              <stop offset="100%" stop-color="#122f08"/>
+            </linearGradient>
+            <linearGradient id="leafGradLightBL" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#7ebd5b"/>
+              <stop offset="70%" stop-color="#3d7326"/>
+              <stop offset="100%" stop-color="#1f420d"/>
+            </linearGradient>
+            <filter id="shadowBL" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="-2" dy="-3" stdDeviation="2.5" flood-color="#0a1a03" flood-opacity="0.22"/>
+            </filter>
+          </defs>
+          <path d="M-10 170 C30 135 70 85 150 30" stroke="url(#stemGrad)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M22 135 C8 110 20 82 42 80 C50 102 42 128 22 135 Z" fill="url(#leafGradDarkBL)" filter="url(#shadowBL)"/>
+          <path d="M22 135 C28 115 35 98 42 80" stroke="#82c761" stroke-width="1.2" opacity="0.65"/>
+          <path d="M42 152 C68 162 92 142 88 120 C65 112 42 130 42 152 Z" fill="url(#leafGradLightBL)" filter="url(#shadowBL)"/>
+          <path d="M42 152 C58 140 74 128 88 120" stroke="#a4ea83" stroke-width="1.2" opacity="0.65"/>
+          <path d="M62 98 C50 70 68 50 92 55 C96 78 82 96 62 98 Z" fill="url(#leafGradDarkBL)" filter="url(#shadowBL)"/>
+          <path d="M62 98 C72 82 82 68 92 55" stroke="#82c761" stroke-width="1.2" opacity="0.65"/>
+          <path d="M98 78 C124 88 146 65 138 42 C114 40 95 58 98 78 Z" fill="url(#leafGradLightBL)" filter="url(#shadowBL)"/>
+          <path d="M98 78 C112 64 126 52 138 42" stroke="#a4ea83" stroke-width="1.2" opacity="0.65"/>
+          <path d="M132 52 C126 28 146 18 162 25 C160 42 148 54 132 52 Z" fill="url(#leafGradDarkBL)" filter="url(#shadowBL)"/>
+        </svg>
+
+        <div>
+          <div class="lesmills-brand-block">
+            <img src="{% static 'images/lesmills_logo.jpg' %}" alt="LesMills" 
+     style="width: 80%; max-width: 200px; margin-bottom: 8px; mix-blend-mode: multiply;">
+            <div class="lesmills-title-text">YOGA</div>
+          </div>
+
+          <div class="lesmills-price-tag">$60.000 <span>/ mes</span></div>
+
+          <div class="banner-primera-vez">
+            ¡¡ Por primera vez<br>en Punta Arenas !!
+          </div>
+
+          <!-- Horario -->
+          <div class="schedule-pill">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
+              <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+              <circle cx="8" cy="13" r="1.3"/>
+              <circle cx="12" cy="13" r="1.3"/>
+              <circle cx="16" cy="13" r="1.3"/>
+              <circle cx="8" cy="17" r="1.3"/>
+              <circle cx="12" cy="17" r="1.3"/>
+              <circle cx="16" cy="17" r="1.3"/>
+            </svg>
+            <div>
+              <div class="schedule-days">Martes y Jueves</div>
+              <div class="schedule-time">09.00 hrs</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <!-- Botón WhatsApp -->
+          <a href="https://wa.me/569850508?text=Hola,%20quisiera%20más%20información%20sobre%20LesMills%20Yoga" target="_blank" class="whatsapp-pill">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+            </svg>
+            <span>Inscribirme por WhatsApp</span>
+          </a>
+
+          <!-- Eslogan Inferior -->
+          <div class="slogan-footer">
+            CUERPO FUERTE<br>
+            MENTE TRANQUILA<br>
+            UNA VIDA MEJOR
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CAJA 2: LESMILLS PILATES -->
+      <div class="lesmills-poster-card">
+        
+        <!-- RAMA DE PLANTITAS REALISTA (ESQUINA SUPERIOR DERECHA) -->
+        <svg class="leaf-branch-tr" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M160 -10 C125 30 75 70 20 150" stroke="url(#stemGrad)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M125 22 C100 8 72 20 70 42 C92 50 118 42 125 22 Z" fill="url(#leafGradDark)" filter="url(#shadowTR)"/>
+          <path d="M125 22 C105 28 88 35 70 42" stroke="#82c761" stroke-width="1.2" opacity="0.65"/>
+          <path d="M142 42 C152 68 132 92 110 88 C102 65 120 42 142 42 Z" fill="url(#leafGradLight)" filter="url(#shadowTR)"/>
+          <path d="M142 42 C130 58 118 74 110 88" stroke="#a4ea83" stroke-width="1.2" opacity="0.65"/>
+          <path d="M88 62 C60 50 40 68 45 92 C68 96 86 82 88 62 Z" fill="url(#leafGradDark)" filter="url(#shadowTR)"/>
+          <path d="M88 62 C72 72 58 82 45 92" stroke="#82c761" stroke-width="1.2" opacity="0.65"/>
+          <path d="M68 98 C78 124 55 146 32 138 C30 114 48 95 68 98 Z" fill="url(#leafGradLight)" filter="url(#shadowTR)"/>
+          <path d="M68 98 C54 112 42 126 32 138" stroke="#a4ea83" stroke-width="1.2" opacity="0.65"/>
+          <path d="M42 132 C18 126 8 146 15 162 C32 160 44 148 42 132 Z" fill="url(#leafGradDark)" filter="url(#shadowTR)"/>
+        </svg>
+
+        <!-- RAMA DE PLANTITAS REALISTA (ESQUINA INFERIOR IZQUIERDA) -->
+        <svg class="leaf-branch-bl" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M-10 170 C30 135 70 85 150 30" stroke="url(#stemGrad)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M22 135 C8 110 20 82 42 80 C50 102 42 128 22 135 Z" fill="url(#leafGradDarkBL)" filter="url(#shadowBL)"/>
+          <path d="M22 135 C28 115 35 98 42 80" stroke="#82c761" stroke-width="1.2" opacity="0.65"/>
+          <path d="M42 152 C68 162 92 142 88 120 C65 112 42 130 42 152 Z" fill="url(#leafGradLightBL)" filter="url(#shadowBL)"/>
+          <path d="M42 152 C58 140 74 128 88 120" stroke="#a4ea83" stroke-width="1.2" opacity="0.65"/>
+          <path d="M62 98 C50 70 68 50 92 55 C96 78 82 96 62 98 Z" fill="url(#leafGradDarkBL)" filter="url(#shadowBL)"/>
+          <path d="M62 98 C72 82 82 68 92 55" stroke="#82c761" stroke-width="1.2" opacity="0.65"/>
+          <path d="M98 78 C124 88 146 65 138 42 C114 40 95 58 98 78 Z" fill="url(#leafGradLightBL)" filter="url(#shadowBL)"/>
+          <path d="M98 78 C112 64 126 52 138 42" stroke="#a4ea83" stroke-width="1.2" opacity="0.65"/>
+          <path d="M132 52 C126 28 146 18 162 25 C160 42 148 54 132 52 Z" fill="url(#leafGradDarkBL)" filter="url(#shadowBL)"/>
+        </svg>
+
+        <div>
+          <div class="lesmills-brand-block">
+            <img src="{% static 'images/lesmills_logo.jpg' %}" alt="LesMills" 
+     style="width: 80%; max-width: 200px; margin-bottom: 8px; mix-blend-mode: multiply;">
+            <div class="lesmills-title-text">PILATES</div>
+          </div>
+
+          <div class="lesmills-price-tag">$60.000 <span>/ mes</span></div>
+
+          <div class="banner-primera-vez">
+            ¡¡ Por primera vez<br>en Punta Arenas !!
+          </div>
+
+          <!-- Horario -->
+          <div class="schedule-pill">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
+              <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+              <circle cx="8" cy="13" r="1.3"/>
+              <circle cx="12" cy="13" r="1.3"/>
+              <circle cx="16" cy="13" r="1.3"/>
+              <circle cx="8" cy="17" r="1.3"/>
+              <circle cx="12" cy="17" r="1.3"/>
+              <circle cx="16" cy="17" r="1.3"/>
+            </svg>
+            <div>
+              <div class="schedule-days">Martes y Jueves</div>
+              <div class="schedule-time">09.00 hrs</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <!-- Botón WhatsApp -->
+          <a href="https://wa.me/569850508?text=Hola,%20quisiera%20más%20información%20sobre%20LesMills%20Pilates" target="_blank" class="whatsapp-pill">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+            </svg>
+            <span>Inscribirme por WhatsApp</span>
+          </a>
+
+          <!-- Eslogan Inferior -->
+          <div class="slogan-footer">
+            CUERPO FUERTE<br>
+            MENTE TRANQUILA<br>
+            UNA VIDA MEJOR
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <br><br><br><br>
+
+    <!-- PILATES REFORMER TRADICIONAL -->
     <h2 class="subtitle">Pilates - Precios y Packs</h2>
 
     <div class="price__table">
@@ -166,7 +584,7 @@
         <a href="#" class="price__cta">Clase Grupal</a>
       </div>
       
-      <!-- # Se volvió a poner online 2026/09/14  se había sacado 2026/08/15-->
+      <!-- # Se volvió a poner online 2026/09/14 se había sacado 2026/08/15-->
       <div class="price__element">
         <h3 class="price__price">$20.000</h3>
         <div class="price__items">
@@ -176,7 +594,6 @@
         </div>
         <a href="#" class="price__cta">Clase de Prueba</a>
       </div>
-      
       
       <div class="price__element">
         <h3 class="price__price">$27.000</h3>
@@ -264,7 +681,7 @@
     {% if user.is_authenticated %}
       <a href="{% url 'dashboard' %}" class="cta">Ir a mis clases</a>
     {% else %}
-      <a href="#" class="cta" onclick="alert('Registro disponible próximamente. Contáctanos al Whatsapp.'); return false;">Inscríbete ahora</a>
+      <a href="https://wa.me/569850508?text=Hola,%20quisiera%20inscribirme" target="_blank" class="cta">Inscríbete ahora</a>
     {% endif %}
   </section>
 
@@ -285,7 +702,7 @@
   {% else %}
     <div class="auth-links" style="text-align: center; padding: 2rem;">
       <a href="{% url 'account_login' %}" class="cta" style="margin-right: 1rem;">Iniciar sesión</a>
-      <a href="#" class="cta" onclick="alert('Registro disponible próximamente. Contáctanos al Whatsapp.'); return false;">Registrarse</a>
+      <a href="https://wa.me/569850508?text=Hola,%20quisiera%20más%20información" target="_blank" class="cta">Registrarse</a>
     </div>
   {% endif %}
 
