@@ -255,14 +255,16 @@ inputFecha.addEventListener('change', async () => {
   try {
     const resp = await fetch(`{% url 'horas_disponibles_ajax' %}?fecha=${fecha}&tipo=PL`);
     const data = await resp.json();
-    const horaInfo = data.horas?.find(h => h.hora === {{ hora_int }});
+    const hayDisponible = data.horas?.some(h => h.disponible);
 
-    if (!horaInfo || !horaInfo.disponible) {
-      cuposInfo.textContent = '⚠️ No hay cupos disponibles ese día. Elige otro.';
-      cuposInfo.classList.add('visible', 'sin-cupo');
-    } else {
-      cuposInfo.textContent = `✓ Quedan ${horaInfo.cupos_min} cupo${horaInfo.cupos_min !== 1 ? 's' : ''} disponibles para ese día.`;
-      cuposInfo.classList.add('visible');
+      if (!hayDisponible) {
+        cuposInfo.textContent = '⚠️ No hay cupos disponibles ese día. Elige otro.';
+        cuposInfo.classList.add('visible', 'sin-cupo');
+      } else {
+        const primero = data.horas.find(h => h.disponible);
+        cuposInfo.textContent = `✓ Quedan ${primero.cupos_min} cupo${primero.cupos_min !== 1 ? 's' : ''} disponibles para ese día.`;
+        cuposInfo.classList.add('visible');
+      }
     }
   } catch (e) {
     // Si falla el AJAX, no bloqueamos — el backend valida igual
