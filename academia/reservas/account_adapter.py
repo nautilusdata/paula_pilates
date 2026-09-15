@@ -5,9 +5,10 @@ from django.core.exceptions import ValidationError
 class WhitelistEmailAdapter(DefaultAccountAdapter):
     def clean_email(self, email):
         email = super().clean_email(email)
-        if not User.objects.filter(email=email).exists():
-            raise ValidationError(
-                'Este email no está registrado en nuestro sistema. '
-                'Contacta a la Academia para inscribirte.'
-            )
+        # Whitelist desactivada por Paula 2026-09-15 — registro abierto
+        # if not User.objects.filter(email=email).exists():
+        #     raise ValidationError(
+        #         'Este email no está registrado en nuestro sistema. '
+        #         'Contacta a la Academia para inscribirte.'
+        #     )
         return email
