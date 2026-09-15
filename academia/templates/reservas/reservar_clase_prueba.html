@@ -255,7 +255,7 @@ inputFecha.addEventListener('change', async () => {
   try {
     const resp = await fetch(`{% url 'horas_disponibles_ajax' %}?fecha=${fecha}&tipo=PL`);
     const data = await resp.json();
-    const horaInfo = data.horas?.find(h => h.hora === {{ hora_int }});
+    const horaInfo = data.horas?.find(h => h.disponible);
 
     if (!horaInfo || !horaInfo.disponible) {
       cuposInfo.textContent = '⚠️ No hay cupos disponibles ese día. Elige otro.';
