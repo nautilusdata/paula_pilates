@@ -88,7 +88,6 @@
             <a href="{% url 'account_logout' %}" class="auth-btn logout">Salir</a>
         {% else %}
             <a href="{% url 'account_login' %}" class="auth-btn login">Login</a>
-            <a href="#" class="auth-btn signup" onclick="alert('Contáctanos para el registro.'); return false;">Registrarse</a>
             <a href="{% url 'account_signup' %}" class="auth-btn signup">Registrarse</a>
         {% endif %}
     </div>
