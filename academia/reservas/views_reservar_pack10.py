@@ -813,7 +813,7 @@ def reservar_clase_prueba(request):
     # ─────────────────────────────────────────────────────────────────────────
     
     import json
-    horas_test = horas_disponibles_por_tipo('TEST')
+    horas_test = horas_disponibles_por_tipo('PL')
     hora_int   = horas_test[0] if horas_test else 12
     feriados   = feriados_punta_arenas()
     context = {
@@ -833,7 +833,7 @@ def reservar_clase_prueba(request):
     if request.method == 'POST':
         fecha_str = request.POST.get('fecha_inicio')
 
-        horas_test = horas_disponibles_por_tipo('TEST')
+        horas_test = horas_disponibles_por_tipo('PL')
         hora = horas_test[0] if horas_test else None
 
         errores = []
