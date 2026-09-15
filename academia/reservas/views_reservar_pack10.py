@@ -794,13 +794,23 @@ def reservar_clase_suelta_confirmar(request):
 
     return render(request, 'reservas/reservar_clase_suelta_confirmar.html', context)
 
-# ─── CLASE PRUEBA — REACTIVADA 20260914 ────────────────────────────────────────────────#
+# ─── CLASE PRUEBA — REACTIVADA 20260914 se agrega check de traza si alumna es realmente nueva#
 # ─── CLASE PRUEBA — DORMIDA 20260816 ───────────────────────────────────────────────────#
 @login_required
 @require_http_methods(["GET", "POST"])
 def reservar_clase_prueba(request):
 
     #return redirect('reservar')  # DORMIDA 2026-08-15 — reactivada 2026-08-27 por Paula
+
+    # ── Verificar alumna nueva - CHECK / TRAZA ───────────────────────
+    tiene_historial = Pack.objects.filter(
+        alumna=request.user,
+        estado__in=['ACTIVO', 'COMPLETADO', 'PENDIENTE_PAGO']
+    ).exists()
+    if tiene_historial:
+        messages.error(request, 'La clase de prueba es solo para alumnas nuevas.')
+        return redirect('reservar')
+    # ─────────────────────────────────────────────────────────────────────────
     
     import json
     horas_test = horas_disponibles_por_tipo('TEST')

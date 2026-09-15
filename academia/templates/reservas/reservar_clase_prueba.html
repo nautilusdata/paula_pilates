@@ -133,16 +133,16 @@
   </nav>
 
   <div class="pasos">
-    <div class="paso activo">1 · Elegir sábado</div>
+    <div class="paso activo">1 · Elegir fecha</div>
     <div class="paso">2 · Confirmar</div>
     <div class="paso">3 · Pagar</div>
   </div>
 
   <p class="pack-titulo">Clase de Prueba</p>
-  <p class="pack-subtitulo">Pilates Reformer · Solo sábados · ${{ precio|floatformat:0 }}</p>
+  <p class="pack-subtitulo">Pilates Reformer · Cualquier día · ${{ precio|floatformat:0 }}</p>
 
   <div class="aviso">
-    <strong>Solo sábados a las 12:30.</strong> Elige el sábado que más te acomoda y te esperamos para que conozcas el estudio.
+    <strong>Clase de prueba individual.</strong> Elige el día que más te acomoda y te esperamos para que conozcas el estudio.
   </div>
 
   {% if errores %}
@@ -157,7 +157,7 @@
   <div class="info-fija">
     <div class="info-fija-fila">
       <span class="etiq">Día</span>
-      <span class="valor">Sábado</span>
+      <span class="valor">Pilates Reformer</span>
     </div>
     <div class="info-fija-fila">
       <span class="etiq">Hora</span>
@@ -176,12 +176,12 @@
   <form method="POST" id="form-prueba">
     {% csrf_token %}
 
-    <div class="seccion-label">① ¿Qué sábado quieres venir?</div>
+    <div class="seccion-label">① ¿Qué día quieres venir?</div>
     <input type="date" name="fecha_inicio" id="fecha_inicio"
            class="fecha-field"
            min="{{ hoy|date:'Y-m-d' }}"
            value="{{ sel_fecha|default:'' }}" required>
-    <span class="fecha-hint">Solo sábados — otros días serán rechazados.</span>
+    <span class="fecha-hint">Elige el día que más te acomoda.</span>
     <div class="aviso-feriado-prueba" id="aviso-feriado"></div>
     <div class="cupos-prueba" id="cupos-info"></div>
 
@@ -235,17 +235,17 @@ inputFecha.addEventListener('change', async () => {
 
   const jsDate = new Date(fecha + 'T12:00:00');
 
-  // Solo sábados
-  if (jsDate.getDay() !== 6) {
-    alert('La clase de prueba es solo los sábados. Por favor elige un sábado.');
-    inputFecha.value = '';
-    return;
-  }
+  // Solo sábados — eliminado 2026-09-15, ahora cualquier día
+  // if (jsDate.getDay() !== 6) {
+  //   alert('La clase de prueba es solo los sábados. Por favor elige un sábado.');
+  //   inputFecha.value = '';
+  //   return;
+  // }
 
   // Feriado
   if (FERIADOS.includes(fecha)) {
     const siguiente = siguienteSabadoHabil(fecha);
-    avisoFer.innerHTML = `⚠️ Ese sábado es <strong>feriado</strong>. El siguiente sábado hábil es <strong>${formatFecha(siguiente)}</strong>.`;
+    avisoFer.innerHTML = `⚠️ Ese día es <strong>feriado</strong>. El siguiente día hábil es <strong>${formatFecha(siguiente)}</strong>.`;
     avisoFer.classList.add('visible');
     inputFecha.value = '';
     return;
@@ -258,10 +258,10 @@ inputFecha.addEventListener('change', async () => {
     const horaInfo = data.horas?.find(h => h.hora === {{ hora_int }});
 
     if (!horaInfo || !horaInfo.disponible) {
-      cuposInfo.textContent = '⚠️ No hay cupos disponibles ese sábado. Elige otro.';
+      cuposInfo.textContent = '⚠️ No hay cupos disponibles ese día. Elige otro.';
       cuposInfo.classList.add('visible', 'sin-cupo');
     } else {
-      cuposInfo.textContent = `✓ Quedan ${horaInfo.cupos_min} cupo${horaInfo.cupos_min !== 1 ? 's' : ''} disponibles para ese sábado.`;
+      cuposInfo.textContent = `✓ Quedan ${horaInfo.cupos_min} cupo${horaInfo.cupos_min !== 1 ? 's' : ''} disponibles para ese día.`;
       cuposInfo.classList.add('visible');
     }
   } catch (e) {
