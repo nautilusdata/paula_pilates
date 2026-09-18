@@ -511,7 +511,8 @@
   {% else %}
     <div class="auth-links" style="text-align: center; padding: 2rem;">
       <a href="{% url 'account_login' %}" class="cta" style="margin-right: 1rem;">Iniciar sesión</a>
-      <a href="{% url 'account_signup' %}" class="cta">Registrarse</a>
+      <!-- a href="{% url 'account_signup' %}" class="cta">Registrarse</a -->
+      <a href="#" class="auth-btn signup" onclick="alert('Para registrarte contacta a la Academia al WhatsApp +56985050508'); return false;">Registrarse</a>
     </div>
   {% endif %}
 
